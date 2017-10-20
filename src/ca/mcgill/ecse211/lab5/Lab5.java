@@ -27,6 +27,8 @@ public class Lab5 extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 	public static final double TRACK = 15.15; // Width of car
 	private static double origin[][] = { { 0, 0 } };
+	private static int x=0;
+	private static int y=0;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -40,51 +42,92 @@ public class Lab5 extends Thread {
 		t.clear();
 
 		// ask the user whether the robot should use rising edge or falling edge
-		t.drawString("< Ris- | Fall- >", 0, 0);
-		t.drawString("  ing  | ing    ", 0, 1);
-		t.drawString("  edge | edge   ", 0, 2);
-		t.drawString("       |        ", 0, 3);
-		t.drawString("       |        ", 0, 4);
+		t.drawString("Select X and Y  ", 0, 0);
+		t.drawString("                ", 0, 1);
+		t.drawString("                ", 0, 2);
+		t.drawString("                ", 0, 3);
+		t.drawString("                ", 0, 4);
 
 		// wait for the user to press a button and start the odometer and
 		// odometer display
 		buttonChoice = Button.waitForAnyPress();
 
-		odometer.start();
-		odometryDisplay.start();
+		
+			while (buttonChoice != Button.ID_ENTER){
 
-		if (buttonChoice == Button.ID_RIGHT) {
-			// create navigation and start ultrasonic localizer thread with
-			// falling edge
-			Navigation navigation = new Navigation(odometer, origin, leftMotor, rightMotor);
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
-			usLocalizer.start();
+				if (buttonChoice == Button.ID_RIGHT){
+					if (x < 8){
+						x++;
+					}
+					t.clear();
+					t.drawString("X:", 0, 0);
+					t.drawInt(x, 3, 0);
+					t.drawString("Y:", 0, 2);
+					t.drawInt(y, 3, 2);
+				}
+				
+				if (buttonChoice == Button.ID_LEFT){
+					if (x > 0){
+						x--;
+					}
+					t.clear();
+					t.drawString("X:", 0, 0);
+					t.drawInt(x, 3, 0);
+					t.drawString("Y:", 0, 2);
+					t.drawInt(y, 3, 2);
+				}
+				
+				if (buttonChoice == Button.ID_UP){
+					if (y < 8){
+						y++;
+					}
+					t.clear();
+					t.drawString("X:", 0, 0);
+					t.drawInt(x, 3, 0);
+					t.drawString("Y:", 0, 2);
+					t.drawInt(y, 3, 2);
+				}
+				
+				if (buttonChoice == Button.ID_DOWN){
+					if (y > 0){
+						y--;
+					} 
+					
+					t.clear();
+					t.drawString("X:", 0, 0);
+					t.drawInt(x, 3, 0);
+					t.drawString("Y:", 0, 2);
+					t.drawInt(y, 3, 2);
+				}
+				
+				
+				buttonChoice = Button.waitForAnyPress();
+			}
+			
+			double coordinate[][] = {{x,y}};
+			
+			t.clear();
+			buttonChoice = Button.waitForAnyPress();
+			
+		if (buttonChoice == Button.ID_ENTER) {
+			
+			odometer.start();
+			odometryDisplay.start();	
+			Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);
+			navigation.start();
+//			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
+//					UltrasonicLocalizer.LocalizationType.RISING_EDGE);
+//			usLocalizer.start();
 
 			// wait for the user to press any button and start light localizer
 			// thread
 
-			Button.waitForAnyPress();
+//			Button.waitForAnyPress();
+			
+			
 
-			LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation);
-			lightLocalizer.start();
-		}
-
-		if (buttonChoice == Button.ID_LEFT) {
-			// create navigation and start ultrasonic localizer thread with
-			// rising edge
-			Navigation navigation = new Navigation(odometer, origin, leftMotor, rightMotor);
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.RISING_EDGE);
-			usLocalizer.start();
-
-			// wait for the user to press any button and start light localizer
-			// thread
-
-			Button.waitForAnyPress();
-
-			LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation);
-			lightLocalizer.start();
+//			LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation);
+//			lightLocalizer.start();
 		}
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)

@@ -14,13 +14,14 @@ in order to match lab 4.
 public class Navigation extends Thread {
 
 	// Create constants
-	private static final int MOTOR_SPEED = 150;
-	private static final int ROTATE_SPEED = 100;
+	private static final int MOTOR_SPEED = 200;
+	private static final int ROTATE_SPEED = 150;
 	private static final int MAX_DISTANCE_WALL = 15;
 	private static final int AVOID_ANGLE = 90;
 	private static final int AVOID_DISTANCE = 30;
 	private static final double SENSOR_OFFSET = 10;
 	private static final double SQUARE_LENGTH = 30.48;
+	private static double CENTER_OFFSET = 1.5;
 
 	// the maximum and minimum x and y values possible
 	private static final double XMax = 3 * SQUARE_LENGTH;
@@ -65,7 +66,7 @@ public class Navigation extends Thread {
 	public void travelTo(double endX, double endY) {
 
 		isNavigating = true;
-
+		CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) * CENTER_OFFSET);
 		// convert from coordinates to actual distance
 		endX = endX * SQUARE_LENGTH;
 		endY = endY * SQUARE_LENGTH;
@@ -93,6 +94,7 @@ public class Navigation extends Thread {
 
 			// function to move the robot forward forward
 			driveWithoutAvoid(distanceToTravel);
+			
 
 			isNavigating = false;
 
@@ -109,9 +111,10 @@ public class Navigation extends Thread {
 		Lab5.leftMotor.setSpeed(ROTATE_SPEED); // set speeds
 		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
 
-		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel), true); // move
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), true); // move
 		// forward
-		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel), false);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), false);
+		turnTo(0);
 
 	}
 
