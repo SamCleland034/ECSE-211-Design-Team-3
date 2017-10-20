@@ -17,6 +17,7 @@ public class Lab5 extends Thread {
 
 	// Assign ports to motors and to sensor
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	public static final EV3LargeRegulatedMotor zipMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	public static final EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 	private Odometer odometer;
@@ -53,9 +54,10 @@ public class Lab5 extends Thread {
 		// wait for the user to press a button and start the odometer and
 		// odometer display
 		buttonChoice = Button.waitForAnyPress();
-
+		
 
 		while (buttonChoice != Button.ID_ENTER){
+			zipMotor.rotate(720);
 
 			if (buttonChoice == Button.ID_RIGHT){
 				if (x < 8){
