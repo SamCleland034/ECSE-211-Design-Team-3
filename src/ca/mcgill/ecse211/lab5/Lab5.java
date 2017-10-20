@@ -59,7 +59,8 @@ public class Lab5 extends Thread {
 		
 
 		while (buttonChoice != Button.ID_ENTER){
-			zipMotor.rotate(720);
+			zipMotor.setSpeed(100);
+			zipMotor.rotate(5000);
 
 			if (buttonChoice == Button.ID_RIGHT){
 				if (x < 8){
