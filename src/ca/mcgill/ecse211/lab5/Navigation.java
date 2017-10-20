@@ -60,7 +60,7 @@ public class Navigation extends Thread {
 			travelTo(path[i][0], path[i][1]);
 		}
 	}
-	
+
 	//this method makes the robot travel to coordinates passed as parameters
 
 	public void travelTo(double endX, double endY) {
@@ -84,17 +84,17 @@ public class Navigation extends Thread {
 		else { // has not reached destination
 
 			turnTo(Math.toDegrees(Math.atan2(distanceX, distanceY))); // turn to
-																		// the
-																		// correct
-																		// angle
+			// the
+			// correct
+			// angle
 			distanceToTravel = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)); // calculate
-																							// distance
-																							// to
-																							// travel
+			// distance
+			// to
+			// travel
 
 			// function to move the robot forward forward
 			driveWithoutAvoid(distanceToTravel);
-			
+
 
 			isNavigating = false;
 
@@ -103,7 +103,7 @@ public class Navigation extends Thread {
 		}
 
 	}
-	
+
 	//this method makes the robot drive the indicated distance without looking for obstacles
 
 	public void driveWithoutAvoid(double distanceToTravel) {
@@ -125,18 +125,18 @@ public class Navigation extends Thread {
 		Lab5.rightMotor.setSpeed(MOTOR_SPEED);
 
 		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel), true); // move
-																									// forward
+		// forward
 		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel), true);
 
 		Lab5.usSensor.fetchSample(Lab5.sample, 0); // fetch
-																			// usSensor
-																			// data
+		// usSensor
+		// data
 		double wall_dist = Lab5.sample[0] * 100;
 
 		while (wall_dist > MAX_DISTANCE_WALL) {// far enough from block
 			Lab5.usSensor.fetchSample(Lab5.sample, 0);
 			wall_dist = Lab5.sample[0] * 100; // update distance from
-															// wall
+			// wall
 
 			if (Math.abs(endX - odometer.getX()) <= 1 && Math.abs(endY - odometer.getY()) <= 1) {
 				Sound.buzz();
@@ -182,12 +182,12 @@ public class Navigation extends Thread {
 		}
 
 		Lab5.usSensor.fetchSample(Lab5.sample, 0); // get
-																			// sensor
-																			// reading
+		// sensor
+		// reading
 		double wall_dist = Lab5.sample[0] * 100;
 
 		while (wall_dist < MAX_DISTANCE_WALL) { // while the robot is blocked by
-												// the obstacle
+			// the obstacle
 
 			// Rotate 90 degrees to the left or the right
 			Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, AVOID_ANGLE * angleDirection), true);
@@ -217,43 +217,43 @@ public class Navigation extends Thread {
 	}
 
 	// this method makes the robot turn to the indicated angle the shortest way
-	 void turnTo(double theta) {
-	  // get current angle and convert to degrees
-	  double currentTheta = Math.toDegrees(odometer.getTheta());
-	  // angle that robot needs to turn
-	  double turnTheta = theta - currentTheta;
+	void turnTo(double theta) {
+		// get current angle and convert to degrees
+		double currentTheta = Math.toDegrees(odometer.getTheta());
+		// angle that robot needs to turn
+		double turnTheta = theta - currentTheta;
 
-	  // Minimum angle is between -180 and 180
-	  if (turnTheta < -180) {
-	   turnTheta = turnTheta + 360;
-	  } else if (turnTheta > 180) {
-	   turnTheta = turnTheta - 360;
-	  }
+		// Minimum angle is between -180 and 180
+		if (turnTheta < -180) {
+			turnTheta = turnTheta + 360;
+		} else if (turnTheta > 180) {
+			turnTheta = turnTheta - 360;
+		}
 
-	  // set rotate speed for both motors
-	  Lab5.leftMotor.setSpeed(ROTATE_SPEED);
-	  Lab5.rightMotor.setSpeed(ROTATE_SPEED);
+		// set rotate speed for both motors
+		Lab5.leftMotor.setSpeed(ROTATE_SPEED);
+		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
 
-	  // Turn
-	  Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), true);
-	  Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), false);
-	 }
+		// Turn
+		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), true);
+		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), false);
+	}
 
-	 //this method makes the robot turn the indicated angle
-	 void turn(double theta) {
-	  // set rotate speed for both motors
-		 Lab5.leftMotor.setSpeed(ROTATE_SPEED);
-		 Lab5.rightMotor.setSpeed(ROTATE_SPEED);
+	//this method makes the robot turn the indicated angle
+	void turn(double theta) {
+		// set rotate speed for both motors
+		Lab5.leftMotor.setSpeed(ROTATE_SPEED);
+		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
 
-	  // Turn
-		 Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
-	  Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
-	 }
+		// Turn
+		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
+		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
+	}
 
-	 // set a boolean to know when it is navigating
-	 boolean isNavigating() {
-	  return Lab5.leftMotor.isMoving() && Lab5.rightMotor.isMoving();
-	 }
+	// set a boolean to know when it is navigating
+	boolean isNavigating() {
+		return Lab5.leftMotor.isMoving() && Lab5.rightMotor.isMoving();
+	}
 
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
