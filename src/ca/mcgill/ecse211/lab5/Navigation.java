@@ -11,17 +11,17 @@ This class is an updated version from lab 3 where we changed most methods
 in order to match lab 4.
  ***/
 
-public class Navigation extends Thread {
+public class Navigation  {
 
 	// Create constants
-	private static final int MOTOR_SPEED = 200;
+	private static final int MOTOR_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
 	private static final int MAX_DISTANCE_WALL = 15;
 	private static final int AVOID_ANGLE = 90;
 	private static final int AVOID_DISTANCE = 30;
 	private static final double SENSOR_OFFSET = 10;
 	private static final double SQUARE_LENGTH = 30.48;
-	private static double CENTER_OFFSET = 1.5;
+	private static double CENTER_OFFSET = 2;
 
 	// the maximum and minimum x and y values possible
 	private static final double XMax = 3 * SQUARE_LENGTH;
@@ -42,11 +42,11 @@ public class Navigation extends Thread {
 		// Reset the motors
 		for (EV3LargeRegulatedMotor motors : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motors.stop();
-			motors.setAcceleration(500);
+			motors.setSpeed(300);
 		}
 	}
 
-	public void run() {
+	public void startNav() {
 
 		try {
 			Thread.sleep(2000);
@@ -62,7 +62,6 @@ public class Navigation extends Thread {
 	}
 
 	//this method makes the robot travel to coordinates passed as parameters
-
 	public void travelTo(double endX, double endY) {
 
 		isNavigating = true;
@@ -76,9 +75,9 @@ public class Navigation extends Thread {
 		double distanceY = endY - odometer.getY();
 
 		// If reached destination, then stop
-		if (Math.abs(distanceX) <= 0.5 && Math.abs(distanceY) <= 0.5) {
-			Lab5.leftMotor.stop();
-			Lab5.rightMotor.stop();
+		if (Math.abs(distanceX) <= 0.3 && Math.abs(distanceY) <= 0.3) {
+			Lab5.leftMotor.stop(true);
+			Lab5.rightMotor.stop(false);
 		}
 
 		else { // has not reached destination
@@ -97,7 +96,7 @@ public class Navigation extends Thread {
 
 
 			isNavigating = false;
-
+			while(isNavigating()) continue; 
 			// make a sound when has reached destination
 			Sound.beep();
 		}
@@ -107,14 +106,14 @@ public class Navigation extends Thread {
 	//this method makes the robot drive the indicated distance without looking for obstacles
 
 	public void driveWithoutAvoid(double distanceToTravel) {
-
-		Lab5.leftMotor.setSpeed(ROTATE_SPEED); // set speeds
-		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
+		
+		Lab5.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
+		Lab5.rightMotor.setSpeed(MOTOR_SPEED);
 
 		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), true); // move
 		// forward
 		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), false);
-		turnTo(0);
+
 
 	}
 
@@ -238,7 +237,28 @@ public class Navigation extends Thread {
 		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), true);
 		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), false);
 	}
-
+	
+	/**
+	 * zip traversal algorithm
+	 * slows down near the end for a safer landing
+	 *
+	 */
+	public void zipTraversal() {
+		Lab5.leftMotor.setSpeed(300); // set speeds
+		Lab5.rightMotor.setSpeed(300); 
+		Lab5.zipMotor.setSpeed(MOTOR_SPEED);
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,30), true);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,30), true);
+		Lab5.zipMotor.rotate(convertDistance(1.1, 100), true);
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,250), true);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,250), false);
+		Lab5.leftMotor.setSpeed(150);
+		Lab5.rightMotor.setSpeed(150);
+		Lab5.zipMotor.setSpeed(MOTOR_SPEED/2);
+		Lab5.zipMotor.rotate(convertDistance(1.1, 20), true);
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,50), true);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,50), false);
+	}
 	//this method makes the robot turn the indicated angle
 	void turn(double theta) {
 		// set rotate speed for both motors
@@ -249,17 +269,24 @@ public class Navigation extends Thread {
 		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
 		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
 	}
+	void turnWithoutInterruption(double theta) {
+		Lab5.leftMotor.setSpeed(ROTATE_SPEED);
+		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
 
+		// Turn
+		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
+		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), false);
+	}
 	// set a boolean to know when it is navigating
 	boolean isNavigating() {
 		return Lab5.leftMotor.isMoving() && Lab5.rightMotor.isMoving();
 	}
 
-	private static int convertDistance(double radius, double distance) {
+	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
-	private static int convertAngle(double radius, double width, double angle) {
+	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 

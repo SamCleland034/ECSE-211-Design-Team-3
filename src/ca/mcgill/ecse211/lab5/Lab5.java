@@ -26,15 +26,19 @@ public class Lab5 extends Thread {
 
 	static SampleProvider usDist = usSensor.getMode("Distance");
 	static float[] sample = new float[usDist.sampleSize()];
-
+	public static final double TILE_SPACING = 30.48;
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
-	public static final double TRACK = 15.15; // Width of car
+	public static final double TRACK = 15.13; // Width of car
 	private static double origin[][] = { { 0, 0 } ,{1,1}};
 	private static int x=0;
 	private static int y=0;
 	private static int xc=0;
 	private static int yc=0;
+	private static final Port LightPort = LocalEV3.get().getPort("S4");
 
+	/**
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		int buttonChoice;
 
@@ -42,7 +46,10 @@ public class Lab5 extends Thread {
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		Odometer odometer = new Odometer(leftMotor, rightMotor);
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
+		
 
+		EV3ColorSensor colorSensor = new EV3ColorSensor(LightPort);
+		colorSensor.setFloodlight(lejos.robotics.Color.WHITE);
 		// clear the display
 		t.clear();
 
@@ -59,8 +66,6 @@ public class Lab5 extends Thread {
 		
 
 		while (buttonChoice != Button.ID_ENTER){
-			zipMotor.setSpeed(100);
-			zipMotor.rotate(5000);
 
 			if (buttonChoice == Button.ID_RIGHT){
 				if (x < 8){
@@ -173,32 +178,158 @@ public class Lab5 extends Thread {
 			}
 			buttonChoice = Button.waitForAnyPress();
 		}
+		t.drawString("   Select SP    ", 0, 0);
+		t.drawString("       0        ", 0, 1);
+		t.drawString("  3         1   ", 0, 2);
+		t.drawString("       2        ", 0, 3);
+		t.drawString("                ", 0, 4);
+		
+		buttonChoice= Button.waitForAnyPress();
+		
 		
 		double coordinate[][] = {{x,y},{xc,yc}};
-
-		if (buttonChoice == Button.ID_ENTER) {
-
+		Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);
+		LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation, colorSensor);
+		if(buttonChoice == Button.ID_UP) {
+			t.clear();
 			odometer.start();
 			odometryDisplay.start();	
-			Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);
-			navigation.start();
-			//			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-			//					UltrasonicLocalizer.LocalizationType.RISING_EDGE);
-			//			usLocalizer.start();
-
-			// wait for the user to press any button and start light localizer
-			// thread
-
-			//			Button.waitForAnyPress();
-
-
-
-			//			LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation);
-			//			lightLocalizer.start();
+			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
+			UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
+			usLocalizer.start();
+			
+			Button.waitForAnyPress();
+			lightLocalizer.startLightLOC();
+			Button.waitForAnyPress();
+			odometer.setTheta(0);
+			odometer.setX(1*TILE_SPACING);
+			odometer.setY(1*TILE_SPACING);
+			navigation.travelTo(x,y);
+			Button.waitForAnyPress();
+			odometer.setX(0);
+			odometer.setY(0);
+			lightLocalizer.lightLocWithError();
+			boolean xLine = lightLocalizer.correctLocalization();
+			if(xLine) odometer.setTheta(Math.PI/2);
+			else odometer.setTheta(0);
+			//odometer.setTheta(Math.PI/2);
+			odometer.setX(x*TILE_SPACING);
+			odometer.setY(y*TILE_SPACING);
+			
+			Button.waitForAnyPress();
+			navigation.travelTo(xc, yc);
+			navigation.zipTraversal();
 		}
+		else if(buttonChoice == Button.ID_RIGHT) {
+			t.clear();
+			odometer.start();
+			odometryDisplay.start();	
+			//Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);
+			
+			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
+			UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
+			usLocalizer.start();
+			Button.waitForAnyPress();
+			/*try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}*/
+			lightLocalizer.startLightLOC();
+			Button.waitForAnyPress();
+			odometer.setTheta(3*Math.PI/2);
+			odometer.setX(7*TILE_SPACING);
+			odometer.setY(1*TILE_SPACING);
+			navigation.travelTo(1, 1);
+			navigation.travelTo(x,y);
+			Button.waitForAnyPress();
+			lightLocalizer.lightLocWithError();
+			boolean xLine = lightLocalizer.correctLocalization();
+			if(xLine) odometer.setTheta(Math.PI/2);
+			else odometer.setTheta(0);
+			//odometer.setTheta(Math.PI/2);
+			odometer.setX(x*TILE_SPACING);
+			odometer.setY(y*TILE_SPACING);
+			
+			Button.waitForAnyPress();
+			navigation.travelTo(xc, yc);
+			navigation.zipTraversal();
+		}
+		else if(buttonChoice == Button.ID_DOWN) {
+			t.clear();
+			odometer.start();
+			odometryDisplay.start();	
+			//Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);	
+			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
+			UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
+			usLocalizer.start();
+			Button.waitForAnyPress();
+			lightLocalizer.startLightLOC();
+			Button.waitForAnyPress();
+			odometer.setTheta(Math.PI);
+			odometer.setX(7*TILE_SPACING);
+			odometer.setY(7*TILE_SPACING);
+			navigation.travelTo(7,y-1);
+			navigation.travelTo(x, y-1);
+			navigation.travelTo(x,y);
+			Button.waitForAnyPress();
+			odometer.setX(0);
+			odometer.setY(0);
+			lightLocalizer.lightLocWithError();
+			boolean xLine = lightLocalizer.correctLocalization();
+			if(xLine) odometer.setTheta(Math.PI/2);
+			else odometer.setTheta(0);
+			//odometer.setTheta(Math.PI/2);
+			odometer.setX(x*TILE_SPACING);
+			odometer.setY(y*TILE_SPACING);
+			
+			Button.waitForAnyPress();
+			navigation.travelTo(xc, yc);
+			navigation.zipTraversal();
+		}
+		else if(buttonChoice == Button.ID_LEFT) {
+			t.clear();
+			odometer.start();
+			odometryDisplay.start();	
+		//	Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);	
+			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
+			UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
+			usLocalizer.start();
+			Button.waitForAnyPress();
+			lightLocalizer.startLightLOC();
+			Button.waitForAnyPress();
+			odometer.setTheta(Math.PI/2);
+			odometer.setX(1*TILE_SPACING);
+			odometer.setY(7*TILE_SPACING);
+			navigation.travelTo(x, y-1);
+			navigation.travelTo(x,y);
+			Button.waitForAnyPress();
+			odometer.setX(0);
+			odometer.setY(0);
+			lightLocalizer.lightLocWithError();
+			boolean xLine = lightLocalizer.correctLocalization();
+			if(xLine) odometer.setTheta(Math.PI/2);
+			else odometer.setTheta(0);
+			//odometer.setTheta(Math.PI/2);
+			odometer.setX(x*TILE_SPACING);
+			odometer.setY(y*TILE_SPACING);
+			
+			Button.waitForAnyPress();
+			navigation.travelTo(xc, yc);
+			navigation.zipTraversal();
+		}
+		
+		
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
 		System.exit(0);
 	}
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+
+	
 }
