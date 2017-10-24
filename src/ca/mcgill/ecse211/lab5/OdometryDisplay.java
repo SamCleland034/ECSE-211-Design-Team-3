@@ -41,11 +41,11 @@ public class OdometryDisplay extends Thread {
 			for (int i = 0; i < 3; i++) {
 				t.drawString(formattedDoubleToString(position[i], 2), 3, i);
 			}
-			
-			//get the ultrasonic sensor information			
+
+			// get the ultrasonic sensor information
 			Lab5.usSensor.fetchSample(Lab5.sample, 0);
-			
-			//display the ultrasonic sensor information
+
+			// display the ultrasonic sensor information
 			t.drawString(Float.toString(Lab5.sample[0] * 100), 3, 3);
 
 			// throttle the OdometryDisplay

@@ -7,21 +7,21 @@ import lejos.hardware.port.Port;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /***
-This class is an updated version from lab 3 where we changed most methods
-in order to match lab 4.
+ * This class is an updated version from lab 3 where we changed most methods in
+ * order to match lab 4.
  ***/
 
-public class Navigation  {
+public class Navigation {
 
 	// Create constants
-	private static final int MOTOR_SPEED = 250;
+	private static final int MOTOR_SPEED = 225;
 	private static final int ROTATE_SPEED = 150;
 	private static final int MAX_DISTANCE_WALL = 15;
 	private static final int AVOID_ANGLE = 90;
 	private static final int AVOID_DISTANCE = 30;
 	private static final double SENSOR_OFFSET = 10;
 	private static final double SQUARE_LENGTH = 30.48;
-	private static double CENTER_OFFSET = 2;
+	private static double CENTER_OFFSET = 1.95;
 
 	// the maximum and minimum x and y values possible
 	private static final double XMax = 3 * SQUARE_LENGTH;
@@ -61,7 +61,7 @@ public class Navigation  {
 		}
 	}
 
-	//this method makes the robot travel to coordinates passed as parameters
+	// this method makes the robot travel to coordinates passed as parameters
 	public void travelTo(double endX, double endY) {
 
 		isNavigating = true;
@@ -94,19 +94,20 @@ public class Navigation  {
 			// function to move the robot forward forward
 			driveWithoutAvoid(distanceToTravel);
 
-
 			isNavigating = false;
-			while(isNavigating()) continue; 
+			while (isNavigating())
+				continue;
 			// make a sound when has reached destination
 			Sound.beep();
 		}
 
 	}
 
-	//this method makes the robot drive the indicated distance without looking for obstacles
+	// this method makes the robot drive the indicated distance without looking for
+	// obstacles
 
 	public void driveWithoutAvoid(double distanceToTravel) {
-		
+
 		Lab5.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
 		Lab5.rightMotor.setSpeed(MOTOR_SPEED);
 
@@ -114,10 +115,9 @@ public class Navigation  {
 		// forward
 		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), false);
 
-
 	}
 
-	//this method makes the robot drive a certain distance
+	// this method makes the robot drive a certain distance
 	public void drive(double distanceToTravel, double endX, double endY) {
 
 		Lab5.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
@@ -237,29 +237,40 @@ public class Navigation  {
 		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), true);
 		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, turnTheta), false);
 	}
-	
+
 	/**
-	 * zip traversal algorithm
-	 * slows down near the end for a safer landing
+	 * zip traversal algorithm slows down near the end for a safer landing
 	 *
 	 */
 	public void zipTraversal() {
 		Lab5.leftMotor.setSpeed(300); // set speeds
-		Lab5.rightMotor.setSpeed(300); 
+		Lab5.rightMotor.setSpeed(300);
 		Lab5.zipMotor.setSpeed(MOTOR_SPEED);
-		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,30), true);
-		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,30), true);
-		Lab5.zipMotor.rotate(convertDistance(1.1, 100), true);
-		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,250), true);
-		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,250), false);
-		Lab5.leftMotor.setSpeed(150);
+		Lab5.zipMotor.forward();// travels about 3/4 the zipline
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, 230), true);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, 230), false);
+		while (isNavigating())
+			continue;
+		Lab5.leftMotor.setSpeed(150); // slow down once getting to the downward slope
 		Lab5.rightMotor.setSpeed(150);
-		Lab5.zipMotor.setSpeed(MOTOR_SPEED/2);
-		Lab5.zipMotor.rotate(convertDistance(1.1, 20), true);
-		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,50), true);
-		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS,50), false);
+		Lab5.zipMotor.setSpeed(MOTOR_SPEED / 2);
+		Lab5.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
+		Lab5.leftMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, 50), true);
+		Lab5.rightMotor.rotate(convertDistance(Lab5.WHEEL_RADIUS, 50), false);
 	}
-	//this method makes the robot turn the indicated angle
+
+	/**
+	 * Same method as turn, without speed change
+	 * 
+	 * @author Sam Cleland
+	 * @param theta
+	 */
+	public void turnWithSameSpeed(double theta) {
+		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
+		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
+	}
+
+	// this method makes the robot turn the indicated angle
 	void turn(double theta) {
 		// set rotate speed for both motors
 		Lab5.leftMotor.setSpeed(ROTATE_SPEED);
@@ -269,6 +280,7 @@ public class Navigation  {
 		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
 		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
 	}
+
 	void turnWithoutInterruption(double theta) {
 		Lab5.leftMotor.setSpeed(ROTATE_SPEED);
 		Lab5.rightMotor.setSpeed(ROTATE_SPEED);
@@ -277,6 +289,7 @@ public class Navigation  {
 		Lab5.leftMotor.rotate(convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), true);
 		Lab5.rightMotor.rotate(-convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, theta), false);
 	}
+
 	// set a boolean to know when it is navigating
 	boolean isNavigating() {
 		return Lab5.leftMotor.isMoving() && Lab5.rightMotor.isMoving();

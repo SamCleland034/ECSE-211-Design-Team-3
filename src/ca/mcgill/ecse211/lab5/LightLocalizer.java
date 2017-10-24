@@ -32,40 +32,37 @@ public class LightLocalizer {
 	private EV3ColorSensor colorSensor;
 
 	// assign port to light sensor
-	
-	public LightLocalizer(Odometer odometer, Navigation navigation,
-			EV3ColorSensor colorSensor) {
+
+	public LightLocalizer(Odometer odometer, Navigation navigation, EV3ColorSensor colorSensor) {
 		this.odometer = odometer;
 		this.navigation = navigation;
 		this.colorSensor = colorSensor;
-		
-		
+
 	}
 
 	public void startLightLOC() {
 		long correctionStart, correctionEnd;
-		navigation.turn(10);
-		while(navigation.isNavigating()) continue;
+		// navigation.turn(10);
+		// while(navigation.isNavigating()) continue;
 		odometer.setTheta(0);
 		// initialize color sensor
-	
+
 		colorSensor.getColorIDMode();
 		SampleProvider provider = colorSensor.getMode("ColorID");
 		float colorSamples[] = new float[100];
 		Sound.beepSequenceUp();
-		
+
 		// Initialize theta, it will be corrected
 
 		// the following code enables the robot to position itself so that the
 		// light sensor will hit all four lines
-		Lab5.leftMotor.setSpeed(2*MOTOR_SPEED); // set speeds
-		Lab5.rightMotor.setSpeed(2*MOTOR_SPEED);
+		Lab5.leftMotor.setSpeed(2 * MOTOR_SPEED); // set speeds
+		Lab5.rightMotor.setSpeed(2 * MOTOR_SPEED);
 
 		Lab5.leftMotor.forward(); // Run forward
 		Lab5.rightMotor.forward();
 
 		boolean crossedLine = false; // Set flag
-		
 
 		// Before starting turning, make the robot go to (-25, -25)
 		while (!crossedLine) { // Set the crossedLine flag to be true when it
@@ -97,7 +94,7 @@ public class LightLocalizer {
 
 		while (!crossedLine) {
 			// get sample from sensor
-			
+
 			colorSensor.fetchSample(colorSamples, 1);
 			int color = (int) colorSamples[1];
 			// when the robot crosses a black line, stop the motors
@@ -124,7 +121,7 @@ public class LightLocalizer {
 			correctionStart = System.currentTimeMillis();
 
 			// get color detected by light sensor
-			
+
 			colorSensor.fetchSample(colorSamples, 1);
 			int color = (int) colorSamples[1];
 
@@ -196,41 +193,46 @@ public class LightLocalizer {
 		// navigation.turnTo(deltaTheta);
 		Sound.playNote(Sound.XYLOPHONE, 500, 500);
 	}
-	
+
+	// Used when getting to (x, y)
 	public void lightLocWithError() {
 		long correctionStart, correctionEnd;
-		while(navigation.isNavigating()) continue;
 		// initialize color sensor
 		colorSensor.getColorIDMode();
 		SampleProvider provider = colorSensor.getMode("ColorID");
 		float colorSamples[] = new float[100];
 		colorSensor.fetchSample(colorSamples, 1);
-		int colortype= (int)colorSamples[1];
-		//check if on a line in the beginning
-		//re-position to do localization
-		if(colortype ==13) {
+		int colortype = (int) colorSamples[1];
+
+		// check if on a line in the beginning
+		// re-position to do localization
+		if (colortype == 13) {
 			Sound.buzz();
 			navigation.turnWithoutInterruption(-90);
 			navigation.driveWithoutAvoid(10);
 			navigation.turnWithoutInterruption(90);
-		}
-		else {
-			correctPosition(colorSamples);
+			while (navigation.isNavigating())
+				continue;
+			startLightLOC();
+			return;
+		} else { // Check if a line is nearby the lightsensor
+			boolean correct = correctPosition(colorSamples);
+			if (correct) {
+				startLightLOC();
+				return;
+			}
 		}
 		Sound.beepSequenceUp();
-		
-		// Initialize theta, it will be corrected
 
 		// the following code enables the robot to position itself so that the
 		// light sensor will hit all four lines
-		Lab5.leftMotor.setSpeed(2*MOTOR_SPEED); // set speeds
-		Lab5.rightMotor.setSpeed(2*MOTOR_SPEED);
+		Lab5.leftMotor.setSpeed(2 * MOTOR_SPEED); // set speeds
+		Lab5.rightMotor.setSpeed(2 * MOTOR_SPEED);
 
 		Lab5.leftMotor.forward(); // Run forward
 		Lab5.rightMotor.forward();
 
 		boolean crossedLine = false; // Set flag
-		
 
 		// Before starting turning, make the robot go to (-25, -25)
 		while (!crossedLine) { // Set the crossedLine flag to be true when it
@@ -246,13 +248,14 @@ public class LightLocalizer {
 				Lab5.rightMotor.stop(false);
 				Sound.beep();
 				crossedLine = true;
-				
+
 			}
 		}
 
 		// once the sensor sees the black line, drive 25 cm backwards
-		navigation.driveWithoutAvoid(-27);
-		while(navigation.isNavigating()) continue;
+		navigation.driveWithoutAvoid(-25);
+		while (navigation.isNavigating())
+			continue;
 
 		navigation.turnTo(90); // turn to 90 degrees
 
@@ -264,7 +267,7 @@ public class LightLocalizer {
 
 		while (!crossedLine) {
 			// get sample from sensor
-			
+
 			colorSensor.fetchSample(colorSamples, 1);
 			int color = (int) colorSamples[1];
 			// when the robot crosses a black line, stop the motors
@@ -277,8 +280,9 @@ public class LightLocalizer {
 		}
 
 		// drive 25 cm backwards and turn back to 0 degrees
-		navigation.driveWithoutAvoid(-27);
-		while(navigation.isNavigating())continue; 
+		navigation.driveWithoutAvoid(-25);
+		while (navigation.isNavigating())
+			continue;
 
 		navigation.turnTo(0);
 
@@ -292,7 +296,7 @@ public class LightLocalizer {
 			correctionStart = System.currentTimeMillis();
 
 			// get color detected by light sensor
-			
+
 			colorSensor.fetchSample(colorSamples, 1);
 			int color = (int) colorSamples[1];
 
@@ -339,7 +343,7 @@ public class LightLocalizer {
 		// experimentally
 		double deltaTheta = (Math.PI / 2.0) - thetaY2 + Math.PI + (thetaY / 2.0) - 6;
 
-		double newTheta = odometer.getTheta() + deltaTheta;//;
+		double newTheta = odometer.getTheta() + deltaTheta;
 
 		if (newTheta < 0) { // Keep newTheta (in radians) between 0 and 2pi
 			newTheta = newTheta + 2 * Math.PI;
@@ -364,103 +368,114 @@ public class LightLocalizer {
 		// navigation.turnTo(deltaTheta);
 		Sound.playNote(Sound.XYLOPHONE, 500, 500);
 	}
-	
-	  
-	 
-	/**Executed after the localization at the xo, yo coordinates
-	 * Do this to correct the angle of the robot if the angle is off-centered
-	 * Assumes correct x and y 
+
+	/**
+	 * Executed after the localization at the xo, yo coordinates Do this to correct
+	 * the angle of the robot if the angle is off-centered Assumes correct x and y
+	 * If the change in theta is greater than 45, we know that the robot is at 90 degrees
+	 * So we set the boolean to true and the boolean value will then set it to 90 or 0 depending on if it is true or false
 	 * @return xLineCrossed
 	 */
 	public boolean correctLocalization() {
+		// get color detected by sensor
 		colorSensor.getColorIDMode();
 		SampleProvider provider = colorSensor.getMode("ColorID");
 		float colorSamples[] = new float[100];
-		colorSensor.fetchSample(colorSamples,1);
+		colorSensor.fetchSample(colorSamples, 1);
 		int color = (int) colorSamples[1];
-		if(color==13) return false;
-		boolean xLineCrossed = false; 
-		double currentTheta= Math.toDegrees(odometer.getTheta());
-		Lab5.leftMotor.setSpeed(40);
+		if (color == 13)
+			return false; // return false if black line
+		boolean xLineCrossed = false; // x line isn't crossed
+		double currentTheta = Math.toDegrees(odometer.getTheta());
+		Lab5.leftMotor.setSpeed(40); // set motor speed lower to detect line better
 		Lab5.rightMotor.setSpeed(40);
 		Lab5.leftMotor.forward();
 		Lab5.rightMotor.backward();
-		boolean crossedLine= false;
-		while(!crossedLine) {
-			
+		boolean crossedLine = false; // black line has been crossed
+		while (!crossedLine) { // if still not crossed
+			// get color
 			colorSensor.fetchSample(colorSamples, 1);
 			color = (int) colorSamples[1];
-			if(color == 13) {
+			if (color == 13) {
 				Sound.beep();
-				double changeInTheta = Math.toDegrees(odometer.getTheta())-currentTheta;
+				double changeInTheta = Math.toDegrees(odometer.getTheta()) - currentTheta; // difference in odometer
+																							// theta and current theta
 				Lab5.leftMotor.stop(true);
 				Lab5.rightMotor.stop(false);
-				navigation.turn(-5);
-				while(navigation.isNavigating()) continue;
-				crossedLine=true;
-				xLineCrossed= changeInTheta>45;
+				Lab5.leftMotor.setAcceleration(50);
+				Lab5.rightMotor.setAcceleration(50);
+				navigation.turnWithSameSpeed(-6);
+				Lab5.leftMotor.setAcceleration(200);
+				Lab5.rightMotor.setAcceleration(200);
+				while (navigation.isNavigating())
+					continue;
+				crossedLine = true;
+				xLineCrossed = changeInTheta > 45;
 			}
-			
+
 		}
-		return xLineCrossed; 
+		return xLineCrossed;
 	}
-	
+
 	/**
-	 * sweeps robot left to right to detect if it is near a line
-	 *if it is near a line, then it moves accordingly to the left 
-	 * Doing this to allow the robot to localize in an adequate location
+	 * sweeps robot left to right to detect if it is near a line if it is near a
+	 * line, then it moves accordingly to the left Doing this to allow the robot to
+	 * localize in an adequate location
+	 * 
 	 * @param colorSamples
 	 */
-	public void correctPosition(float[] colorSamples) {
-			int rotations = Navigation.convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, 15);
-			Lab5.leftMotor.setSpeed(60);
-			Lab5.rightMotor.setSpeed(60);
-			Lab5.leftMotor.rotate(-rotations, true);
-			Lab5.rightMotor.rotate(rotations, true);
-			double currentTheta = Math.toDegrees(odometer.getTheta());
-			while(navigation.isNavigating()) {
-				colorSensor.fetchSample(colorSamples, 1);
-				int colortype= (int)colorSamples[1];
-				if(colortype ==13) {
-					Lab5.leftMotor.stop(true);
-					Lab5.rightMotor.stop(false);
-					Sound.buzz();
-					double changeInTheta = Math.toDegrees(odometer.getTheta())
-					-currentTheta;
-					navigation.turnTo(-90+(360-changeInTheta));
-					while(navigation.isNavigating()) continue;
-					
-					odometer.setTheta(-Math.PI/2);
-					navigation.driveWithoutAvoid(6);
-					navigation.turnTo(0);
-					
-					return;
-				}
+	public boolean correctPosition(float[] colorSamples) {
+		boolean corrected = false;
+		int rotations = Navigation.convertAngle(Lab5.WHEEL_RADIUS, Lab5.TRACK, 15);
+		Lab5.leftMotor.setSpeed(60);
+		Lab5.rightMotor.setSpeed(60);
+		Lab5.leftMotor.rotate(-rotations, true);
+		Lab5.rightMotor.rotate(rotations, true);
+		double currentTheta = Math.toDegrees(odometer.getTheta());
+		while (navigation.isNavigating()) {
+			colorSensor.fetchSample(colorSamples, 1);
+			int colortype = (int) colorSamples[1];
+			if (colortype == 13) {
+				Lab5.leftMotor.stop(true);
+				Lab5.rightMotor.stop(false);
+				Sound.buzz();
+				double changeInTheta = Math.toDegrees(odometer.getTheta()) - currentTheta;
+				navigation.turnTo(-90 + (360 - changeInTheta));
+				while (navigation.isNavigating())
+					continue;
+
+				odometer.setTheta(-Math.PI / 2);
+				navigation.driveWithoutAvoid(6);
+				navigation.turnTo(0);
+				corrected = true;
+				return corrected;
 			}
-			Lab5.leftMotor.rotate(2*rotations, true);
-			Lab5.rightMotor.rotate(-2*rotations, true);
-			while(navigation.isNavigating()) {
-				colorSensor.fetchSample(colorSamples, 1);
-				int colortype= (int)colorSamples[1];
-				if( colortype ==13) {
-					Lab5.leftMotor.stop(true);
-					Lab5.rightMotor.stop(false);
-					Sound.buzz();
-					double changeInTheta = Math.toDegrees(odometer.getTheta())
-					-currentTheta;
-					navigation.turnWithoutInterruption(-90-changeInTheta);
-					while(navigation.isNavigating()) continue;
-					odometer.setTheta(-Math.PI/2);
-					navigation.driveWithoutAvoid(7);
-					navigation.turnTo(0);
-					return;
-				}
-				
-			}
-			Lab5.leftMotor.rotate(-rotations,true);
-			Lab5.rightMotor.rotate(rotations,false);
+
 		}
-				
-			
-	
+		Lab5.leftMotor.rotate(2 * rotations, true);
+		Lab5.rightMotor.rotate(-2 * rotations, true);
+		while (navigation.isNavigating()) {
+			colorSensor.fetchSample(colorSamples, 1);
+			int colortype = (int) colorSamples[1];
+			if (colortype == 13) {
+				Lab5.leftMotor.stop(true);
+				Lab5.rightMotor.stop(false);
+				Sound.buzz();
+				double changeInTheta = Math.toDegrees(odometer.getTheta()) - currentTheta;
+				navigation.turnWithoutInterruption(-90 - changeInTheta);
+				while (navigation.isNavigating())
+					continue;
+				odometer.setTheta(-Math.PI / 2);
+				navigation.driveWithoutAvoid(7);
+				navigation.turnTo(0);
+				corrected = true;
+				return corrected;
+			}
+
+		}
+		Lab5.leftMotor.rotate(-rotations, true);
+		Lab5.rightMotor.rotate(rotations, false);
+		return corrected;
+	}
+
 }

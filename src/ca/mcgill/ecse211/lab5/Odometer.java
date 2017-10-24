@@ -18,11 +18,10 @@ public class Odometer extends Thread {
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
 
-	private static final long ODOMETER_PERIOD = 25; /*
-													 * odometer update period,
-													 * in ms
+	private static final long ODOMETER_PERIOD = 22; /*
+													 * odometer update period, in ms
 													 */
-	
+
 	private Object lock; /* lock object for mutual exclusion */
 
 	// default constructor
@@ -51,14 +50,14 @@ public class Odometer extends Thread {
 			nowTachoRight = rightMotor.getTachoCount();
 
 			// compute wheel displacement
-			distanceLeft = Math.PI * Lab5.WHEEL_RADIUS * (nowTachoLeft - getLeftMotorTachoCount()) / 180; 
-			distanceRight = Math.PI * Lab5.WHEEL_RADIUS * (nowTachoRight - getRightMotorTachoCount()) / 180; 
+			distanceLeft = Math.PI * Lab5.WHEEL_RADIUS * (nowTachoLeft - getLeftMotorTachoCount()) / 180;
+			distanceRight = Math.PI * Lab5.WHEEL_RADIUS * (nowTachoRight - getRightMotorTachoCount()) / 180;
 
 			setLeftMotorTachoCount(nowTachoLeft); // save tacho counts for next iteration
 			setRightMotorTachoCount(nowTachoRight);
 
 			deltaDistance = 0.5 * (distanceLeft + distanceRight); // compute vehicle displacement
-			
+
 			deltaT = (distanceLeft - distanceRight) / Lab5.TRACK; // compute change in heading
 
 			// update heading
@@ -67,15 +66,14 @@ public class Odometer extends Thread {
 
 			synchronized (lock) {
 				/**
-				 * Don't use the variables x, y, or theta anywhere but here!
-				 * Only update the values of x, y, and theta in this block. Do
-				 * not perform complex math
+				 * Don't use the variables x, y, or theta anywhere but here! Only update the
+				 * values of x, y, and theta in this block. Do not perform complex math
 				 */
 
 				setX(getX() + dX); // update estimates of X and Y position
 				setY(getY() + dY);
-				setTheta((getTheta()+deltaT));
-				
+				setTheta((getTheta() + deltaT));
+
 				if (getTheta() < 0) { // Keep theta (in radians) between 0 and 2pi
 					setTheta(getTheta() + 2 * Math.PI);
 				} else if (getTheta() > 2 * Math.PI) {
@@ -106,7 +104,7 @@ public class Odometer extends Thread {
 			if (update[1])
 				position[1] = y;
 			if (update[2])
-				position[2] = Math.toDegrees(theta); //Change radians to degrees
+				position[2] = Math.toDegrees(theta); // Change radians to degrees
 		}
 	}
 
