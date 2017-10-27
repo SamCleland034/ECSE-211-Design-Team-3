@@ -8,9 +8,9 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /***
  * This class is an updated version from lab 3 where we changed most methods in
- * order to match lab 4, used when we need to travel to a specific coordinate
- * Also use for other operations such as flag search an zip traversal. How the
- * robot travels the grid, based on what is passed into the constructor.
+ * order to match lab 4. It is used when we need to travel to a specific coordinate.
+ * Additionally, it is used for other operations such as the flag search or zipline
+ * traversal: How the robot travels the grid, based on what is passed into the constructor.
  * 
  * @version 1.0
  ***/
@@ -76,7 +76,7 @@ public class Navigation {
 	 *            coordinates that will be passed to this version of the navigation
 	 *            at the start
 	 * @param leftMotor,
-	 *            setting the speed of the motors
+	 *            set the speed of the motors
 	 * @param rightMotor
 	 */
 	public Navigation(Odometer odometer, double[][] path, EV3LargeRegulatedMotor leftMotor,
@@ -91,28 +91,28 @@ public class Navigation {
 		}
 	}
 
+//	/**
+//	 * Start nav, 
+//	 */
+//	public void startNav() {
+//
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			// there is nothing to be done here because it is not expected that
+//			// the odometer will be interrupted by another thread
+//		}
+//
+//		// travel to each waypoints
+//		for (int i = 0; i < path.length; i++) {
+//			travelTo(path[i][0], path[i][1]);
+//		}
+//	}
+
 	/**
-	 * Start nav,
-	 */
-	public void startNav() {
-
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// there is nothing to be done here because it is not expected that
-			// the odometer will be interrupted by another thread
-		}
-
-		// travel to each waypoints
-		for (int i = 0; i < path.length; i++) {
-			travelTo(path[i][0], path[i][1]);
-		}
-	}
-
-	/**
-	 * Travel to, orients the robot to x and y on the grid calls turn to if the
+	 * Travel to, orients the robot to x and y on the grid, calls turn to if the
 	 * robot is not aligned in the proper position to reach x and y. If using start
-	 * nav method, will continuously call this method until no more coordinates in
+	 * nav method, it will continuously call this method until no more coordinates in
 	 * the path
 	 * 
 	 * @param endX

@@ -1,5 +1,3 @@
-//TESTTT
-
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Button;
@@ -18,8 +16,9 @@ import lejos.hardware.sensor.*;
 // TODO: Auto-generated Javadoc
 /**
  * Date 10/25/17 Preliminary version of the DPM final project using the final
- * code from lab 5 Still need to incorporate additional functionality such as
- * odometry correction and flag search.
+ * code from lab 5, but additional functionality such as odometry correction 
+ * and flag search still need to be incorporated.
+ * 
  *
  * @author Sam Cleland, Yiming Wu, Charles Brana
  * @version 0.1
@@ -36,7 +35,7 @@ public class FinalProject extends Thread {
 	/** The Constant rightMotor, global right motor for entire project */
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
-	/** The Constant usSensor. Ultra sonic sensor used */
+	/** The Constant usSensor. Ultrasonic sensor used */
 	public static final EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 
 	/** The odometer. */
