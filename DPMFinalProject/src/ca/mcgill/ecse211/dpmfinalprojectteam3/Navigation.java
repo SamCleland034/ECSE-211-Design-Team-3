@@ -419,12 +419,12 @@ public class Navigation {
 	}
 	/**
 	 * Travel in a continuous sequence (in a square/rectangle in this case), ending
-	 * in the same spot unless interupted by flag search, then travel to upper left
+	 * in the same spot unless interrupted by flag search, then travel to upper left
 	 * of green search region or lower right of red search region .
 	 * 
 	 * @since 10/29/17
-	 * @param coords,coords
-	 *            that will be traveled continously
+	 * @param coords, coords
+	 *            that will be traveled continuously
 	 * @param whichZone,
 	 *            if in red zone or green zone have to traverse slightly different
 	 */
