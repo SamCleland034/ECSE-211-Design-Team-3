@@ -5,7 +5,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * This class is used in the start to approximate a suitable heading to then
+ * This class is used in the start to approximate a suitable heading to then,
  * perform light localization using the light sensor.
  * 
  * @version 1.0
@@ -73,7 +73,7 @@ public class UltrasonicLocalizer extends Thread {
 	 *            the odometer, keep track of the wheel rotations to get an angle to
 	 *            turn to
 	 * @param navigation
-	 *            the navigation, using turn to method to determine where we need to
+	 *            the navigation, uses turn to method to determine where we need to
 	 *            turn to after calculating theta values
 	 * @param localizationType
 	 *            the localization type, determine if rising or falling edge
@@ -279,7 +279,7 @@ public class UltrasonicLocalizer extends Thread {
 
 	/**
 	 * Filter far, filter out far distances unless they get repeated enough to
-	 * suggest nothing is ther
+	 * suggest nothing is there.
 	 *
 	 * @param dist
 	 *            the dist, distance the ultrasonic sensor reads

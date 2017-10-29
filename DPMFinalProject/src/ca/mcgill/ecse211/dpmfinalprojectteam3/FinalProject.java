@@ -1,5 +1,3 @@
-//TESTTT
-
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Button;

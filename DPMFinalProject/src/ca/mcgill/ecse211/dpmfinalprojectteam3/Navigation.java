@@ -89,7 +89,7 @@ public class Navigation {
 	}
 
 	/**
-	 * Start nav,.
+	 * Starts navigation.
 	 */
 	public void startNav() {
 
@@ -110,7 +110,7 @@ public class Navigation {
 	 * Travel to, orients the robot to x and y on the grid calls turn to if the
 	 * robot is not aligned in the proper position to reach x and y. If using start
 	 * nav method, will continuously call this method until no more coordinates in
-	 * the path
+	 * the double array path
 	 * 
 	 * @param endX
 	 *            x coordinate of the destination
@@ -417,7 +417,6 @@ public class Navigation {
 	public boolean flagSearch(int correctColor) {
 		return true;
 	}
-
 	/**
 	 * Travel in a continuous sequence (in a square/rectangle in this case), ending
 	 * in the same spot unless interupted by flag search, then travel to upper left

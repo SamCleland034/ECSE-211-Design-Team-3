@@ -9,12 +9,12 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 public interface UltrasonicController {
 
 	/**
-	 * Processes the data read from the US sensor with filtering included Determines
-	 * if the distance is ok, too close or too far. Robot responds accordingly to
+	 * Processes data read from the US sensor with filtering included. Determines
+	 * if the distance is correct, too close or too far. Robot responds accordingly to
 	 * each of the 3 cases.
 	 *
 	 * @param distance,
-	 *            distance value read in through the poller.
+	 *            distance value read through the poller.
 	 */
 	public void processUSData(int distance);
 

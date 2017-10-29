@@ -4,7 +4,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class Odometer, use the odometer class to keep track of the position of
+ * Uses the odometer class to keep track of the position of
  * the robot with respect to the wheel rotations of the robot, along with the
  * heading of the robot
  */
@@ -107,8 +107,7 @@ public class Odometer extends Thread {
 
 			synchronized (lock) {
 				/**
-				 * Don't use the variables x, y, or theta anywhere but here! Only update the
-				 * values of x, y, and theta in this block. Do not perform complex math
+				 * Updates the values of x, y, and theta in this block.
 				 */
 
 				setX(getX() + dX); // update estimates of X and Y position
@@ -143,7 +142,7 @@ public class Odometer extends Thread {
 	 * @param position,
 	 *            parameters that want to be received
 	 * @param update,
-	 *            tells us which parameters need to be receieved
+	 *            tells us which parameters need to be received
 	 * @return the position, returns the position of the robot
 	 */
 	public void getPosition(double[] position, boolean[] update) {
