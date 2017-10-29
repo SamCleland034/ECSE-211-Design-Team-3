@@ -5,7 +5,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * This class is used in the start to approximate a suitable heading to then,
+ * Uses at the start to approximate a suitable heading to then,
  * perform light localization using the light sensor.
  * 
  * @version 1.0

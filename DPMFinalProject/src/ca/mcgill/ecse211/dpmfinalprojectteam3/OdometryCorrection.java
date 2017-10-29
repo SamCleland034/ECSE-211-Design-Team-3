@@ -8,9 +8,9 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * The Class OdometryCorrection, used to correct the small but accumulating
- * errors of the odometer using the light sensor to detect grid lines on the
- * floor
+ * Uses to correct the small but accumulating errors of the 
+ * odometer using the light sensor to detect grid lines on the
+ * floor.
  * 
  * @version 1.0
  */
