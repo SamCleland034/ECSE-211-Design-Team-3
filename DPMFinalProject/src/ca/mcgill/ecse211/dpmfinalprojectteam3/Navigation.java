@@ -1,16 +1,12 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.motor.*;
-import lejos.hardware.port.Port;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /***
- * This class is an updated version from lab 3 where we changed most methods in
- * order to match lab 4. It is used when we need to travel to a specific coordinate.
- * Additionally, it is used for other operations such as the flag search or zipline
- * traversal: How the robot travels the grid, based on what is passed into the constructor.
+ * Navigates the robot around using coordinates that get converted into
+ * distances based on the length of the tiles. Other features include methods
+ * for specific tasks such as avoiding an obstacle and searching for the flag.
  * 
  * @version 1.0
  ***/
@@ -75,9 +71,10 @@ public class Navigation {
 	 * @param path
 	 *            coordinates that will be passed to this version of the navigation
 	 *            at the start
-	 * @param leftMotor,
-	 *            set the speed of the motors
+	 * @param leftMotor
+	 *            the left motor
 	 * @param rightMotor
+	 *            the right motor
 	 */
 	public Navigation(Odometer odometer, double[][] path, EV3LargeRegulatedMotor leftMotor,
 			EV3LargeRegulatedMotor rightMotor) {
@@ -91,28 +88,28 @@ public class Navigation {
 		}
 	}
 
-//	/**
-//	 * Start nav, 
-//	 */
-//	public void startNav() {
-//
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			// there is nothing to be done here because it is not expected that
-//			// the odometer will be interrupted by another thread
-//		}
-//
-//		// travel to each waypoints
-//		for (int i = 0; i < path.length; i++) {
-//			travelTo(path[i][0], path[i][1]);
-//		}
-//	}
+	/**
+	 * Start nav,.
+	 */
+	public void startNav() {
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// there is nothing to be done here because it is not expected that
+			// the odometer will be interrupted by another thread
+		}
+
+		// travel to each waypoints
+		for (int i = 0; i < path.length; i++) {
+			travelTo(path[i][0], path[i][1]);
+		}
+	}
 
 	/**
-	 * Travel to, orients the robot to x and y on the grid, calls turn to if the
+	 * Travel to, orients the robot to x and y on the grid calls turn to if the
 	 * robot is not aligned in the proper position to reach x and y. If using start
-	 * nav method, it will continuously call this method until no more coordinates in
+	 * nav method, will continuously call this method until no more coordinates in
 	 * the path
 	 * 
 	 * @param endX
@@ -166,11 +163,11 @@ public class Navigation {
 	// obstacles
 
 	/**
-	 * Drive without avoid, called if neglecting avoidance WILL NOT USE THIS METHOD
-	 * IN FINAL PROJECT SINCE NEED TO ACCOUNT FOR AVOIDING
+	 * Drive without avoid, called if neglecting avoidance in special cases.
 	 * 
-	 * @param distanceToTravel,
-	 *            how far the robot needs to travel to reach destination
+	 *
+	 * @param distanceToTravel
+	 *            the distance to travel
 	 */
 	public void driveWithoutAvoid(double distanceToTravel) {
 
@@ -186,7 +183,7 @@ public class Navigation {
 	}
 
 	/**
-	 * Drive, accounts for avoiding as well
+	 * Drive, accounts for avoiding as well.
 	 *
 	 * @param distanceToTravel
 	 *            the distance to travel
@@ -229,8 +226,8 @@ public class Navigation {
 
 	/**
 	 * Avoid, called by drive if the US sensor reads a value that is smaller than
-	 * the bandcenter
-	 * 
+	 * the bandcenter.
+	 *
 	 * @param endX
 	 *            the end X
 	 * @param endY
@@ -307,9 +304,10 @@ public class Navigation {
 	}
 
 	/**
-	 * Turn to, adjust heading of the robot to the desired destination
+	 * Turn to, adjust heading of the robot to the desired destination.
 	 *
 	 * @param theta
+	 *            the theta
 	 */
 	// this method makes the robot turn to the indicated angle the shortest way
 	void turnTo(double theta) {
@@ -399,9 +397,46 @@ public class Navigation {
 	}
 
 	/**
+	 * Method called once we reach one of the search regions (lower left of red
+	 * region or upper right of green region) Travels the x and y length of the
+	 * search region while simultaneously searching for the correct color block.
+	 * Once it travels the y or x length, it will then turn to the next corner and
+	 * travel to that corner until it finds the correct color block. Once the light
+	 * sensor comes across the correct block, the robot will then beep 3 times and
+	 * then travel to the upper left of the green region or lower right of the red
+	 * region to then figure out where it needs to go next.
+	 * 
+	 * @since 10/29/17
+	 * @param correctColor
+	 *            the correct color
+	 * @return true, once it finds the correct flag, keep traversing along the
+	 *         search region until the robot reaches the upper left corner of the
+	 *         green search region or the lower right region of the search region to
+	 *         then continue where it has to go next
+	 */
+	public boolean flagSearch(int correctColor) {
+		return true;
+	}
+
+	/**
+	 * Travel in a continuous sequence (in a square/rectangle in this case), ending
+	 * in the same spot unless interupted by flag search, then travel to upper left
+	 * of green search region or lower right of red search region .
+	 * 
+	 * @since 10/29/17
+	 * @param coords,coords
+	 *            that will be traveled continously
+	 * @param whichZone,
+	 *            if in red zone or green zone have to traverse slightly different
+	 */
+	public void travelInSequence(double[] coords, boolean whichZone) {
+
+	}
+
+	/**
 	 * Checks if is navigating.
 	 *
-	 * @return true, if is navigating
+	 * @return true, if both of the motors are moving
 	 */
 	static // set a boolean to know when it is navigating
 	boolean isNavigating() {
@@ -412,10 +447,11 @@ public class Navigation {
 	 * Convert distance.
 	 *
 	 * @param radius
-	 *            the radius
+	 *            the radius of the wheels
 	 * @param distance
-	 *            the distance
-	 * @return the int
+	 *            the distance that needs to be traveled
+	 * @return rotations, the number of rotations each wheel has to rotate in order
+	 *         to go that distance
 	 */
 	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -425,12 +461,13 @@ public class Navigation {
 	 * Convert angle.
 	 *
 	 * @param radius
-	 *            the radius
+	 *            the radius, wheel radius of robot
 	 * @param width
-	 *            the width
+	 *            the width, distance between the wheels of the robot
 	 * @param angle
-	 *            the angle
-	 * @return the int
+	 *            the angle, the angle we want the robot to turn to
+	 * @return rotations, the number of rotations each wheel has to turn to adjust
+	 *         heading to theta
 	 */
 	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);

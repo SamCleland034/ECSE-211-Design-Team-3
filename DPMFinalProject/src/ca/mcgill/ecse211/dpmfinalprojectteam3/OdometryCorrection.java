@@ -2,32 +2,27 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
-
 import lejos.hardware.ev3.LocalEV3;
-
-import lejos.hardware.port.SensorPort;
-
-import lejos.hardware.sensor.*;
-
 import lejos.hardware.port.Port;
-
+import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class OdometryCorrection, used to correct the small but accumulating
  * errors of the odometer using the light sensor to detect gridlines on the
  * floor
+ * 
+ * @version 1.0
  */
 public class OdometryCorrection extends Thread {
 
 	/** The Constant CORRECTION_PERIOD. Sampling rate of light sensor data */
 	private static final long CORRECTION_PERIOD = 10;
 
-	/** The nbr of turns. */
+	/** The number of turns robot has made. */
 	private static int nbrOfTurns = 0;
 
-	/** The nbr of lines. */
+	/** The number of lines crossed by the robot. */
 	private static int nbrOfLines = 0;
 
 	/** The x. */

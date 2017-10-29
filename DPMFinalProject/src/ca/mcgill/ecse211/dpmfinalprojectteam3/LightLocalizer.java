@@ -5,16 +5,14 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.Port;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * The Class LightLocalizer, used to allow the robot, at the beginning, and at
- * times when error accumulates too much to re-adjust itself, and corrects the odometer
- * using one to potentially two light sensors to perform this task
+ * The Class LightLocalizer, used to allow the robot in the beginning and in
+ * times when error accumulates too much to re-adjust itself and start off fresh
+ * Using one to potentially two light sensors to perform this task
  * 
  * @version 1.0
  */
@@ -75,7 +73,7 @@ public class LightLocalizer {
 	 * @param odometer
 	 *            ,the odometer used for light localization
 	 * @param navigation
-	 *            ,the navigation we will use to travel to (0,0) once we get the
+	 *            ,the navigation we will use to travel to 0,0 once we figure out
 	 *            correct heading
 	 * @param colorSensor
 	 *            the color sensor, used to detect lines when doing light
@@ -90,7 +88,7 @@ public class LightLocalizer {
 
 	/**
 	 * Start light LOC, primary method for localization in one of the starting
-	 * corners after ultrasonic localization has performed.
+	 * corners after ultrasonic localization
 	 */
 	public void startLightLOC() {
 		long correctionStart, correctionEnd;
@@ -249,7 +247,7 @@ public class LightLocalizer {
 	/**
 	 * Light loc with error, light localization primarily used when in an area that
 	 * is not in one of the starting points, such as after dismounting from the
-	 * zipline. It checks for certain cases such as if the light sensor is near or on a line.
+	 * zipline. Have to check for certain cases such as if near or on a line
 	 * 
 	 */
 	// Used when getting to (x, y)
@@ -428,15 +426,15 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Executed after the localization at (xo, yo) coordinates. It executes to correct
-	 * the angle of the robot if the angle is off-centered assuming it corrects x and y.
-	 * If the change in theta is greater than 45 degrees, we know that the robot is at 90
-	 * degrees. Then, we set the boolean to true, and the boolean value will then set it
-	 * to 90 or 0 degrees depending on if it is true or false.
+	 * Executed after the localization at the xo, yo coordinates Do this to correct
+	 * the angle of the robot if the angle is off-centered Assumes correct x and y
+	 * If the change in theta is greater than 45, we know that the robot is at 90
+	 * degrees So we set the boolean to true and the boolean value will then set it
+	 * to 90 or 0 depending on if it is true or false.
 	 *
 	 * @return xLineCrossed, we return a boolean to see which line the robot crossed
 	 *         if the theta value of the line is greater than 45, we know that it
-	 *         must be facing to 90 degrees since after localization it will be either
+	 *         must be facing to 90 since after localization it will be either
 	 *         slightly on the left or right of a line never more than 45 degrees to
 	 *         the left or the right.
 	 */
@@ -482,14 +480,13 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * It sweeps the robot left to right to detect if it is near a line, 
-	 * then it moves accordingly to the left. That way, it allows the robot to
-	 * localize in an adequate location so the light sensor can brush over all
-	 * four lines.
+	 * sweeps robot left to right to detect if it is near a line if it is near a
+	 * line, then it moves accordingly to the left Doing this to allow the robot to
+	 * localize in an adequate location.
 	 *
 	 * @param colorSamples
 	 *            the color samples
-	 * @return false if it does not detect a line, true if it does then performs
+	 * @return false if it doesn't detect a line, true if it does then performs
 	 *         normal localization like in the first method since the position of
 	 *         the robot will be corrected
 	 */

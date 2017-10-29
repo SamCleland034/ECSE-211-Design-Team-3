@@ -2,17 +2,13 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.SensorPort;
-import lejos.hardware.sensor.*;
-import lejos.hardware.port.Port;
-import lejos.robotics.SampleProvider;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class UltrasonicLocalizer, used in the start to approximate a suitable
- * heading to then perform light localization using the light sensor.
+ * This class is used in the start to approximate a suitable heading to then
+ * perform light localization using the light sensor.
+ * 
+ * @version 1.0
  */
 public class UltrasonicLocalizer extends Thread {
 
@@ -22,18 +18,15 @@ public class UltrasonicLocalizer extends Thread {
 	// Define the two types of correction
 	public enum LocalizationType {
 
-		/** The falling edge. */
+		/** Robot seeing a change from high distance to low distance. */
 		FALLING_EDGE,
-		/** The rising edge. */
+		/** Robot seeing a change from low distance to high distance. */
 		RISING_EDGE
 	};
 
 	/** The rotate speed. Rotating speed for ultrasonic localization */
 	// Define variables
 	public static float ROTATE_SPEED = 70;
-
-	/** The distance. Distance that the ultrasonic sensor reads */
-	private double distance;
 
 	/** The dist. */
 	private double dist;
@@ -52,9 +45,6 @@ public class UltrasonicLocalizer extends Thread {
 	 * values
 	 */
 	private static final int BOTTOM_THRESHOLD = 35; // "d-k"
-
-	/** The Constant MAX_DISTANCE_BETWEEN. */
-	private static final int MAX_DISTANCE_BETWEEN = 43; // "d"
 
 	/** The Constant FILTER_OUT. To filter out bad data */
 	// Used to filter values
@@ -119,8 +109,8 @@ public class UltrasonicLocalizer extends Thread {
 	}
 
 	/**
-	 * Do localize, main ultrasonic localization method that will perform the actual
-	 * functionality we need to do
+	 * Do localize, main ultrasonic localization method that will perform the
+	 * ultrasonic localization seen in lab 4
 	 */
 	public void doLocalize() {
 
@@ -259,9 +249,9 @@ public class UltrasonicLocalizer extends Thread {
 	 * Update angle. Update angle to the correct heading that we need to adjust to
 	 *
 	 * @param first_angle
-	 *            the first angle
+	 *            the first angle recorded
 	 * @param second_angle
-	 *            the second angle
+	 *            the second angle recorded
 	 */
 	public void updateAngle(double first_angle, double second_angle) {
 
@@ -285,19 +275,6 @@ public class UltrasonicLocalizer extends Thread {
 			UPDATED_ANGLE = UPDATED_ANGLE + 200; // This value is found experimentally
 			navigation.turn(UPDATED_ANGLE);
 		}
-	}
-
-	/**
-	 * Convert distance.
-	 *
-	 * @param radius
-	 *            the radius
-	 * @param distance
-	 *            the distance
-	 * @return the int
-	 */
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 	/**

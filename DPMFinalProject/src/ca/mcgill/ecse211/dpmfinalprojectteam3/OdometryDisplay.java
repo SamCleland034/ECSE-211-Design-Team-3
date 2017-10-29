@@ -6,10 +6,11 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.lcd.TextLCD;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class OdometryDisplay, used to display the odometer to the screen of the
  * EV3 brick. Also display other things such as the ultrasonic sensor readings
+ * 
+ * @version 1.0
  */
 public class OdometryDisplay extends Thread {
 
@@ -26,9 +27,9 @@ public class OdometryDisplay extends Thread {
 	 * Instantiates a new odometry display.
 	 *
 	 * @param odometer
-	 *            the odometer
+	 *            the odometer that will be displayed on the screen
 	 * @param t
-	 *            the t
+	 *            the t, the actual display
 	 */
 	// constructor
 	public OdometryDisplay(Odometer odometer, TextLCD t) {
@@ -90,9 +91,9 @@ public class OdometryDisplay extends Thread {
 	 * Formatted double to string.
 	 *
 	 * @param x
-	 *            the x
+	 *            the x, converts input to string
 	 * @param places
-	 *            the places
+	 *            the places,
 	 * @return the string
 	 */
 	private static String formattedDoubleToString(double x, int places) {

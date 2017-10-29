@@ -1,38 +1,106 @@
+//TESTTT
+
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Button;
-import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
-import lejos.hardware.port.SensorPort;
-import lejos.hardware.sensor.*;
 
-// TODO: Auto-generated Javadoc
 /**
  * Date 10/25/17 Preliminary version of the DPM final project using the final
- * code from lab 5, but additional functionality such as odometry correction 
- * and flag search still need to be incorporated.
+ * code from lab 5 Still need to incorporate additional functionality such as
+ * odometry correction and flag search.
  * 
- *
  * @author Sam Cleland, Yiming Wu, Charles Brana
- * @version 0.1
+ * @version 1.0
+ * 
  */
 public class FinalProject extends Thread {
 
-	/** The Constant leftMotor, global left motor for entire project */
+	/** x coord of the zipline in the green region. */
+	public int zipgreenX;
+
+	/** y coord of the zipline in the green region. */
+	public int zipgreenY;
+
+	/** xc coord of the zipline in the green region. */
+	public int zipgreenXc;
+
+	/** yc coord of the zipline in the green region. */
+	public int zipgreenYc;
+
+	/** x coord of the zipline in the red region. */
+	public int zipredX;
+
+	/** y coord of the zipline in the red region. */
+	public int zipredY;
+
+	/** xc coord of the zipline in the red region. */
+	public int zipredXc;
+
+	/** yc coord of the zipline in the red region. */
+	public int zipredYc;
+
+	/** x coord of the lower left corner of green search region. */
+	public int LLSRGX;
+
+	/** y coord of the lower left corner of green search region. */
+	public int LLSRGY;
+
+	/** x coord of the upper right corner of green search region. */
+	public int UPSRGX;
+
+	/** y coord of the upper right corner of green search region. */
+	public int UPSRGY;
+
+	/** x coord of the lower left corner of red search region. */
+	public int LLSRRX;
+
+	/** y coord of the lower left corner of red search region. */
+	public int LLSRRY;
+
+	/** x coord of the upper right corner of red search region. */
+	public int UPSRRX;
+
+	/** y coord of the upper right corner of red search region. */
+	public int UPSRRY;
+
+	/** x coord of lower left corner of horizontal shallow water region. */
+	public int SHLLX;
+
+	/** y coord of lower left corner of horizontal shallow water region. */
+	public int SHLLY;
+
+	/** x coord of upper right corner of horizontal shallow water region. */
+	public int SHURX;
+
+	/** y coord of upper right corner of horizontal shallow water region. */
+	public int SHURY;
+	/** x coord of lower left corner of vertical shallow water region. */
+	public int SVLLX;
+
+	/** y coord of lower left corner of vertical shallow water region. */
+	public int SVLLY;
+
+	/** x coord of upper right corner of vertical shallow water region. */
+	public int SVURX;
+
+	/** y coord of upper right corner of vertical shallow water region. */
+	public int SVURY;
+
+	/** The Constant leftMotor, global left motor for entire project. */
 	// Assign ports to motors and to sensor
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
-	/** The Constant zipMotor, used for the zip motor, global access */
+	/** The Constant zipMotor, used for the zip motor, global access. */
 	public static final EV3LargeRegulatedMotor zipMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
-	/** The Constant rightMotor, global right motor for entire project */
+	/** The Constant rightMotor, global right motor for entire project. */
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
 	/** The Constant usSensor. Ultrasonic sensor used */
@@ -41,14 +109,14 @@ public class FinalProject extends Thread {
 	/** The odometer. */
 	private Odometer odometer;
 
-	/** The us dist, used to change the sensor mode to distance */
+	/** The us dist, used to change the sensor mode to distance. */
 	// create variables
 	static SampleProvider usDist = usSensor.getMode("Distance");
 
 	/** The sample. Float array used to generate */
 	static float[] sample = new float[usDist.sampleSize()];
 
-	/** The Constant TILE_SPACING, distance in centimeters between each tile */
+	/** The Constant TILE_SPACING, distance in centimeters between each tile. */
 	public static final double TILE_SPACING = 30.48;
 
 	/** The Constant WHEEL_RADIUS. Wheel radius of our robot's wheels */
@@ -73,7 +141,7 @@ public class FinalProject extends Thread {
 	private static final Port LightPort = LocalEV3.get().getPort("S4");
 
 	/**
-	 * The main method
+	 * The main method.
 	 *
 	 * @param args
 	 *            the arguments
@@ -370,37 +438,6 @@ public class FinalProject extends Thread {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
 		System.exit(0);
-	}
-
-	/**
-	 * Convert angle.
-	 *
-	 * @param radius
-	 *            the radius, robot wheel radius
-	 * @param width
-	 *            the width, bandwidth of robot
-	 * @param angle
-	 *            the angle, angle that needs to be turned to
-	 * @return the int, the number of rotations that the robot must use to turn to
-	 *         angle
-	 */
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
-	}
-
-	/**
-	 * Convert distance.
-	 *
-	 * @param radius
-	 *            the radius, robot wheel radius
-	 * @param distance
-	 *            the distance, distance that needs to be traveled via wheel
-	 *            rotations
-	 * @return the int, number of rotations that need to be performed to reach this
-	 *         distance with the wheel radius value given
-	 */
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 }
