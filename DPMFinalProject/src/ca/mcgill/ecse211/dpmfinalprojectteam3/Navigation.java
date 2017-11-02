@@ -93,21 +93,22 @@ public class Navigation {
 	 * Start nav,.
 	 */
 	public void startNav() {
-		double importantCoordX;
-		double importantCoordY;
+		double coordX;
+		double coordY;
 		while (!path.isEmpty()) {
-			travelTo(path.getFirst(), path.get(1));
-			importantCoordX = path.removeFirst();
-			importantCoordY = path.removeFirst();
-			if (importantCoordX == FinalProject.LLSRRX && importantCoordY == FinalProject.LLSRRY
+			coordX = path.removeFirst();
+			coordY = path.removeFirst();
+			travelTo(coordX, coordY);
+
+			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY
 					&& FinalProject.stage != Stage.FLAGSEARCH) {
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
-			} else if (importantCoordX == FinalProject.zipgreenXc && importantCoordY == FinalProject.zipgreenYc
+			} else if (coordX == FinalProject.zipgreenXc && coordY == FinalProject.zipgreenYc
 					&& FinalProject.stage != Stage.ZIPLOCALIZATION) {
 				FinalProject.stage = Stage.ZIPLOCALIZATION;
 				break;
-			} else if (importantCoordX == FinalProject.URSRGX && importantCoordY == FinalProject.URSRGY
+			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY
 					&& FinalProject.stage != Stage.FLAGSEARCH) {
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
@@ -454,7 +455,7 @@ public class Navigation {
 	 *
 	 * @return true, if both of the motors are moving
 	 */
-	public // set a boolean to know when it is navigating
+	public static // set a boolean to know when it is navigating
 	boolean isNavigating() {
 		return FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving();
 	}

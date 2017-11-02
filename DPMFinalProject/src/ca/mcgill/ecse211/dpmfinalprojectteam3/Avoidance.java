@@ -50,10 +50,11 @@ public class Avoidance extends Thread {
 				FinalProject.leftMotor.setSpeed(200);
 				FinalProject.rightMotor.setSpeed(200);
 				while (inDanger) {
+					startTime = System.currentTimeMillis();
 					distance = poller.getReading();
-					if (distance > 255 && filter > FILTERCONTROL) {
+					if (distance > 255 && filter < FILTERCONTROL) {
 						filter++;
-					} else if (distance > 255 && filter < FILTERCONTROL) {
+					} else if (distance > 255 && filter > FILTERCONTROL) {
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
 						inDanger = false;
@@ -77,6 +78,13 @@ public class Avoidance extends Thread {
 						FinalProject.rightMotor.setSpeed(200);
 						FinalProject.rightMotor.forward();
 						FinalProject.leftMotor.forward();
+					}
+					endTime = System.currentTimeMillis();
+					if (endTime - startTime < 2 * SAMPLINGPERIOD) {
+						try {
+							Thread.sleep(2 * SAMPLINGPERIOD - (endTime - startTime));
+						} catch (InterruptedException e) {
+						}
 					}
 				}
 
