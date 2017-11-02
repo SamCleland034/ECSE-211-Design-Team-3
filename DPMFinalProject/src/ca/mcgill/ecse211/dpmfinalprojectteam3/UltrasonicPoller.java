@@ -22,6 +22,8 @@ public class UltrasonicPoller extends Thread {
 	public UltrasonicPoller(SampleProvider us, float[] usData, Avoidance controller) {
 		this.us = us;
 		this.usData = usData;
+		this.master = controller;
+		controller.setPoller(this);
 
 	}
 

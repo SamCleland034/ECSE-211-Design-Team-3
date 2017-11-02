@@ -190,7 +190,7 @@ public class FinalProject extends Thread {
 
 	/** The Constant TRACK. Distance between the wheels */
 	public static final double TRACK = 15.13; // Width of car
-
+	public static final double THRESHOLD = 40;
 	/** The x. */
 	private static int x = 0;
 
@@ -233,11 +233,13 @@ public class FinalProject extends Thread {
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		t.drawString("Got coordinates from wifi!", 0, 0);
 		Button.waitForAnyPress();
+		t.clear();
 		Odometer odometer = new Odometer(leftMotor, rightMotor);
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
 		Navigation gps = new Navigation(odometer);
 		Avoidance master = new Avoidance(gps);
-		master.avoid = false;
+		master.avoiding = false;
+		SensorRotation sensorMotor = new SensorRotation(master, usMotor);
 		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master);
 		if (greenTeam == 3) {
 			LinkedList<Integer> coordsList = new LinkedList<Integer>();
@@ -255,6 +257,8 @@ public class FinalProject extends Thread {
 			coordsList.addLast(SHURY);
 			coordsList.addLast(SVLLX);
 			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(1);
 			gps.setPath(coordsList);
 			gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY, URSRRX, LLSRRY);
 		} else {
@@ -273,8 +277,8 @@ public class FinalProject extends Thread {
 			coordsList.addLast(zipgreenY);
 			coordsList.addLast(zipredXc);
 			coordsList.addLast(zipredYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(LLSRRY);
+			coordsList.addLast(1);
+			coordsList.addLast(11);
 
 			gps.setPath(coordsList);
 			gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY, LLSRGX, URSRGY);
@@ -284,6 +288,7 @@ public class FinalProject extends Thread {
 		t.clear();
 		odometer.start();
 		odometryDisplay.start();
+		master.start();
 		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
 		usLoc.doLocalization();
 		LightPoller leftpoller = new LightPoller(leftSensor, leftProvider);
@@ -291,7 +296,6 @@ public class FinalProject extends Thread {
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller);
 		lightLoc.startLightLOC();
 		// clear the display
-		t.clear();
 		/*
 		 * STOPPED HERE FOR NOW!!!!!!!!!!!!!!! 11/1/2017 3:40-10:04 PM
 		 * 
@@ -306,7 +310,20 @@ public class FinalProject extends Thread {
 		// wait for the user to press a button and start the odometer and
 		// odometer display
 		buttonChoice = Button.waitForAnyPress();
+		if (greenTeam == 3) {
+			odometer.setX(11 * TILE_SPACING);
+			odometer.setY(TILE_SPACING);
+			odometer.setTheta(3 * Math.PI / 2);
+		} else {
+			odometer.setX(TILE_SPACING);
+			odometer.setY(11 * TILE_SPACING);
+			odometer.setTheta(Math.PI / 2);
+		}
+		stage = Stage.NAVIGATION;
+		navigating(gps);
+		if (stage == Stage.FLAGSEARCH) {
 
+		}
 		while (buttonChoice != Button.ID_ENTER) {
 			// increment or decrement x and y depending on button pressed
 			if (buttonChoice == Button.ID_RIGHT) {
@@ -577,4 +594,15 @@ public class FinalProject extends Thread {
 		System.exit(0);
 	}
 
+	public static void flagsearch(Navigation gps) {
+
+	}
+
+	public static void navigating(Navigation gps) {
+		stage = Stage.NAVIGATION;
+
+		gps.startNav();
+		while (stage == Stage.NAVIGATION)
+			continue;
+	}
 }

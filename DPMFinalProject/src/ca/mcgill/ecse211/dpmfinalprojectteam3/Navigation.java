@@ -16,6 +16,7 @@ public class Navigation {
 
 	/** The Constant MOTOR_SPEED. Default motor speed */
 	// Create constants
+	private static Avoidance master;
 	private static final int MOTOR_SPEED = 225;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
@@ -53,7 +54,7 @@ public class Navigation {
 	private static final double YMin = -1 * SQUARE_LENGTH;
 
 	/** The path. */
-	private static LinkedList path; // For demo coordinates
+	private static LinkedList<Integer> path; // For demo coordinates
 
 	/** The odometer. */
 	private Odometer odometer;
@@ -92,17 +93,25 @@ public class Navigation {
 	 * Start nav,.
 	 */
 	public void startNav() {
-
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// there is nothing to be done here because it is not expected that
-			// the odometer will be interrupted by another thread
-		}
-
-		// travel to each waypoints
-		for (int i = 0; i < path.length; i++) {
-			travelTo(path[i][0], path[i][1]);
+		double importantCoordX;
+		double importantCoordY;
+		while (!path.isEmpty()) {
+			travelTo(path.getFirst(), path.get(1));
+			importantCoordX = path.removeFirst();
+			importantCoordY = path.removeFirst();
+			if (importantCoordX == FinalProject.LLSRRX && importantCoordY == FinalProject.LLSRRY
+					&& FinalProject.stage != Stage.FLAGSEARCH) {
+				FinalProject.stage = Stage.FLAGSEARCH;
+				break;
+			} else if (importantCoordX == FinalProject.zipgreenXc && importantCoordY == FinalProject.zipgreenYc
+					&& FinalProject.stage != Stage.ZIPLOCALIZATION) {
+				FinalProject.stage = Stage.ZIPLOCALIZATION;
+				break;
+			} else if (importantCoordX == FinalProject.URSRGX && importantCoordY == FinalProject.URSRGY
+					&& FinalProject.stage != Stage.FLAGSEARCH) {
+				FinalProject.stage = Stage.FLAGSEARCH;
+				break;
+			}
 		}
 	}
 
@@ -121,7 +130,8 @@ public class Navigation {
 	public void travelTo(double endX, double endY) {
 
 		isNavigating = true;
-		CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) * CENTER_OFFSET);
+		// CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) *
+		// CENTER_OFFSET);
 		// convert from coordinates to actual distance
 		endX = endX * SQUARE_LENGTH;
 		endY = endY * SQUARE_LENGTH;
@@ -148,7 +158,7 @@ public class Navigation {
 			// travel
 
 			// function to move the robot forward forward
-			driveWithoutAvoid(distanceToTravel);
+			drive(distanceToTravel, endX, endY);
 
 			isNavigating = false;
 			while (isNavigating())
@@ -202,26 +212,32 @@ public class Navigation {
 		// forward
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true);
 
-		FinalProject.usSensor.fetchSample(FinalProject.sample, 0); // fetch
+		// fetch
 		// usSensor
 		// data
-		double wall_dist = FinalProject.sample[0] * 100;
 
-		while (wall_dist > MAX_DISTANCE_WALL) {// far enough from block
-			FinalProject.usSensor.fetchSample(FinalProject.sample, 0);
-			wall_dist = FinalProject.sample[0] * 100; // update distance from
+		while (!master.inDanger) {// far enough from block
+
+			// update distance from
 			// wall
 
-			if (Math.abs(endX - odometer.getX()) <= 1 && Math.abs(endY - odometer.getY()) <= 1) {
+			if (Math.abs(endX - odometer.getX()) <= 2 && Math.abs(endY - odometer.getY()) <= 2) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
-				break; // break out of while loop if has reached destination
+				return; // break out of while loop if has reached destination
 			}
 
 		}
 		// if too close to obstacle
-		if (wall_dist < MAX_DISTANCE_WALL) {
-			Avoid(endX, endY); // run avoid method
+		while (master.inDanger) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+			continue;
 		}
+		travelTo(endX, endY);
 	}
 
 	/**
@@ -477,4 +493,7 @@ public class Navigation {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 
+	public void setAvoidance(Avoidance master) {
+		this.master = master;
+	}
 }

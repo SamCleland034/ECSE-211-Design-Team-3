@@ -6,7 +6,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
-import lejos.robotics.SampleProvider;
 
 /**
  * The Class LightLocalizer, used to allow the robot in the beginning and in
@@ -471,12 +470,12 @@ public class LightLocalizer {
 	 */
 	public boolean correctLocalization() {
 		// get color detected by sensor
-		FinalProject.colorSensor.getColorIDMode();
-		SampleProvider provider = FinalProject.colorSensor.getMode("ColorID");
-		float colorSamples[] = new float[100];
-		FinalProject.colorSensor.fetchSample(colorSamples, 1);
-		int color = (int) colorSamples[1];
-		if (color == 13)
+		int colorLeft = 0;
+		int lastColorLeft = 0;
+		int lastColorRight = 0;
+		int colorRight = 0;
+		if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1
+				|| Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1)
 			return false; // return false if black line
 		boolean xLineCrossed = false; // x line isn't crossed
 		double currentTheta = Math.toDegrees(odometer.getTheta());
@@ -487,9 +486,9 @@ public class LightLocalizer {
 		boolean crossedLine = false; // black line has been crossed
 		while (!crossedLine) { // if still not crossed
 			// get color
-			FinalProject.colorSensor.fetchSample(colorSamples, 1);
-			color = (int) colorSamples[1];
-			if (color == 13) {
+
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1
+					|| Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
 				Sound.beep();
 				double changeInTheta = Math.toDegrees(odometer.getTheta()) - currentTheta; // difference in odometer
 																							// theta and current theta
