@@ -1,7 +1,8 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
+import java.util.LinkedList;
+
 import lejos.hardware.Sound;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /***
  * Navigates the robot around using coordinates that get converted into
@@ -37,7 +38,7 @@ public class Navigation {
 
 	/** The center offset. */
 	private static double CENTER_OFFSET = 1.95;
-
+	private static double[] searchRegionPath;
 	/** The Constant XMax. */
 	// the maximum and minimum x and y values possible
 	private static final double XMax = 3 * SQUARE_LENGTH;
@@ -52,10 +53,10 @@ public class Navigation {
 	private static final double YMin = -1 * SQUARE_LENGTH;
 
 	/** The path. */
-	private static double path[][]; // For demo coordinates
+	private static LinkedList path; // For demo coordinates
 
 	/** The odometer. */
-	private static Odometer odometer;
+	private Odometer odometer;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -76,20 +77,19 @@ public class Navigation {
 	 * @param rightMotor
 	 *            the right motor
 	 */
-	public Navigation(Odometer odometer, double[][] path, EV3LargeRegulatedMotor leftMotor,
-			EV3LargeRegulatedMotor rightMotor) {
+	public Navigation(Odometer odometer) {
 		this.odometer = odometer;
-		this.path = path;
 
 		// Reset the motors
-		for (EV3LargeRegulatedMotor motors : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			motors.stop();
-			motors.setSpeed(300);
-		}
+
+	}
+
+	public void setPath(LinkedList<Integer> coordsList) {
+		this.path = coordsList;
 	}
 
 	/**
-	 * Starts navigation.
+	 * Start nav,.
 	 */
 	public void startNav() {
 
@@ -110,7 +110,7 @@ public class Navigation {
 	 * Travel to, orients the robot to x and y on the grid calls turn to if the
 	 * robot is not aligned in the proper position to reach x and y. If using start
 	 * nav method, will continuously call this method until no more coordinates in
-	 * the double array path
+	 * the path
 	 * 
 	 * @param endX
 	 *            x coordinate of the destination
@@ -417,14 +417,15 @@ public class Navigation {
 	public boolean flagSearch(int correctColor) {
 		return true;
 	}
+
 	/**
 	 * Travel in a continuous sequence (in a square/rectangle in this case), ending
-	 * in the same spot unless interrupted by flag search, then travel to upper left
+	 * in the same spot unless interupted by flag search, then travel to upper left
 	 * of green search region or lower right of red search region .
 	 * 
 	 * @since 10/29/17
-	 * @param coords, coords
-	 *            that will be traveled continuously
+	 * @param coords,coords
+	 *            that will be traveled continously
 	 * @param whichZone,
 	 *            if in red zone or green zone have to traverse slightly different
 	 */
@@ -437,7 +438,7 @@ public class Navigation {
 	 *
 	 * @return true, if both of the motors are moving
 	 */
-	static // set a boolean to know when it is navigating
+	public // set a boolean to know when it is navigating
 	boolean isNavigating() {
 		return FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving();
 	}
@@ -452,6 +453,10 @@ public class Navigation {
 	 * @return rotations, the number of rotations each wheel has to rotate in order
 	 *         to go that distance
 	 */
+	public void setSearchRegionPath(double... coords) {
+		this.searchRegionPath = coords;
+	}
+
 	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}

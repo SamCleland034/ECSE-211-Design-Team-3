@@ -6,13 +6,12 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * Allows the robot in the beginning, and in times when error accumulates 
- * too much to re-adjust itself and continue its tasks with corrected odometer
- * using one to potentially two light sensors to perform this task
+ * The Class LightLocalizer, used to allow the robot in the beginning and in
+ * times when error accumulates too much to re-adjust itself and start off fresh
+ * Using one to potentially two light sensors to perform this task
  * 
  * @version 1.0
  */
@@ -40,7 +39,7 @@ public class LightLocalizer {
 	/** The navigation. */
 	private Navigation navigation;
 
-	/** The number of lines. */
+	/** The nbr of lines. */
 	// Define variables needed
 	private int nbrOfLines = 0;
 
@@ -63,8 +62,9 @@ public class LightLocalizer {
 	private double thetaX = 0;
 
 	/** The color sensor. */
-	private EV3ColorSensor colorSensor;
 
+	private LightPoller leftPoller;
+	private LightPoller rightPoller;
 	// assign port to light sensor
 
 	/**
@@ -73,16 +73,19 @@ public class LightLocalizer {
 	 * @param odometer
 	 *            ,the odometer used for light localization
 	 * @param navigation
-	 *            ,the navigation we will use to travel to 0,0 once we get
+	 *            ,the navigation we will use to travel to 0,0 once we figure out
 	 *            correct heading
-	 * @param colorSensor
-	 *            ,the color sensor used to detect lines when doing light
+	 * @param rightpoller
+	 * @param leftpoller
+	 * @param FinalProject.colorSensor
+	 *            the color sensor, used to detect lines when doing light
 	 *            localization
 	 */
-	public LightLocalizer(Odometer odometer, Navigation navigation, EV3ColorSensor colorSensor) {
+	public LightLocalizer(Odometer odometer, Navigation navigation, LightPoller leftpoller, LightPoller rightpoller) {
 		this.odometer = odometer;
 		this.navigation = navigation;
-		this.colorSensor = colorSensor;
+		this.leftPoller = leftpoller;
+		this.rightPoller = rightpoller;
 
 	}
 
@@ -96,10 +99,6 @@ public class LightLocalizer {
 		// while(navigation.isNavigating()) continue;
 		odometer.setTheta(0);
 		// initialize color sensor
-
-		colorSensor.getColorIDMode();
-		SampleProvider provider = colorSensor.getMode("ColorID");
-		float colorSamples[] = new float[100];
 		Sound.beepSequenceUp();
 
 		// Initialize theta, it will be corrected
@@ -112,21 +111,30 @@ public class LightLocalizer {
 		FinalProject.leftMotor.forward(); // Run forward
 		FinalProject.rightMotor.forward();
 
-		boolean crossedLine = false; // Set flag
-
+		boolean crossedLineLeft = false; // Set flag
+		boolean crossedLineRight = false;
+		int colorLeft;
+		int lastColorLeft;
+		int lastColorRight;
+		int colorRight;
 		// Before starting turning, make the robot go to (-25, -25)
-		while (!crossedLine) { // Set the crossedLine flag to be true when it
-								// crosses a line
+		while (!(crossedLineLeft && crossedLineRight)) { // Set the crossedLine flag to be true when it
+			// crosses a line
 			// get sample from light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
 			// when the sensor sees a black line, stop the motors
-			if (color == 13) {
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
 				Sound.beep();
-				crossedLine = true;
-				FinalProject.leftMotor.stop(true);
+				crossedLineLeft = true;
+				FinalProject.leftMotor.stop(false);
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				crossedLineRight = true;
 				FinalProject.rightMotor.stop(false);
 			}
 		}
@@ -136,22 +144,29 @@ public class LightLocalizer {
 
 		navigation.turnTo(90); // turn to 90 degrees
 
-		crossedLine = false; // set flag back to false
-
+		crossedLineLeft = false; // set flag back to false
+		crossedLineRight = false;
 		// drive forward until the sensor crosses a black line
 		FinalProject.leftMotor.forward();
 		FinalProject.rightMotor.forward();
 
-		while (!crossedLine) {
-			// get sample from sensor
+		while (!(crossedLineLeft && crossedLineRight)) { // Set the crossedLine flag to be true when it
+			// crosses a line
+			// get sample from light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-			// when the robot crosses a black line, stop the motors
-			if (color == 13) {
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
+			// when the sensor sees a black line, stop the motors
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
 				Sound.beep();
-				crossedLine = true;
-				FinalProject.leftMotor.stop(true);
+				crossedLineLeft = true;
+				FinalProject.leftMotor.stop(false);
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				crossedLineRight = true;
 				FinalProject.rightMotor.stop(false);
 			}
 		}
@@ -162,55 +177,55 @@ public class LightLocalizer {
 		navigation.turnTo(0);
 
 		// turn 360 degrees
-		navigation.turn(360);
-
+		FinalProject.leftMotor.forward();
+		FinalProject.rightMotor.backward();
+		double[] leftThetas = new double[4];
+		double[] rightThetas = new double[4];
+		int rightNumCount = 0;
+		int leftNumCount = 0;
 		// while the robot is turning, fetch the color from the color sensor and
 		// save the values of theta when the sensor crosses a black line
-		while (navigation.isNavigating()) {
+		while (rightNumCount < 4 && leftNumCount < 4) {
 
 			correctionStart = System.currentTimeMillis();
 
 			// get color detected by light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
+				Sound.beep();
+				leftThetas[leftNumCount] = odometer.getTheta();
+				leftNumCount += 1;
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				rightThetas[rightNumCount] = odometer.getTheta();
+				rightNumCount += 1;
+			}
 			// if color is black, beep, increment the number of lines crossed
 			// and save value of theta
-			if (color == 13) {
-				Sound.beepSequenceUp();
-				nbrOfLines++;
 
-				// save value of theta to the appropriate variable, depending on
-				// which line is being crossed
-				if (nbrOfLines == 1) {
-					thetaX1 = odometer.getTheta();
-				} else if (nbrOfLines == 2) {
-					thetaY1 = odometer.getTheta();
-				} else if (nbrOfLines == 3) {
-					thetaX2 = odometer.getTheta();
-				} else if (nbrOfLines == 4) {
-					thetaY2 = odometer.getTheta();
-				}
-			}
-
-			// this ensure the odometry correction occurs only once every period
-			correctionEnd = System.currentTimeMillis();
-			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
-				try {
-					Thread.sleep(CORRECTION_PERIOD - (correctionEnd - correctionStart));
-				} catch (InterruptedException e) {
-					// there is nothing to be done here because it is not
-					// expected that the odometry correction will be
-					// interrupted by another thread
-				}
-			}
 		}
+
+		// this ensure the odometry correction occurs only once every period
+		/*
+		 * correctionEnd = System.currentTimeMillis(); if (correctionEnd -
+		 * correctionStart < CORRECTION_PERIOD) { try { Thread.sleep(CORRECTION_PERIOD -
+		 * (correctionEnd - correctionStart)); } catch (InterruptedException e) { //
+		 * there is nothing to be done here because it is not // expected that the
+		 * odometry correction will be // interrupted by another thread } }
+		 */
 
 		Sound.beep();
 
 		// calculate values of thetaX and thetaY
-
+		thetaX2 = (leftThetas[2] + rightThetas[2]) / 2;
+		thetaX1 = (leftThetas[0] + rightThetas[0] / 2);
+		thetaY2 = (leftThetas[3] + rightThetas[3]) / 2;
+		thetaY1 = (leftThetas[1] + rightThetas[1]) / 2;
 		thetaX = thetaX2 - thetaX1;
 		thetaY = thetaY2 - thetaY1;
 
@@ -254,15 +269,16 @@ public class LightLocalizer {
 	public void lightLocWithError() {
 		long correctionStart, correctionEnd;
 		// initialize color sensor
-		colorSensor.getColorIDMode();
-		SampleProvider provider = colorSensor.getMode("ColorID");
-		float colorSamples[] = new float[100];
-		colorSensor.fetchSample(colorSamples, 1);
-		int colortype = (int) colorSamples[1];
+
+		int colorLeft = leftPoller.getLightVal();
+		int lastColorLeft = leftPoller.getLastLightVal();
+		int colorRight = rightPoller.getLightVal();
+		int lastColorRight = rightPoller.getLastLightVal();
 
 		// check if on a line in the beginning
 		// re-position to do localization
-		if (colortype == 13) {
+		if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1
+				|| Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
 			Sound.buzz();
 			navigation.turnWithoutInterruption(-90);
 			navigation.driveWithoutAvoid(10);
@@ -272,13 +288,20 @@ public class LightLocalizer {
 			startLightLOC();
 			return;
 		} else { // Check if a line is nearby the lightsensor
-			boolean correct = correctPosition(colorSamples);
+			boolean correct = correctPosition();
 			if (correct) {
 				startLightLOC();
 				return;
 			}
 		}
+
+		// navigation.turn(10);
+		// while(navigation.isNavigating()) continue;
+		odometer.setTheta(0);
+		// initialize color sensor
 		Sound.beepSequenceUp();
+
+		// Initialize theta, it will be corrected
 
 		// the following code enables the robot to position itself so that the
 		// light sensor will hit all four lines
@@ -288,110 +311,118 @@ public class LightLocalizer {
 		FinalProject.leftMotor.forward(); // Run forward
 		FinalProject.rightMotor.forward();
 
-		boolean crossedLine = false; // Set flag
+		boolean crossedLineLeft = false; // Set flag
+		boolean crossedLineRight = false;
 
 		// Before starting turning, make the robot go to (-25, -25)
-		while (!crossedLine) { // Set the crossedLine flag to be true when it
-								// crosses a line
+		while (!(crossedLineLeft && crossedLineRight)) { // Set the crossedLine flag to be true when it
+			// crosses a line
 			// get sample from light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
 			// when the sensor sees a black line, stop the motors
-			if (color == 13) {
-				FinalProject.leftMotor.stop(true);
-				FinalProject.rightMotor.stop(false);
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
 				Sound.beep();
-				crossedLine = true;
-
+				crossedLineLeft = true;
+				FinalProject.leftMotor.stop(false);
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				crossedLineRight = true;
+				FinalProject.rightMotor.stop(false);
 			}
 		}
 
 		// once the sensor sees the black line, drive 25 cm backwards
 		navigation.driveWithoutAvoid(-25);
-		while (navigation.isNavigating())
-			continue;
 
 		navigation.turnTo(90); // turn to 90 degrees
 
-		crossedLine = false; // set flag back to false
-
+		crossedLineLeft = false; // set flag back to false
+		crossedLineRight = false;
 		// drive forward until the sensor crosses a black line
 		FinalProject.leftMotor.forward();
 		FinalProject.rightMotor.forward();
 
-		while (!crossedLine) {
-			// get sample from sensor
+		while (!(crossedLineLeft && crossedLineRight)) { // Set the crossedLine flag to be true when it
+			// crosses a line
+			// get sample from light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-			// when the robot crosses a black line, stop the motors
-			if (color == 13) {
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
+			// when the sensor sees a black line, stop the motors
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
 				Sound.beep();
-				crossedLine = true;
-				FinalProject.leftMotor.stop(true);
+				crossedLineLeft = true;
+				FinalProject.leftMotor.stop(false);
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				crossedLineRight = true;
 				FinalProject.rightMotor.stop(false);
 			}
 		}
 
 		// drive 25 cm backwards and turn back to 0 degrees
 		navigation.driveWithoutAvoid(-25);
-		while (navigation.isNavigating())
-			continue;
 
 		navigation.turnTo(0);
 
 		// turn 360 degrees
-		navigation.turn(360);
-
+		FinalProject.leftMotor.forward();
+		FinalProject.rightMotor.backward();
+		double[] leftThetas = new double[4];
+		double[] rightThetas = new double[4];
+		int rightNumCount = 0;
+		int leftNumCount = 0;
 		// while the robot is turning, fetch the color from the color sensor and
 		// save the values of theta when the sensor crosses a black line
-		while (navigation.isNavigating()) {
+		while (rightNumCount < 4 && leftNumCount < 4) {
 
 			correctionStart = System.currentTimeMillis();
 
 			// get color detected by light sensor
 
-			colorSensor.fetchSample(colorSamples, 1);
-			int color = (int) colorSamples[1];
-
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
+				Sound.beep();
+				leftThetas[leftNumCount] = odometer.getTheta();
+				leftNumCount += 1;
+			}
+			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
+				Sound.beep();
+				rightThetas[rightNumCount] = odometer.getTheta();
+				rightNumCount += 1;
+			}
 			// if color is black, beep, increment the number of lines crossed
 			// and save value of theta
-			if (color == 13) {
-				Sound.beepSequenceUp();
-				nbrOfLines++;
 
-				// save value of theta to the appropriate variable, depending on
-				// which line is being crossed
-				if (nbrOfLines == 1) {
-					thetaX1 = odometer.getTheta();
-				} else if (nbrOfLines == 2) {
-					thetaY1 = odometer.getTheta();
-				} else if (nbrOfLines == 3) {
-					thetaX2 = odometer.getTheta();
-				} else if (nbrOfLines == 4) {
-					thetaY2 = odometer.getTheta();
-				}
-			}
-
-			// this ensure the odometry correction occurs only once every period
-			correctionEnd = System.currentTimeMillis();
-			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
-				try {
-					Thread.sleep(CORRECTION_PERIOD - (correctionEnd - correctionStart));
-				} catch (InterruptedException e) {
-					// there is nothing to be done here because it is not
-					// expected that the odometry correction will be
-					// interrupted by another thread
-				}
-			}
 		}
+
+		// this ensure the odometry correction occurs only once every period
+		/*
+		 * correctionEnd = System.currentTimeMillis(); if (correctionEnd -
+		 * correctionStart < CORRECTION_PERIOD) { try { Thread.sleep(CORRECTION_PERIOD -
+		 * (correctionEnd - correctionStart)); } catch (InterruptedException e) { //
+		 * there is nothing to be done here because it is not // expected that the
+		 * odometry correction will be // interrupted by another thread } }
+		 */
 
 		Sound.beep();
 
 		// calculate values of thetaX and thetaY
-
+		thetaX2 = (leftThetas[2] + rightThetas[2]) / 2;
+		thetaX1 = (leftThetas[0] + rightThetas[0] / 2);
+		thetaY2 = (leftThetas[3] + rightThetas[3]) / 2;
+		thetaY1 = (leftThetas[1] + rightThetas[1]) / 2;
 		thetaX = thetaX2 - thetaX1;
 		thetaY = thetaY2 - thetaY1;
 
@@ -426,24 +457,24 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Executes after the localization at xo, yo coordinates to correct the angle 
-	 * of the robot if the angle is off-centered. If the change in theta is greater 
-	 * than 45 degrees, we know that the robot is at 90 degrees by setting the boolean
-	 * to true and the boolean value will then set it to 90 or 0 degrees depending if 
-	 * it is true or false.
+	 * Executed after the localization at the xo, yo coordinates Do this to correct
+	 * the angle of the robot if the angle is off-centered Assumes correct x and y
+	 * If the change in theta is greater than 45, we know that the robot is at 90
+	 * degrees So we set the boolean to true and the boolean value will then set it
+	 * to 90 or 0 depending on if it is true or false.
 	 *
 	 * @return xLineCrossed, we return a boolean to see which line the robot crossed
-	 *         if the theta value of the line is greater than 45 degrees, we know that 
-	 *         it must be facing to 90 since after localization it will be either
-	 *         slightly on the left or right of a line, but never more than 45 degrees to
+	 *         if the theta value of the line is greater than 45, we know that it
+	 *         must be facing to 90 since after localization it will be either
+	 *         slightly on the left or right of a line never more than 45 degrees to
 	 *         the left or the right.
 	 */
 	public boolean correctLocalization() {
 		// get color detected by sensor
-		colorSensor.getColorIDMode();
-		SampleProvider provider = colorSensor.getMode("ColorID");
+		FinalProject.colorSensor.getColorIDMode();
+		SampleProvider provider = FinalProject.colorSensor.getMode("ColorID");
 		float colorSamples[] = new float[100];
-		colorSensor.fetchSample(colorSamples, 1);
+		FinalProject.colorSensor.fetchSample(colorSamples, 1);
 		int color = (int) colorSamples[1];
 		if (color == 13)
 			return false; // return false if black line
@@ -456,7 +487,7 @@ public class LightLocalizer {
 		boolean crossedLine = false; // black line has been crossed
 		while (!crossedLine) { // if still not crossed
 			// get color
-			colorSensor.fetchSample(colorSamples, 1);
+			FinalProject.colorSensor.fetchSample(colorSamples, 1);
 			color = (int) colorSamples[1];
 			if (color == 13) {
 				Sound.beep();
@@ -480,28 +511,37 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Sweeps robot left to right to detect if it is near a line, then 
-	 * it moves accordingly to the left. Doing this allows the robot to
+	 * sweeps robot left to right to detect if it is near a line if it is near a
+	 * line, then it moves accordingly to the left Doing this to allow the robot to
 	 * localize in an adequate location.
 	 *
 	 * @param colorSamples
 	 *            the color samples
-	 * @return false if it does not detect a line, true if it does, then performs
+	 * @return false if it doesn't detect a line, true if it does then performs
 	 *         normal localization like in the first method since the position of
 	 *         the robot will be corrected
 	 */
-	public boolean correctPosition(float[] colorSamples) {
+	public boolean correctPosition() {
 		boolean corrected = false;
 		int rotations = Navigation.convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, 15);
 		FinalProject.leftMotor.setSpeed(60);
 		FinalProject.rightMotor.setSpeed(60);
+		int colorLeft = 0;
+		int lastColorLeft = 0;
+		int lastColorRight = 0;
+		int colorRight = 0;
 		FinalProject.leftMotor.rotate(-rotations, true);
 		FinalProject.rightMotor.rotate(rotations, true);
 		double currentTheta = Math.toDegrees(odometer.getTheta());
 		while (navigation.isNavigating()) {
-			colorSensor.fetchSample(colorSamples, 1);
-			int colortype = (int) colorSamples[1];
-			if (colortype == 13) {
+
+			colorLeft = leftPoller.getLightVal();
+			lastColorLeft = leftPoller.getLastLightVal();
+			colorRight = rightPoller.getLightVal();
+			lastColorRight = rightPoller.getLastLightVal();
+
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1
+					|| Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
@@ -521,9 +561,9 @@ public class LightLocalizer {
 		FinalProject.leftMotor.rotate(2 * rotations, true);
 		FinalProject.rightMotor.rotate(-2 * rotations, true);
 		while (navigation.isNavigating()) {
-			colorSensor.fetchSample(colorSamples, 1);
-			int colortype = (int) colorSamples[1];
-			if (colortype == 13) {
+
+			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1
+					|| Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
