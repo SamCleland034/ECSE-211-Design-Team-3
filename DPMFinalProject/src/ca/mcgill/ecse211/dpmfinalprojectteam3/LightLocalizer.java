@@ -336,21 +336,27 @@ public class LightLocalizer {
 			// crosses a line
 			// get sample from light sensor
 
-			colorLeft = leftPoller.getLightVal();
-			lastColorLeft = leftPoller.getLastLightVal();
-			colorRight = rightPoller.getLightVal();
-			lastColorRight = rightPoller.getLastLightVal();
+			FinalProject.leftProvider.fetchSample(leftsample, 0);
+			colorLeft = (int) leftsample[0];
+			FinalProject.rightProvider.fetchSample(rightsample, 0);
+			colorRight = (int) rightsample[0];
 			// when the sensor sees a black line, stop the motors
 			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
 				Sound.beep();
 				crossedLineLeft = true;
-				FinalProject.leftMotor.stop(false);
+				crossedLineRight = true;
 			}
 			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
-				Sound.beep();
-				crossedLineRight = true;
+				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
+				Sound.beep();
+				crossedLineLeft = true;
+				crossedLineRight = true;
 			}
+			lastColorLeft = colorLeft;
+			lastColorRight = colorRight;
 		}
 
 		// once the sensor sees the black line, drive 25 cm backwards
@@ -368,21 +374,27 @@ public class LightLocalizer {
 			// crosses a line
 			// get sample from light sensor
 
-			colorLeft = leftPoller.getLightVal();
-			lastColorLeft = leftPoller.getLastLightVal();
-			colorRight = rightPoller.getLightVal();
-			lastColorRight = rightPoller.getLastLightVal();
+			FinalProject.leftProvider.fetchSample(leftsample, 0);
+			colorLeft = (int) leftsample[0];
+			FinalProject.rightProvider.fetchSample(rightsample, 0);
+			colorRight = (int) rightsample[0];
 			// when the sensor sees a black line, stop the motors
 			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
 				Sound.beep();
 				crossedLineLeft = true;
-				FinalProject.leftMotor.stop(false);
+				crossedLineRight = true;
 			}
 			if (Math.abs((colorRight - lastColorRight) / lastColorRight) >= 1) {
-				Sound.beep();
-				crossedLineRight = true;
+				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
+				Sound.beep();
+				crossedLineLeft = true;
+				crossedLineRight = true;
 			}
+			lastColorLeft = colorLeft;
+			lastColorRight = colorRight;
 		}
 
 		// drive 25 cm backwards and turn back to 0 degrees
@@ -405,10 +417,10 @@ public class LightLocalizer {
 
 			// get color detected by light sensor
 
-			colorLeft = leftPoller.getLightVal();
-			lastColorLeft = leftPoller.getLastLightVal();
-			colorRight = rightPoller.getLightVal();
-			lastColorRight = rightPoller.getLastLightVal();
+			FinalProject.leftProvider.fetchSample(leftsample, 0);
+			colorLeft = (int) leftsample[0];
+			FinalProject.rightProvider.fetchSample(rightsample, 0);
+			colorRight = (int) rightsample[0];
 			if (Math.abs((colorLeft - lastColorLeft) / lastColorLeft) >= 1) {
 				Sound.beep();
 				leftThetas[leftNumCount] = odometer.getTheta();
@@ -421,7 +433,8 @@ public class LightLocalizer {
 			}
 			// if color is black, beep, increment the number of lines crossed
 			// and save value of theta
-
+			lastColorLeft = colorLeft;
+			lastColorRight = colorRight;
 		}
 
 		// this ensure the odometry correction occurs only once every period
@@ -489,8 +502,8 @@ public class LightLocalizer {
 	public boolean correctLocalization() {
 		// get color detected by sensor
 		int colorLeft = 0;
-		int lastColorLeft = 0;
-		int lastColorRight = 0;
+		int lastColorLeft = 6;
+		int lastColorRight = 6;
 		int colorRight = 0;
 		float[] leftsample = new float[1];
 		float[] rightsample = new float[1];
@@ -554,8 +567,8 @@ public class LightLocalizer {
 		FinalProject.leftMotor.setSpeed(60);
 		FinalProject.rightMotor.setSpeed(60);
 		int colorLeft = 0;
-		int lastColorLeft = 0;
-		int lastColorRight = 0;
+		int lastColorLeft = 6;
+		int lastColorRight = 6;
 		int colorRight = 0;
 		FinalProject.leftMotor.rotate(-rotations, true);
 		FinalProject.rightMotor.rotate(rotations, true);
