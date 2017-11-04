@@ -36,13 +36,13 @@ import lejos.hardware.Button;
  */
 public class WiFi {
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.3";
+	private static final String SERVER_IP = "192.168.2.42";
 	private static final int TEAM_NUMBER = 3;
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
 
 	@SuppressWarnings("rawtypes")
-	public static void getValues() {
+	public void getValues() {
 
 		System.out.println("Running..");
 
@@ -95,8 +95,8 @@ public class WiFi {
 			FinalProject.redCorner = ((Long) data.get("RedCorner")).intValue();
 			FinalProject.redTeam = ((Long) data.get("RedTeam")).intValue();
 			FinalProject.greenTeam = ((Long) data.get("GreenTeam")).intValue();
-			FinalProject.greenCorner = ((Long) data.get("GreenCorner")).intValue();
-
+			FinalProject.greenCorner = ((Long) data.get("OG")).intValue();
+			FinalProject.redColor = ((Long) data.get("OR")).intValue();
 			/*
 			 * // Example 2 : Print out specific values int redTeam = ((Long)
 			 * data.get("RedTeam")).intValue(); System.out.println("Red Team: " + redTeam);

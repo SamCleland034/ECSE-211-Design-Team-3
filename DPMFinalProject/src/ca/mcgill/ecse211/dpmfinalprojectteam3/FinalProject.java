@@ -157,7 +157,8 @@ public class FinalProject extends Thread {
 
 	/** y coord of upper right corner of vertical shallow water region. */
 	public static int SVURY;
-
+	public static int redColor;
+	public static int greenColor;
 	/** The Constant leftMotor, global left motor for entire project. */
 	// Assign ports to motors and to sensor
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
@@ -173,7 +174,6 @@ public class FinalProject extends Thread {
 	public static final EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 
 	/** The odometer. */
-	private Odometer odometer;
 
 	/** The us dist, used to change the sensor mode to distance. */
 	// create variables
@@ -190,7 +190,7 @@ public class FinalProject extends Thread {
 
 	/** The Constant TRACK. Distance between the wheels */
 	public static final double TRACK = 15.13; // Width of car
-
+	public static final double THRESHOLD = 40;
 	/** The x. */
 	private static int x = 0;
 
@@ -210,6 +210,7 @@ public class FinalProject extends Thread {
 	public static final EV3ColorSensor leftSensor = new EV3ColorSensor(LeftPort);
 	private static final Port RightPort = LocalEV3.get().getPort("S3");
 	public static final EV3ColorSensor rightSensor = new EV3ColorSensor(RightPort);
+	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	static SampleProvider leftProvider = leftSensor.getColorIDMode();
 	static SampleProvider rightProvider = rightSensor.getColorIDMode();
 
@@ -222,23 +223,25 @@ public class FinalProject extends Thread {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
-		int buttonChoice;
+
 		stage = Stage.WIFI;
-		WiFi.getValues();
+		WiFi wifi = new WiFi();
+		wifi.getValues();
 		while (stage == Stage.WIFI) {
 			continue;
 		}
 
 		// instantiate threads controlling the robot
 		final TextLCD t = LocalEV3.get().getTextLCD();
-		t.drawString("Got coordinates from wifi!", 0, 0);
+		t.drawString("ZIPLINE GREEN X=" + zipgreenX, 0, 0);
 		Button.waitForAnyPress();
-		Odometer odometer = new Odometer(leftMotor, rightMotor);
+		t.clear();
+
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
 		Navigation gps = new Navigation(odometer);
 		Avoidance master = new Avoidance(gps);
-		master.avoid = false;
-		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master);
+		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
+		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
 		if (greenTeam == 3) {
 			LinkedList<Integer> coordsList = new LinkedList<Integer>();
 			coordsList.addLast(zipgreenXc);
@@ -255,6 +258,8 @@ public class FinalProject extends Thread {
 			coordsList.addLast(SHURY);
 			coordsList.addLast(SVLLX);
 			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(1);
 			gps.setPath(coordsList);
 			gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY, URSRRX, LLSRRY);
 		} else {
@@ -273,8 +278,8 @@ public class FinalProject extends Thread {
 			coordsList.addLast(zipgreenY);
 			coordsList.addLast(zipredXc);
 			coordsList.addLast(zipredYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(LLSRRY);
+			coordsList.addLast(1);
+			coordsList.addLast(11);
 
 			gps.setPath(coordsList);
 			gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY, LLSRGX, URSRGY);
@@ -284,14 +289,17 @@ public class FinalProject extends Thread {
 		t.clear();
 		odometer.start();
 		odometryDisplay.start();
+		master.start();
 		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
+		uspoller.start();
 		usLoc.doLocalization();
+		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
+		gps.setColorProvider(colorpoller);
 		LightPoller leftpoller = new LightPoller(leftSensor, leftProvider);
 		LightPoller rightpoller = new LightPoller(rightSensor, rightProvider);
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller);
 		lightLoc.startLightLOC();
 		// clear the display
-		t.clear();
 		/*
 		 * STOPPED HERE FOR NOW!!!!!!!!!!!!!!! 11/1/2017 3:40-10:04 PM
 		 * 
@@ -305,276 +313,95 @@ public class FinalProject extends Thread {
 		 */
 		// wait for the user to press a button and start the odometer and
 		// odometer display
-		buttonChoice = Button.waitForAnyPress();
-
-		while (buttonChoice != Button.ID_ENTER) {
-			// increment or decrement x and y depending on button pressed
-			if (buttonChoice == Button.ID_RIGHT) {
-				if (x < 8) {
-					x++;
-				}
-				t.clear();
-				t.drawString("X:", 0, 0);
-				t.drawInt(x, 3, 0);
-				t.drawString("Y:", 0, 2);
-				t.drawInt(y, 3, 2);
-			}
-
-			if (buttonChoice == Button.ID_LEFT) {
-				if (x > 0) {
-					x--;
-				}
-				t.clear();
-				t.drawString("X:", 0, 0);
-				t.drawInt(x, 3, 0);
-				t.drawString("Y:", 0, 2);
-				t.drawInt(y, 3, 2);
-			}
-
-			if (buttonChoice == Button.ID_UP) {
-				if (y < 8) {
-					y++;
-				}
-				t.clear();
-				t.drawString("X:", 0, 0);
-				t.drawInt(x, 3, 0);
-				t.drawString("Y:", 0, 2);
-				t.drawInt(y, 3, 2);
-			}
-
-			if (buttonChoice == Button.ID_DOWN) {
-				if (y > 0) {
-					y--;
-				}
-
-				t.clear();
-				t.drawString("X:", 0, 0);
-				t.drawInt(x, 3, 0);
-				t.drawString("Y:", 0, 2);
-				t.drawInt(y, 3, 2);
-			}
-
-			buttonChoice = Button.waitForAnyPress();
+		Button.waitForAnyPress();
+		if (greenTeam == 3) {
+			odometer.setX(11 * TILE_SPACING);
+			odometer.setY(TILE_SPACING);
+			odometer.setTheta(3 * Math.PI / 2);
+		} else {
+			odometer.setX(TILE_SPACING);
+			odometer.setY(11 * TILE_SPACING);
+			odometer.setTheta(Math.PI / 2);
 		}
-
-		t.clear();
-
-		// ask the user to input Xc and Yc
-		t.drawString("Select Xc and Yc  ", 0, 0);
-		t.drawString("                  ", 0, 1);
-		t.drawString("                  ", 0, 2);
-		t.drawString("                  ", 0, 3);
-		t.drawString("                  ", 0, 4);
-
-		buttonChoice = Button.waitForAnyPress();
-
-		// increment or decrement Xc and Yc depending onbutton pressed
-		while (buttonChoice != Button.ID_ENTER) {
-
-			if (buttonChoice == Button.ID_RIGHT) {
-				if (xc < 8) {
-					xc++;
-				}
-				t.clear();
-				t.drawString("Xc:", 0, 0);
-				t.drawInt(xc, 3, 0);
-				t.drawString("Yc:", 0, 2);
-				t.drawInt(yc, 3, 2);
+		stage = Stage.NAVIGATION;
+		sensorMotor.on();
+		sensorMotor.start();
+		leftpoller.on();
+		rightpoller.on();
+		leftpoller.start();
+		rightpoller.start();
+		master.start();
+		navigating(gps);
+		while (stage != Stage.NAVIGATION) {
+			if (stage == Stage.FLAGSEARCH) {
+				flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller);
+				stage = Stage.NAVIGATION;
+			} else if (stage == Stage.ZIPLOCALIZATION) {
+				ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor, colorpoller);
+				stage = Stage.NAVIGATION;
 			}
-
-			if (buttonChoice == Button.ID_LEFT) {
-				if (xc > 0) {
-					xc--;
-				}
-				t.clear();
-				t.drawString("Xc:", 0, 0);
-				t.drawInt(xc, 3, 0);
-				t.drawString("Yc:", 0, 2);
-				t.drawInt(yc, 3, 2);
+		}
+		sensorMotor.on();
+		leftpoller.on();
+		rightpoller.on();
+		navigating(gps);
+		while (stage != Stage.NAVIGATION) {
+			if (stage == Stage.FLAGSEARCH) {
+				flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller);
+				stage = Stage.NAVIGATION;
+			} else if (stage == Stage.ZIPLOCALIZATION) {
+				ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor, colorpoller);
+				stage = Stage.NAVIGATION;
 			}
-
-			if (buttonChoice == Button.ID_UP) {
-				if (yc < 8) {
-					yc++;
-				}
-				t.clear();
-				t.drawString("Xc:", 0, 0);
-				t.drawInt(xc, 3, 0);
-				t.drawString("Yc:", 0, 2);
-				t.drawInt(yc, 3, 2);
-			}
-
-			if (buttonChoice == Button.ID_DOWN) {
-				if (yc > 0) {
-					yc--;
-				}
-
-				t.clear();
-				t.drawString("Xc:", 0, 0);
-				t.drawInt(xc, 3, 0);
-				t.drawString("Yc:", 0, 2);
-				t.drawInt(yc, 3, 2);
-			}
-			buttonChoice = Button.waitForAnyPress();
 		}
-
-		// ask user to select corner that the robot starts in
-		t.drawString("   Select SP    ", 0, 0);
-		t.drawString("       0        ", 0, 1);
-		t.drawString("  3         1   ", 0, 2);
-		t.drawString("       2        ", 0, 3);
-		t.drawString("                ", 0, 4);
-
-		buttonChoice = Button.waitForAnyPress();
-
-		double coordinate[][] = { { x, y }, { xc, yc } }; // coordinates needed to navigate
-		// instantiate navigation and light localizzer
-		Navigation navigation = new Navigation(odometer, coordinate, leftMotor, rightMotor);
-		LightLocalizer lightLocalizer = new LightLocalizer(odometer, navigation, colorSensor);
-		// position 0
-		if (buttonChoice == Button.ID_UP) {
-			t.clear(); // clear display
-			odometer.start(); // start odometer and display
-			odometryDisplay.start();
-			// instantiate ultrasonic localizer and choose falling edge
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
-			usLocalizer.start();
-			Button.waitForAnyPress();
-			// start light localization
-			lightLocalizer.startLightLOC();
-			Button.waitForAnyPress();
-			// set odometer values and travel to given x and y values
-			odometer.setTheta(0);// this is angle that the robot localizes to from this corner
-			odometer.setX(1 * TILE_SPACING);
-			odometer.setY(1 * TILE_SPACING);
-			navigation.travelTo(x, y);
-
-			Button.waitForAnyPress();
-			navigation.turn(Math.toRadians(5)); // this value was determined experimentally to correct error
-
-			lightLocalizer.lightLocWithError(); // correct the localization
-												// incase it is off
-			boolean xLine = lightLocalizer.correctLocalization();
-			if (xLine)
-				odometer.setTheta(Math.PI / 2 + Math.toRadians(10)); // assuming values based on
-			else
-				odometer.setTheta(Math.toRadians(10)); // what line is crossed
-			odometer.setX(x * TILE_SPACING); // set x and y
-			odometer.setY(y * TILE_SPACING);
-
-			navigation.turnTo(Math.PI / 2); // turn to correct angle to mount zipline
-
-			Button.waitForAnyPress();
-			navigation.travelTo(xc, yc);
-			Button.waitForAnyPress();
-			// traverse the zipline
-			navigation.zipTraversal();
+		while (stage != Stage.FINISHED) {
+			sensorMotor.on();
+			leftpoller.on();
+			rightpoller.on();
+			navigating(gps);
 		}
-		// position 1
-		// see comments above for position 0
-		else if (buttonChoice == Button.ID_RIGHT) {
-			t.clear();
-			odometer.start();
-			odometryDisplay.start();
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
-			usLocalizer.start();
-			Button.waitForAnyPress();
-			lightLocalizer.startLightLOC();
-			Button.waitForAnyPress();
-			odometer.setTheta(3 * Math.PI / 2);// this is angle that the robot localizes to from this corner
-			odometer.setX(7 * TILE_SPACING);
-			odometer.setY(1 * TILE_SPACING);
-			navigation.travelTo(1, 1);
-			navigation.travelTo(x, y);
-			Button.waitForAnyPress();
-			lightLocalizer.lightLocWithError();
-			boolean xLine = lightLocalizer.correctLocalization();
-			if (xLine)
-				odometer.setTheta(Math.PI / 2 + Math.toRadians(5));
-			else
-				odometer.setTheta(0 + Math.toRadians(5));
-			odometer.setX(x * TILE_SPACING);
-			odometer.setY(y * TILE_SPACING);
-
-			Button.waitForAnyPress();
-			navigation.travelTo(xc, yc);
-			Button.waitForAnyPress();
-			navigation.zipTraversal();
-		}
-		// position 2
-		// see comments above for position 0
-		else if (buttonChoice == Button.ID_DOWN) {
-			t.clear();
-			odometer.start();
-			odometryDisplay.start();
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
-			usLocalizer.start();
-			Button.waitForAnyPress();
-			lightLocalizer.startLightLOC();
-			Button.waitForAnyPress();
-			odometer.setTheta(Math.PI);// this is angle that the robot localizes to from this corner
-			odometer.setX(7 * TILE_SPACING);
-			odometer.setY(7 * TILE_SPACING);
-			navigation.travelTo(7, y - 1);
-			navigation.travelTo(x, y - 1);
-			navigation.travelTo(x, y);
-			Button.waitForAnyPress();
-			odometer.setX(0);
-			odometer.setY(0);
-			lightLocalizer.lightLocWithError();
-			boolean xLine = lightLocalizer.correctLocalization();
-			if (xLine)
-				odometer.setTheta(Math.PI / 2 + Math.toRadians(5));
-			else
-				odometer.setTheta(0 + Math.toRadians(5));
-			odometer.setX(x * TILE_SPACING);
-			odometer.setY(y * TILE_SPACING);
-
-			Button.waitForAnyPress();
-			navigation.travelTo(xc, yc);
-			Button.waitForAnyPress();
-			navigation.zipTraversal();
-		}
-		// position 3
-		// see comments above for position 0
-		else if (buttonChoice == Button.ID_LEFT) {
-			t.clear();
-			odometer.start();
-			odometryDisplay.start();
-			UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(leftMotor, rightMotor, odometer, navigation,
-					UltrasonicLocalizer.LocalizationType.FALLING_EDGE);
-			usLocalizer.start();
-			Button.waitForAnyPress();
-			lightLocalizer.startLightLOC();
-			Button.waitForAnyPress();
-			odometer.setTheta(Math.PI / 2); // this is angle that the robot localizes to from this corner
-			odometer.setX(1 * TILE_SPACING);
-			odometer.setY(7 * TILE_SPACING);
-			navigation.travelTo(x, y - 1); // go to this coord to use same localization
-			navigation.travelTo(x, y);
-			Button.waitForAnyPress();
-			lightLocalizer.lightLocWithError();
-			boolean xLine = lightLocalizer.correctLocalization();
-			if (xLine)
-				odometer.setTheta(Math.PI / 2 + Math.toRadians(5));
-			else
-				odometer.setTheta(0 + Math.toRadians(5));
-			odometer.setX(x * TILE_SPACING);
-			odometer.setY(y * TILE_SPACING);
-
-			Button.waitForAnyPress();
-			navigation.travelTo(xc, yc);
-			Button.waitForAnyPress();
-			navigation.zipTraversal();
-		}
-
-		// exit the program
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
 		System.exit(0);
 	}
 
+	public static void flagsearch(Navigation gps, LightPoller leftpoller, LightPoller rightpoller, Avoidance master,
+			SensorRotation sensorMotor, LightPoller colorpoller) {
+		boolean foundFlag = false;
+		leftpoller.off();
+		rightpoller.off();
+		master.off();
+		sensorMotor.off();
+		colorpoller.on();
+		colorpoller.start();
+		if (greenTeam == 3)
+			foundFlag = gps.flagSearch(greenColor);
+		else
+			foundFlag = gps.flagSearch(redColor);
+		if (foundFlag)
+			return;
+	}
+
+	public static void ziplocalization(Navigation gps, LightPoller leftpoller, LightPoller rightpoller,
+			Avoidance master, LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller) {
+		leftpoller.off();
+		rightpoller.off();
+		master.off();
+		sensorMotor.off();
+		colorpoller.off();
+		loc.lightLocWithError();
+		odometer.setX(zipgreenXc);
+		odometer.setY(zipgreenYc);
+		gps.zipTraversal();
+		loc.lightLocWithError();
+		odometer.setX(zipredXc);
+		odometer.setY(zipredYc);
+	}
+
+	public static void navigating(Navigation gps) {
+		stage = Stage.NAVIGATION;
+		gps.startNav();
+		while (stage == Stage.NAVIGATION)
+			continue;
+	}
 }

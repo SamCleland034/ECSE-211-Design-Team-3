@@ -188,7 +188,7 @@ public class UltrasonicLocalizer {
 
 			// Save the angle read by the odometer
 
-			navigation.turn(-90); // Rotate until the robot sees no wall
+			// Rotate until the robot sees no wall
 			Sound.buzz();
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.forward();
