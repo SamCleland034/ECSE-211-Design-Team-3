@@ -7,34 +7,69 @@ public class LightPoller extends Thread {
 	private EV3ColorSensor sensor;
 	private SampleProvider provider;
 	private float[] sample;
-	private int lightVal = 0;
-	private int lastLightVal = 0;
+	private double lightVal = 0;
+	private double lastLightVal = 0;
+	public boolean on;
 
 	public LightPoller(EV3ColorSensor sensor, SampleProvider provider) {
 		this.sensor = sensor;
 		this.provider = provider;
+		on = false;
 
 	}
 
 	public void run() {
 		sample = new float[1];
 		while (true) {
-			lastLightVal = lightVal;
-			provider.fetchSample(sample, 0); // acquire data
-			lightVal = (int) (sample[0]); // extract from buffer, cast to int
-
-			try {
-				Thread.sleep(50);
-			} catch (Exception e) {
-			} // Poor man's timed sampling
+			if (on) {
+				synchronized (this) {
+					lastLightVal = lightVal;
+					provider.fetchSample(sample, 0); // acquire data
+					lightVal = (double) (sample[0]); // extract from buffer, cast to int
+				}
+				try {
+					Thread.sleep(50);
+				} catch (Exception e) {
+				} // Poor man's timed sampling
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 	}
 
-	public int getLightVal() {
-		return this.lightVal;
+	public double getChangeInLight() {
+		double result;
+		synchronized (this) {
+			result = (lightVal - lastLightVal) / lastLightVal;
+		}
+		return result;
 	}
 
-	public int getLastLightVal() {
-		return this.lastLightVal;
+	public double getLightVal() {
+		double result;
+		synchronized (this) {
+			result = lightVal;
+		}
+
+		return result;
+	}
+
+	public double getLastLightVal() {
+		double result;
+		synchronized (this) {
+			result = lastLightVal;
+		}
+		return result;
+	}
+
+	public void on() {
+		on = true;
+	}
+
+	public void off() {
+		on = false;
 	}
 }

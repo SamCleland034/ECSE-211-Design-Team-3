@@ -4,14 +4,16 @@ public class Avoidance extends Thread {
 	private Navigation gps;
 	private static final long SAMPLINGPERIOD = 50;
 	private UltrasonicPoller poller;
-	private static final int FILTERCONTROL = 40;
+	private static final int FILTERCONTROL = 100;
 	public boolean avoiding;
 	public boolean inDanger;
 	private SensorRotation sensorMotor;
 
 	public Avoidance(Navigation gps) {
 		this.gps = gps;
-
+		this.avoiding = false;
+		gps.setAvoidance(this);
+		this.inDanger = false;
 	}
 
 	public void setSensorRotation(SensorRotation sensorMotor) {
@@ -44,49 +46,65 @@ public class Avoidance extends Thread {
 			} else if (avoiding && inDanger) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
-				sensorMotor.on = false;
+				sensorMotor.off();
+				sleepFor(0.5);
+				while (FinalProject.usMotor.isMoving())
+					continue;
+				sleepFor(1);
+				FinalProject.usMotor.rotateTo(sensorMotor.reference + 45);
+				while (FinalProject.usMotor.isMoving())
+					continue;
 				int filter = 0;
-				FinalProject.usMotor.rotate(-45);
+				int measure = poller.getReading();
 				FinalProject.leftMotor.setSpeed(200);
 				FinalProject.rightMotor.setSpeed(200);
-				while (inDanger) {
+				do {
+
 					startTime = System.currentTimeMillis();
 					distance = poller.getReading();
-					if (distance > 255 && filter < FILTERCONTROL) {
+					if (distance > FinalProject.THRESHOLD + 10 && filter < FILTERCONTROL) {
 						filter++;
-					} else if (distance > 255 && filter > FILTERCONTROL) {
+						// System.out.println("Filter =" + filter);
+					} else if (distance > FinalProject.THRESHOLD + 10 && filter >= FILTERCONTROL) {
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
-						inDanger = false;
+						// System.out.println("Avoided Object");
+						sleepFor(1);
+						FinalProject.usMotor.rotateTo(sensorMotor.reference);
+						while (FinalProject.usMotor.isMoving())
+							continue;
+						sleepFor(1);
 						sensorMotor.on = true;
+						inDanger = false;
 						break;
 					} else {
 						filter = 0;
+						measure = distance;
 					}
-					if (distance > FinalProject.THRESHOLD - 5 && distance < FinalProject.THRESHOLD - 5) {
-						FinalProject.leftMotor.setSpeed(200);
-						FinalProject.rightMotor.setSpeed(200);
+					if (measure > FinalProject.THRESHOLD && measure < FinalProject.THRESHOLD + 10) {
+						FinalProject.leftMotor.setSpeed(250);
+						FinalProject.rightMotor.setSpeed(250);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
-					} else if (distance < FinalProject.THRESHOLD - 5) {
-						FinalProject.leftMotor.setSpeed(200);
-						FinalProject.rightMotor.setSpeed(100);
+					} else if (measure < FinalProject.THRESHOLD) {
+						FinalProject.leftMotor.setSpeed(250);
+						FinalProject.rightMotor.setSpeed(125);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
 					} else {
-						FinalProject.leftMotor.setSpeed(100);
-						FinalProject.rightMotor.setSpeed(200);
+						FinalProject.leftMotor.setSpeed(125);
+						FinalProject.rightMotor.setSpeed(250);
 						FinalProject.rightMotor.forward();
 						FinalProject.leftMotor.forward();
 					}
 					endTime = System.currentTimeMillis();
-					if (endTime - startTime < 2 * SAMPLINGPERIOD) {
+					if (endTime - startTime < SAMPLINGPERIOD) {
 						try {
-							Thread.sleep(2 * SAMPLINGPERIOD - (endTime - startTime));
+							Thread.sleep(SAMPLINGPERIOD - (endTime - startTime));
 						} catch (InterruptedException e) {
 						}
 					}
-				}
+				} while (inDanger);
 
 			} else {
 				try {
@@ -95,5 +113,20 @@ public class Avoidance extends Thread {
 				}
 			}
 		}
+	}
+
+	public void sleepFor(double x) {
+		try {
+			Thread.sleep((long) (x * 100));
+		} catch (InterruptedException e) {
+		}
+	}
+
+	public void on() {
+		avoiding = true;
+	}
+
+	public void off() {
+		avoiding = false;
 	}
 }
