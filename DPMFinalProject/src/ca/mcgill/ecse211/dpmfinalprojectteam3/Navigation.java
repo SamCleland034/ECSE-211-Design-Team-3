@@ -64,6 +64,7 @@ public class Navigation {
 	private SensorRotation sensorMotor;
 	private LightPoller colorpoller;
 	private OdometryCorrection oc;
+	public boolean corrected = false;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -232,8 +233,8 @@ public class Navigation {
 	 */
 	public void driveWithoutAvoid(double distanceToTravel) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED);
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
 
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
 				true); // move
@@ -256,8 +257,8 @@ public class Navigation {
 	// this method makes the robot drive a certain distance
 	public void drive(double distanceToTravel, double endX, double endY) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED);
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
 
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
 		// forward
@@ -272,7 +273,11 @@ public class Navigation {
 
 			// update distance from
 			// wall
-
+			if (corrected) {
+				FinalProject.leftMotor.forward();
+				FinalProject.rightMotor.forward();
+				corrected = false;
+			}
 			if (Math.abs(endX - odometer.getX()) <= 2 && Math.abs(endY - odometer.getY()) <= 2) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
@@ -440,8 +445,8 @@ public class Navigation {
 		FinalProject.rightMotor.setSpeed(150);
 		FinalProject.zipMotor.setSpeed(MOTOR_SPEED / 2);
 		FinalProject.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
-		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 50), true);
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 50), false);
+		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), false);
 	}
 
 	/**

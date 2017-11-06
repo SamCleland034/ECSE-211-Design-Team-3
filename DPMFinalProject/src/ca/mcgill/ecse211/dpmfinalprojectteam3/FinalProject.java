@@ -200,7 +200,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.13; // Width of car
+	public static final double TRACK = 11.26; // Width of car
 	public static final double THRESHOLD = 20;
 	public static Stage stage;
 	/** The Constant LightPort. */
@@ -211,8 +211,8 @@ public class FinalProject extends Thread {
 	private static final Port RightPort = LocalEV3.get().getPort("S3");
 	public static final EV3ColorSensor rightSensor = new EV3ColorSensor(RightPort);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
-	static SampleProvider leftProvider = leftSensor.getColorIDMode();
-	static SampleProvider rightProvider = rightSensor.getColorIDMode();
+	static SampleProvider leftProvider = leftSensor.getRedMode();
+	static SampleProvider rightProvider = rightSensor.getRedMode();
 
 	static SampleProvider colorProvider = colorSensor.getRGBMode();
 
@@ -223,7 +223,46 @@ public class FinalProject extends Thread {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		Navigation gps = new Navigation(odometer);
+		final TextLCD t = LocalEV3.get().getTextLCD();
 
+		t.drawString("READY", 0, 4);
+		Button.waitForAnyPress();
+		t.clear();
+		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
+
+		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
+		/* TEST */gps.setColorProvider(colorpoller);
+		Avoidance master = new Avoidance(gps);
+		LightPoller leftpoller = new LightPoller(leftSensor, leftProvider);
+		LightPoller rightpoller = new LightPoller(rightSensor, rightProvider);
+		JointLightPoller jointpoller = new JointLightPoller(leftProvider, rightProvider);
+		OdometryCorrection oc = new OdometryCorrection(odometer, leftpoller, rightpoller, jointpoller);
+		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller, jointpoller);
+		Button.waitForAnyPress();
+		oc.setNavigation(gps);
+		gps.setOdometryCorrection(oc);
+		jointpoller.on();
+		odometryDisplay.start();
+		Button.waitForAnyPress();
+		odometer.start();
+		// oc.on();
+		// leftpoller.start();
+		// rightpoller.start();
+		jointpoller.start();
+		oc.on();
+		oc.start();
+		odometer.setX(TILE_SPACING / 2);
+		odometer.setY(TILE_SPACING);
+		gps.travelTo(odometer.getX() / TILE_SPACING, 3);
+
+		Button.waitForAnyPress();
+		// oc.start();
+		leftMotor.setSpeed(200);
+		rightMotor.setSpeed(200);
+		leftMotor.forward();
+		rightMotor.forward();
+		/* TST */ Button.waitForAnyPress();
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
 		wifi.getValues();
@@ -232,14 +271,8 @@ public class FinalProject extends Thread {
 		}
 
 		// instantiate threads controlling the robot
-		final TextLCD t = LocalEV3.get().getTextLCD();
-		t.drawString("ZIPLINE GREEN X=" + zipgreenX, 0, 0);
-		t.clear();
 
-		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
-
-		Navigation gps = new Navigation(odometer);
-		Avoidance master = new Avoidance(gps);
+		// TST //Navigation gps = new Navigation(odometer);
 		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
 
 		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
@@ -294,28 +327,15 @@ public class FinalProject extends Thread {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 		}
-		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
-		gps.setColorProvider(colorpoller);
-		LightPoller leftpoller = new LightPoller(leftSensor, leftProvider);
-		LightPoller rightpoller = new LightPoller(rightSensor, rightProvider);
-		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller);
-		leftpoller.start();
-		rightpoller.start();
-		lightLoc.startLightLOC();
-		// clear the display
 		/*
-		 * STOPPED HERE FOR NOW!!!!!!!!!!!!!!! 11/1/2017 3:40-10:04 PM
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
+		 * LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
+		 * gps.setColorProvider(colorpoller); LightPoller leftpoller = new
+		 * LightPoller(leftSensor, leftProvider); //TEST LightPoller rightpoller = new
+		 * LightPoller(rightSensor, rightProvider); LightLocalizer lightLoc = new
+		 * LightLocalizer(odometer, gps, leftpoller, rightpoller); leftpoller.start();
+		 * rightpoller.start(); lightLoc.startLightLOC();
 		 */
-		// wait for the user to press a button and start the odometer and
-		// odometer display
+
 		Button.waitForAnyPress();
 		if (greenTeam == 3) {
 			odometer.setX(11 * TILE_SPACING);

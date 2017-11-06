@@ -1,6 +1,8 @@
 
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
+import lejos.hardware.Sound;
+
 /**
  * The Class OdometryCorrection, used to correct the small but accumulating
  * errors of the odometer using the light sensor to detect gridlines on the
@@ -16,13 +18,16 @@ public class OdometryCorrection extends Thread {
 	private LightPoller rightPoller;
 
 	private boolean on;
-
+	private JointLightPoller jointPoller;
+	private static int SAMPLINGPERIOD = 18;
 	/** The distance between lines. */
 	private static double TILE_SPACING = 30;
+	public boolean corrected = false;
+	private Navigation gps;
 
 	// private EV3ColorSensor colorSensor;
 
-	private static final double SENSOR_OFFSET = 12.8;
+	private static final double SENSOR_OFFSET = 12.9;
 
 	// constructor
 
@@ -32,11 +37,13 @@ public class OdometryCorrection extends Thread {
 	 * @param odometer
 	 *            the odometer
 	 */
-	public OdometryCorrection(Odometer odometer, LightPoller leftPoller, LightPoller rightPoller) {
+	public OdometryCorrection(Odometer odometer, LightPoller leftPoller, LightPoller rightPoller,
+			JointLightPoller jointPoller) {
 
 		this.odometer = odometer;
 		this.leftPoller = leftPoller;
 		this.rightPoller = rightPoller;
+		this.jointPoller = jointPoller;
 		this.on = false;
 	}
 
@@ -49,24 +56,44 @@ public class OdometryCorrection extends Thread {
 	 */
 	public void run() {
 		int speed = 0;
-		double leftChange;
-		double rightChange;
+		long startTime;
+		long endTime;
+		double[] lightValue;
 		while (true) {
 			if (on) {
-				leftChange = leftPoller.getChangeInLight();
-				rightChange = rightPoller.getChangeInLight();
-				if (leftChange >= 1 && rightChange >= 1) {
+				startTime = System.currentTimeMillis();
+				lightValue = jointPoller.getValues();
+				if (lightValue[0] < 0.3 && lightValue[1] < 0.3) {
+					Sound.beepSequence();
 					checkOrientation();
+					gps.corrected = true;
 				} else {
-					if (leftChange >= 1) {
+					if (lightValue[0] < 0.3) {
 						speed = FinalProject.leftMotor.getSpeed();
-						FinalProject.leftMotor.setSpeed(0);
+						FinalProject.leftMotor.stop(true);
+						FinalProject.rightMotor.stop(false);
+						Sound.beep();
 						checkRightPoller(speed);
+						gps.corrected = true;
+
+						break;
 					}
-					if (rightChange >= 1) {
+					if (lightValue[1] < 0.3) {
 						speed = FinalProject.rightMotor.getSpeed();
-						FinalProject.rightMotor.setSpeed(0);
+						FinalProject.rightMotor.stop(true);
+						FinalProject.leftMotor.stop(false);
+						Sound.beep();
 						checkLeftPoller(speed);
+						gps.corrected = true;
+
+						break;
+					}
+				}
+				endTime = System.currentTimeMillis();
+				if (endTime - startTime < SAMPLINGPERIOD) {
+					try {
+						Thread.sleep((SAMPLINGPERIOD - (endTime - startTime)));
+					} catch (InterruptedException e) {
 					}
 				}
 			} else {
@@ -85,7 +112,7 @@ public class OdometryCorrection extends Thread {
 		int correctedY = 0;
 
 		theta = odometer.getTheta();
-		if ((odometer.getTheta() - 2 * Math.PI >= -Math.PI / 4 && odometer.getTheta() <= Math.PI / 4)) {
+		if ((theta) > 7 * Math.PI / 4 || ((theta > 0) && (theta <= Math.PI / 4))) {
 			odometer.setTheta(0);
 			correctedY = (int) (odometer.getY() / TILE_SPACING);
 			odometer.setY(correctedY * TILE_SPACING + SENSOR_OFFSET);
@@ -108,26 +135,45 @@ public class OdometryCorrection extends Thread {
 	private void checkRightPoller(int speed) {
 
 		FinalProject.rightMotor.setSpeed(50);
-
-		while (rightPoller.getChangeInLight() < 1)
+		FinalProject.rightMotor.forward();
+		long startTime = System.currentTimeMillis();
+		while (jointPoller.getRightValue() > 0.3) {
+			if (timedOut(startTime))
+				break;
 			continue;
-		FinalProject.rightMotor.setSpeed(0);
+		}
+		FinalProject.rightMotor.stop(false);
 		checkOrientation();
 		FinalProject.leftMotor.setSpeed(speed);
 		FinalProject.rightMotor.setSpeed(speed);
 
 	}
 
+	private boolean timedOut(long startTime) {
+		if (System.currentTimeMillis() - startTime > 50)
+			return true;
+		return false;
+	}
+
 	private void checkLeftPoller(int speed) {
 
 		FinalProject.leftMotor.setSpeed(50);
-		while (leftPoller.getChangeInLight() < 1)
+		FinalProject.rightMotor.forward();
+		long startTime = System.currentTimeMillis();
+		while (jointPoller.getLeftValue() > 0.3) {
+			if (timedOut(startTime))
+				break;
 			continue;
-		FinalProject.leftMotor.setSpeed(0);
+		}
+		FinalProject.leftMotor.stop(false);
 		checkOrientation();
 		FinalProject.leftMotor.setSpeed(speed);
 		FinalProject.rightMotor.setSpeed(speed);
 
+	}
+
+	public void setNavigation(Navigation gps) {
+		this.gps = gps;
 	}
 
 	public void on() {
