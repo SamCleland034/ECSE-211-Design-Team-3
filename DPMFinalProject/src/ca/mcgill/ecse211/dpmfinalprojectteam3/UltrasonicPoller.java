@@ -2,25 +2,48 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.robotics.SampleProvider;
 
+// TODO: Auto-generated Javadoc
 /**
- * Control of the wall follower is applied periodically by the UltrasonicPoller
- * thread. The while loop at the bottom executes in a loop. Assuming that the
- * us.fetchSample, and cont.processUSData methods operate in about 20mS, and
- * that the thread sleeps for 50 mS at the end of each loop, then one cycle
- * through the loop is approximately 70 mS. This corresponds to a sampling rate
- * of 1/70mS or about 14 Hz.
+ * Main thread for polling ultrasonic data, other threads that taking readings
+ * from this thread include avoidance and ultrasonic localizer.
  * 
  * @version 1.0
  */
 public class UltrasonicPoller extends Thread {
+
+	/** The us. */
 	private SampleProvider us;
+
+	/** The us data. */
 	private float[] usData;
+
+	/** The master. */
 	private Avoidance master;
+
+	/** The gps. */
 	private Navigation gps;
+
+	/** The reading. */
 	private int reading;
+
+	/** The Constant SAMPLINGPERIOD. */
 	private static final int SAMPLINGPERIOD = 45;
+
+	/** The on. */
 	private boolean on;
 
+	/**
+	 * Instantiates a new ultrasonic poller.
+	 *
+	 * @param us
+	 *            the us
+	 * @param usData
+	 *            the us data
+	 * @param controller
+	 *            the controller
+	 * @param gps
+	 *            the gps
+	 */
 	public UltrasonicPoller(SampleProvider us, float[] usData, Avoidance controller, Navigation gps) {
 		this.us = us;
 		this.usData = usData;
@@ -64,14 +87,25 @@ public class UltrasonicPoller extends Thread {
 		}
 	}
 
+	/**
+	 * turn thread on.
+	 */
 	public void on() {
 		on = true;
 	}
 
+	/**
+	 * turn thread off.
+	 */
 	public void off() {
 		on = false;
 	}
 
+	/**
+	 * Gets the reading.
+	 *
+	 * @return the reading
+	 */
 	public int getReading() {
 		return reading;
 	}

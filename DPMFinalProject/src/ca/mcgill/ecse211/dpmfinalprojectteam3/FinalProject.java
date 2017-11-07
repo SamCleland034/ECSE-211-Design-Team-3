@@ -14,6 +14,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 
+// TODO: Auto-generated Javadoc
 /**
  * 11/1/2017, Description of how Code works (Example given from POV of green
  * side): 1. Robot takes in data from the server 2. Enter ultrasonic
@@ -72,31 +73,41 @@ import lejos.robotics.SampleProvider;
  * the green zone. After traversing the river, the robot will then go back to
  * its starting position, which will then prompt the end of the game. How the
  * code will flow: Inital idea was to model the stages of the robot as a state
- * machine, which will be implemented to start with.
+ * machine, which will be implemented to start with, see the Stage enumeration
+ * for more information regarding stages.
  *
- * Threads in use- We have a total of 8 threads, 1 avoidance thread, 3
- * lightpoller threads for each light sensor, 1 odometer thread, 1 odometry
- * display thread, 1 thread to continuous rotate the motor that the US and color
- * sensor are connected to , 1 ultrasonic poller thread and 1 odometry
- * correction thread. However, the way the we implemented the threads is that
- * each thread has two methods, on() and off(). While a thread is on, it will do
- * what it is meant to do, but if it is off, it will sleep for a period of time
- * and then check if it is still off. For example, during the flag search stage,
- * we do not want to use odometry correction since our robot will have to travel
- * in an unknown orientation (on a diagonal), so we will have to disable the
- * odometry correction thread using the off() method. However, sleeping them
- * still might cause issues with how many actions our robot can handle, so we
- * will make changes to this idea if problems arise. See the Stage enumeration
- * for details on how the the robot changes states.
+ * Threads in use- We have a total of 7 threads. 1 avoidance thread, 1 light
+ * poller thread for the color sensor, 1 joint light poller thread for the two
+ * threads that detect lines, 1 odometer thread, 1 odometry display thread, 1
+ * thread to continuous rotate the motor that the US and color sensor are
+ * connected to , 1 ultrasonic poller thread and 1 odometry correction thread.
+ * However, the way the we implemented the threads is that each thread has two
+ * methods, on() and off(). While a thread is on, it will do what it is meant to
+ * do, but if it is off, it will sleep for a period of time and then check if it
+ * is still off. For example, during the flag search stage, we do not want to
+ * use odometry correction since our robot will have to travel in an unknown
+ * orientation (on a diagonal), so we will have to disable the odometry
+ * correction thread using the off() method. However, sleeping them still might
+ * cause issues with how many actions our robot can handle, so we will make
+ * changes to this idea if problems arise. See the Stage enumeration for details
+ * on how the the robot changes states.
  * 
  * @author Sam Cleland, Yiming Wu, Charles Brana
- * @version 2.0: Code estimation: 1200 lines of code(lines meaning number of
+ * @version 2.0: Code estimation: 1600 lines of code(lines meaning number of
  *          semicolons).
  */
 public class FinalProject extends Thread {
+
+	/** The red corner. */
 	public static int redCorner;
+
+	/** The green corner. */
 	public static int greenCorner;
+
+	/** The red team for the game. */
 	public static int redTeam;
+
+	/** The green team for the game. */
 	public static int greenTeam;
 	/** x coord of the zipline in the green region. */
 	public static int zipgreenX;
@@ -168,7 +179,11 @@ public class FinalProject extends Thread {
 
 	/** y coord of upper right corner of vertical shallow water region. */
 	public static int SVURY;
+
+	/** The red color the red team is searching for. */
 	public static int redColor;
+
+	/** The green color the green team is searching for. */
 	public static int greenColor;
 	/** The Constant leftMotor, global left motor for entire project. */
 	// Assign ports to motors and to sensor
@@ -179,12 +194,12 @@ public class FinalProject extends Thread {
 
 	/** The Constant rightMotor, global right motor for entire project. */
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+
+	/** The Constant usMotor. */
 	public static final EV3LargeRegulatedMotor usMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
 
 	/** The Constant usSensor. Ultrasonic sensor used */
 	public static final EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
-
-	/** The odometer. */
 
 	/** The us dist, used to change the sensor mode to distance. */
 	// create variables
@@ -201,19 +216,42 @@ public class FinalProject extends Thread {
 
 	/** The Constant TRACK. Distance between the wheels */
 	public static final double TRACK = 11.26; // Width of car
+
+	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 20;
+
+	/** Enumeration used for state transitions */
 	public static Stage stage;
-	/** The Constant LightPort. */
+	/** The Constant LightPort, for the color sensor. */
 	private static final Port LightPort = LocalEV3.get().getPort("S4");
+
+	/** The Constant colorSensor. */
 	public static final EV3ColorSensor colorSensor = new EV3ColorSensor(LightPort);
+
+	/** The Constant LeftPort. */
 	private static final Port LeftPort = LocalEV3.get().getPort("S2");
+
+	/** The Constant leftSensor. */
 	public static final EV3ColorSensor leftSensor = new EV3ColorSensor(LeftPort);
+
+	/** The Constant RightPort. */
 	private static final Port RightPort = LocalEV3.get().getPort("S3");
+
+	/** The Constant rightSensor. */
 	public static final EV3ColorSensor rightSensor = new EV3ColorSensor(RightPort);
+
+	/**
+	 * The odometer, made it static since it is always used throughout each stage.
+	 */
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
+
+	/** The left provider, using red mode for detecting lines. */
 	static SampleProvider leftProvider = leftSensor.getRedMode();
+
+	/** The right provider, using red mode for detecting lines. */
 	static SampleProvider rightProvider = rightSensor.getRedMode();
 
+	/** The color provider, used for detecting the colors of blocks. */
 	static SampleProvider colorProvider = colorSensor.getRGBMode();
 
 	/**
@@ -225,12 +263,7 @@ public class FinalProject extends Thread {
 	public static void main(String[] args) {
 		Navigation gps = new Navigation(odometer);
 		final TextLCD t = LocalEV3.get().getTextLCD();
-
-		t.drawString("READY", 0, 4);
-		Button.waitForAnyPress();
-		t.clear();
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
-
 		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
 		/* TEST */gps.setColorProvider(colorpoller);
 		Avoidance master = new Avoidance(gps);
@@ -239,30 +272,18 @@ public class FinalProject extends Thread {
 		JointLightPoller jointpoller = new JointLightPoller(leftProvider, rightProvider);
 		OdometryCorrection oc = new OdometryCorrection(odometer, leftpoller, rightpoller, jointpoller);
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller, jointpoller);
-		Button.waitForAnyPress();
 		oc.setNavigation(gps);
 		gps.setOdometryCorrection(oc);
 		jointpoller.on();
 		odometryDisplay.start();
-		Button.waitForAnyPress();
 		odometer.start();
 		// oc.on();
 		// leftpoller.start();
 		// rightpoller.start();
-		jointpoller.start();
-		oc.on();
-		oc.start();
-		odometer.setX(TILE_SPACING / 2);
-		odometer.setY(TILE_SPACING);
-		gps.travelTo(odometer.getX() / TILE_SPACING, 3);
-
-		Button.waitForAnyPress();
+		// jointpoller.start();
+		// oc.on();
 		// oc.start();
-		leftMotor.setSpeed(200);
-		rightMotor.setSpeed(200);
-		leftMotor.forward();
-		rightMotor.forward();
-		/* TST */ Button.waitForAnyPress();
+		Button.waitForAnyPress();
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
 		wifi.getValues();
@@ -312,7 +333,6 @@ public class FinalProject extends Thread {
 		}
 		stage = Stage.STARTINGLOCALIZATION;
 		LocalizationType lt = LocalizationType.FALLINGEDGE;
-		t.clear();
 		uspoller.on();
 		uspoller.start();
 		odometer.start();
@@ -327,14 +347,10 @@ public class FinalProject extends Thread {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 		}
-		/*
-		 * LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
-		 * gps.setColorProvider(colorpoller); LightPoller leftpoller = new
-		 * LightPoller(leftSensor, leftProvider); //TEST LightPoller rightpoller = new
-		 * LightPoller(rightSensor, rightProvider); LightLocalizer lightLoc = new
-		 * LightLocalizer(odometer, gps, leftpoller, rightpoller); leftpoller.start();
-		 * rightpoller.start(); lightLoc.startLightLOC();
-		 */
+		uspoller.off();
+		jointpoller.on();
+		jointpoller.start();
+		lightLoc.startLightLOC4();
 
 		Button.waitForAnyPress();
 		if (greenTeam == 3) {
@@ -356,10 +372,10 @@ public class FinalProject extends Thread {
 
 				navigating(gps, sensorMotor, leftpoller, rightpoller);
 			} else if (stage == Stage.FLAGSEARCH) {
-				flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller);
+				flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller, jointpoller);
 				stage = Stage.NAVIGATION;
 			} else if (stage == Stage.ZIPLOCALIZATION) {
-				ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor, colorpoller);
+				ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor, colorpoller, jointpoller);
 				stage = Stage.NAVIGATION;
 			} else if (stage == Stage.FINISHED) {
 				Sound.beepSequenceUp();
@@ -377,11 +393,31 @@ public class FinalProject extends Thread {
 		 * (Button.waitForAnyPress() != Button.ID_ESCAPE) ; System.exit(0);
 		 */}
 
+	/**
+	 * This method will be called when the robot is in the flagsearch state after
+	 * reaching one of the search region corners. We will then turn off the line
+	 * detector threads such as odometry correction and left poller and turn on the
+	 * ultrasonic related threads except avoidance.
+	 *
+	 * @param gps
+	 *            the gps
+	 * @param leftpoller
+	 *            the leftpoller
+	 * @param rightpoller
+	 *            the rightpoller
+	 * @param master
+	 *            the master
+	 * @param sensorMotor
+	 *            the sensor motor
+	 * @param colorpoller
+	 *            the colorpoller
+	 */
 	public static void flagsearch(Navigation gps, LightPoller leftpoller, LightPoller rightpoller, Avoidance master,
-			SensorRotation sensorMotor, LightPoller colorpoller) {
+			SensorRotation sensorMotor, LightPoller colorpoller, JointLightPoller jointpoller) {
 		boolean foundFlag = false;
 		leftpoller.off();
 		rightpoller.off();
+		jointpoller.off();
 		master.off();
 		sensorMotor.off();
 		colorpoller.on();
@@ -394,10 +430,23 @@ public class FinalProject extends Thread {
 			return;
 	}
 
+	/**
+	 * This robot will be called if the robot switches into the ziplocalization
+	 * stage, which will then turn off all the threads that we don't want on for the
+	 * zip traversal such as odometry correction, avoidance and ultrasonic poller.
+	 *
+	 * @param gps
+	 * @param leftpoller
+	 * @param rightpoller
+	 * @param master
+	 * @param loc
+	 * @param sensorMotor
+	 * @param colorpoller
+	 */
 	public static void ziplocalization(Navigation gps, LightPoller leftpoller, LightPoller rightpoller,
-			Avoidance master, LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller) {
-		leftpoller.off();
-		rightpoller.off();
+			Avoidance master, LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller,
+			JointLightPoller jointlightpoller) {
+		jointlightpoller.on();
 		master.off();
 		sensorMotor.off();
 		colorpoller.off();
@@ -415,6 +464,16 @@ public class FinalProject extends Thread {
 		stage = Stage.NAVIGATION;
 	}
 
+	/**
+	 * This method will be called if the robot is in the navigation phase of the
+	 * project. Continuously cycles through the coordinates passed in through the
+	 * wifi class. Turns on the threads that will be used during this stage
+	 *
+	 * @param gps
+	 * @param motor
+	 * @param leftPoller
+	 * @param rightPoller
+	 */
 	public static void navigating(Navigation gps, SensorRotation motor, LightPoller leftPoller,
 			LightPoller rightPoller) {
 		motor.on();

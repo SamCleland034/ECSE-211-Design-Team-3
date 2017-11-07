@@ -7,11 +7,12 @@ import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class LightLocalizer, used to allow the robot in the beginning and in
  * times when error accumulates too much to re-adjust itself and start off fresh
- * Using one to potentially two light sensors to perform this task
- * 
+ * Using one to potentially two light sensors to perform this task.
+ *
  * @version 1.0
  */
 public class LightLocalizer {
@@ -63,8 +64,11 @@ public class LightLocalizer {
 	/** The color sensor. */
 
 	private LightPoller leftPoller;
+
+	/** The right poller. */
 	private LightPoller rightPoller;
 
+	/** The joint poller. */
 	private JointLightPoller jointPoller;
 	// assign port to light sensor
 
@@ -76,11 +80,12 @@ public class LightLocalizer {
 	 * @param navigation
 	 *            ,the navigation we will use to travel to 0,0 once we figure out
 	 *            correct heading
-	 * @param rightpoller
 	 * @param leftpoller
-	 * @param FinalProject.colorSensor
-	 *            the color sensor, used to detect lines when doing light
-	 *            localization
+	 *            the leftpoller
+	 * @param rightpoller
+	 *            the rightpoller
+	 * @param jointpoller
+	 *            the jointpoller
 	 */
 	public LightLocalizer(Odometer odometer, Navigation navigation, LightPoller leftpoller, LightPoller rightpoller,
 			JointLightPoller jointpoller) {
@@ -92,6 +97,11 @@ public class LightLocalizer {
 
 	}
 
+	/**
+	 * 4th version of this method that uses the joint poller rather than the two
+	 * individual light pollers to synchronize values. Reduced time of light
+	 * localization also with this method
+	 */
 	public void startLightLOC4() {
 		// navigation.turn(10);
 		// while(navigation.isNavigating()) continue;
@@ -219,23 +229,18 @@ public class LightLocalizer {
 		/*
 		 * FinalProject.leftMotor.forward(); FinalProject.rightMotor.backward();
 		 * double[] leftThetas = new double[4]; double[] rightThetas = new double[4];
-		 * int rightNumCount = 0; int leftNumCount = 0; long startTime, endTime = 0;
-		 */
-		// while the robot is turning, fetch the color from the color sensor and
-		// save the values of theta when the sensor crosses a black line
-		/*
-		 * while (rightNumCount < 4 && leftNumCount < 4) { // get color detected by
-		 * light sensor // startTime = System.currentTimeMillis(); lightValue =
+		 * int rightNumCount = 0; int leftNumCount = 0; long startTime, endTime = 0; /
+		 * // while the robot is turning, fetch the color from the color sensor and //
+		 * save the values of theta when the sensor crosses a black line / while
+		 * (rightNumCount < 4 && leftNumCount < 4) { // get color detected by light
+		 * sensor // startTime = System.currentTimeMillis(); lightValue =
 		 * jointPoller.getValues(); if (lightValue[0] < 0.3) { leftThetas[leftNumCount]
 		 * = odometer.getTheta(); Sound.beep(); leftNumCount += 1;
 		 * 
 		 * checkRightPoller3(); rightThetas[rightNumCount] = odometer.getTheta();
 		 * Sound.beep(); rightNumCount += 1;
 		 * 
-		 * }
-		 */
-		/*
-		 * endTime = System.currentTimeMillis(); if (endTime - startTime <
+		 * } / / endTime = System.currentTimeMillis(); if (endTime - startTime <
 		 * CORRECTION_PERIOD) { try { Thread.sleep(CORRECTION_PERIOD - (endTime -
 		 * startTime)); } catch (InterruptedException e) { } }
 		 */
@@ -290,8 +295,10 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Start light LOC, primary method for localization in one of the starting
-	 * corners after ultrasonic localization
+	 * Start light LOC, primary method for light localization in one of the starting
+	 * corners after ultrasonic localization.
+	 * 
+	 * @version outdated
 	 */
 	public void startLightLOC2() {
 		// navigation.turn(10);
@@ -463,6 +470,11 @@ public class LightLocalizer {
 		Sound.playNote(Sound.XYLOPHONE, 500, 500);
 	}
 
+	/**
+	 * Light localizer using two individual light sensors instead of
+	 * jointlightsensor. Also reads the change in the light value instead of the
+	 * actual value.
+	 */
 	public void startLightLOC3() {
 		// navigation.turn(10);
 		// while(navigation.isNavigating()) continue;
@@ -648,17 +660,32 @@ public class LightLocalizer {
 		Sound.playNote(Sound.XYLOPHONE, 500, 500);
 	}
 
+	/**
+	 * Send resources to check if the right poller is about to cross the line, so it
+	 * is more likely to detect
+	 */
 	private void checkRightPoller3() {
 		while (jointPoller.getRightValue() > 0.3)
 			continue;
 
 	}
 
+	/**
+	 * Send resources to check if the left poller is about to cross the line, so it
+	 * is more likely to detect
+	 */
 	private void checkLeftPoller3() {
 		while (jointPoller.getLeftValue() != 13)
 			continue;
 	}
 
+	/**
+	 * Check right poller and after it crosses set the speed back to what it was
+	 * before
+	 *
+	 * @param speed
+	 *            the speed
+	 */
 	private void checkRightPoller2(int speed) {
 		FinalProject.rightMotor.setSpeed(40);
 		FinalProject.rightMotor.forward();
@@ -669,6 +696,12 @@ public class LightLocalizer {
 
 	}
 
+	/**
+	 * Check left poller 2.
+	 *
+	 * @param speed
+	 *            the speed
+	 */
 	private void checkLeftPoller2(int speed) {
 		FinalProject.leftMotor.setSpeed(40);
 		FinalProject.leftMotor.forward();
@@ -678,30 +711,47 @@ public class LightLocalizer {
 		FinalProject.leftMotor.setSpeed(speed);
 	}
 
+	/**
+	 * same as other versions except with direct color reading
+	 */
 	private void checkRightPoller() {
 		while (rightPoller.getLightVal() != 13)
 			continue;
 
 	}
 
+	/**
+	 * same as other versions except with direct color reading
+	 */
 	private void checkLeftPoller1() {
 		while (leftPoller.getChangeInLight() < 1)
 			continue;
 
 	}
 
+	/**
+	 * Check right poller 1.
+	 */
 	private void checkRightPoller1() {
 		while (rightPoller.getChangeInLight() < 1)
 			continue;
 
 	}
 
+	/**
+	 * Check left poller.
+	 */
 	private void checkLeftPoller() {
 		while (leftPoller.getLightVal() != 13)
 			continue;
 
 	}
 
+	/**
+	 * Start light LOC.
+	 * 
+	 * @version outdated
+	 */
 	public void startLightLOC() {
 		long correctionStart, correctionEnd;
 		float[] leftsample = new float[1];
@@ -900,6 +950,7 @@ public class LightLocalizer {
 	 * is not in one of the starting points, such as after dismounting from the
 	 * zipline. Have to check for certain cases such as if near or on a line
 	 * 
+	 * @version outdated/ not needed anymore
 	 */
 	// Used when getting to (x, y)
 	public void lightLocWithError() {
@@ -1176,8 +1227,6 @@ public class LightLocalizer {
 	 * line, then it moves accordingly to the left Doing this to allow the robot to
 	 * localize in an adequate location.
 	 *
-	 * @param colorSamples
-	 *            the color samples
 	 * @return false if it doesn't detect a line, true if it does then performs
 	 *         normal localization like in the first method since the position of
 	 *         the robot will be corrected

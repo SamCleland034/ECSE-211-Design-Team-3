@@ -97,7 +97,10 @@ public class Navigation {
 	}
 
 	/**
-	 * Start nav,.
+	 * Cycles through the coordinates passed in by the wifi class and depending on
+	 * what coords the robot travels to we will change states. For example if we
+	 * reach the zip line coordinates, we will then transition to the zipline stage
+	 * of the project which will execute the code for the ziptraversal algorithm.
 	 */
 	public void startNav() {
 		double coordX;

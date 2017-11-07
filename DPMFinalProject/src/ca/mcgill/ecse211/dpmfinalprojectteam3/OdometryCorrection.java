@@ -19,7 +19,7 @@ public class OdometryCorrection extends Thread {
 
 	private boolean on;
 	private JointLightPoller jointPoller;
-	private static int SAMPLINGPERIOD = 18;
+	private static int SAMPLINGPERIOD = 15;
 	/** The distance between lines. */
 	private static double TILE_SPACING = 30;
 	public boolean corrected = false;
@@ -76,7 +76,6 @@ public class OdometryCorrection extends Thread {
 						checkRightPoller(speed);
 						gps.corrected = true;
 
-						break;
 					}
 					if (lightValue[1] < 0.3) {
 						speed = FinalProject.rightMotor.getSpeed();
@@ -86,7 +85,6 @@ public class OdometryCorrection extends Thread {
 						checkLeftPoller(speed);
 						gps.corrected = true;
 
-						break;
 					}
 				}
 				endTime = System.currentTimeMillis();

@@ -114,6 +114,5 @@ public class WiFi {
 		}
 		// Wait until user decides to end program
 
-		FinalProject.stage = Stage.IDLE;
 	}
 }

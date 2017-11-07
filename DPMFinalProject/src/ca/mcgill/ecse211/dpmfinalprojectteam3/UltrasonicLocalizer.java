@@ -7,7 +7,7 @@ import lejos.hardware.Sound;
  * This class is used in the start to approximate a suitable heading to then
  * perform light localization using the light sensor.
  * 
- * @version 1.0
+ * 
  */
 public class UltrasonicLocalizer {
 
