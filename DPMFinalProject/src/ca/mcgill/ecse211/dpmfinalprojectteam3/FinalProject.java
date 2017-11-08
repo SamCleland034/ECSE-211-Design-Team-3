@@ -215,7 +215,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.26; // Width of car
+	public static final double TRACK = 11.435; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 20;
@@ -264,6 +264,17 @@ public class FinalProject extends Thread {
 		Navigation gps = new Navigation(odometer);
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
+		odometryDisplay.start();
+		odometer.start();
+		
+//		Test.NavigationTest();
+//		Test.UltrasonicTest();
+		Test.CorrectionTest();
+		
+		
+		Button.waitForAnyPress();
+		
+		
 		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
 		/* TEST */gps.setColorProvider(colorpoller);
 		Avoidance master = new Avoidance(gps);
@@ -275,15 +286,18 @@ public class FinalProject extends Thread {
 		oc.setNavigation(gps);
 		gps.setOdometryCorrection(oc);
 		jointpoller.on();
-		odometryDisplay.start();
-		odometer.start();
+//		odometryDisplay.start();
+//		odometer.start();
 		// oc.on();
 		// leftpoller.start();
 		// rightpoller.start();
 		// jointpoller.start();
 		// oc.on();
 		// oc.start();
-		Button.waitForAnyPress();
+		
+
+
+		
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
 		wifi.getValues();

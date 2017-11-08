@@ -172,10 +172,10 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();
 			// Fetch data
-			double dist = poller.getReading();
+			this.dist = poller.getReading();
 			;
 
-			filter_close(dist); // Filter out distances that are too close that's not meant to be
+			//filter_close(dist); // Filter out distances that are too close that's not meant to be
 
 			while (this.dist > TOP_THRESHOLD) { // Doesn't see the wall
 
@@ -198,7 +198,7 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.forward();
 			try {
-				Thread.sleep(500);
+				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				// there is nothing to be done here because it is not expected
 				// that
@@ -207,7 +207,7 @@ public class UltrasonicLocalizer {
 			this.dist = poller.getReading();
 			; // update distance from wall
 
-			filter_close(dist); // Filter out distances that are too close for no reasons
+			//filter_close(dist); // Filter out distances that are too close for no reasons
 
 			// Rotate until it sees a wall
 			while (this.dist > TOP_THRESHOLD) { // Doesn't see the wall
@@ -244,12 +244,12 @@ public class UltrasonicLocalizer {
 		// Computes the correct angle to turn using the the angles collected
 		if (first_angle < second_angle) {
 			UPDATED_ANGLE = 45 - ((first_angle + second_angle) / 2);
-			navigation.turn(UPDATED_ANGLE);
+			//navigation.turn(UPDATED_ANGLE);
 		}
 
 		if (first_angle > second_angle) {
 			UPDATED_ANGLE = 225 - ((first_angle + second_angle) / 2);
-			navigation.turn(UPDATED_ANGLE);
+			//navigation.turn(UPDATED_ANGLE);
 		}
 
 		if (localizationType == LocalizationType.FALLINGEDGE) {

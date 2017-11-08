@@ -17,8 +17,10 @@ public class Navigation {
 	/** The Constant MOTOR_SPEED. Default motor speed */
 	// Create constants
 	private static Avoidance master;
-	private static final int MOTOR_SPEED = 225;
-
+	private static final int MOTOR_SPEED_LEFT = 225;
+	static final double RIGHT_OFFSET = 1.0095;
+	private static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED_LEFT * RIGHT_OFFSET);
+	
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 150;
 
@@ -58,13 +60,13 @@ public class Navigation {
 	private static LinkedList<Integer> path; // For demo coordinates
 
 	/** The odometer. */
-	private Odometer odometer;
+	private static Odometer odometer;
 	private boolean hasFlag = false;
 	private UltrasonicPoller poller;
 	private SensorRotation sensorMotor;
 	private LightPoller colorpoller;
-	private OdometryCorrection oc;
-	public boolean corrected = false;
+	private static OdometryCorrection oc;
+	public static boolean corrected = false;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -141,7 +143,7 @@ public class Navigation {
 	 *            y coordinate of the destination
 	 */
 	// this method makes the robot travel to coordinates passed as parameters
-	public void travelTo(double endX, double endY) {
+	public static void travelTo(double endX, double endY) {
 
 		isNavigating = true;
 		// CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) *
@@ -183,7 +185,7 @@ public class Navigation {
 
 	}
 
-	public void travelToWithoutAvoid(double endX, double endY) {
+	public static void travelToWithoutAvoid(double endX, double endY) {
 
 		isNavigating = true;
 		// CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) *
@@ -199,7 +201,7 @@ public class Navigation {
 		// If reached destination, then stop
 		if (Math.abs(distanceX) <= 0.3 && Math.abs(distanceY) <= 0.3) {
 			FinalProject.leftMotor.stop(true);
-			FinalProject.rightMotor.stop(false);
+			FinalProject.rightMotor.stop(true);
 		}
 
 		else { // has not reached destination
@@ -234,15 +236,15 @@ public class Navigation {
 	 * @param distanceToTravel
 	 *            the distance to travel
 	 */
-	public void driveWithoutAvoid(double distanceToTravel) {
+	public static void driveWithoutAvoid(double distanceToTravel) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
-
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED_LEFT); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
+		
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
 				true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel*RIGHT_OFFSET + CENTER_OFFSET),
 				false);
 
 	}
@@ -258,10 +260,10 @@ public class Navigation {
 	 *            the end Y
 	 */
 	// this method makes the robot drive a certain distance
-	public void drive(double distanceToTravel, double endX, double endY) {
+	public static void drive(double distanceToTravel, double endX, double endY) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED_LEFT / 2); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT / 2);
 
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
 		// forward
@@ -387,7 +389,7 @@ public class Navigation {
 	 * @param theta
 	 *            the theta
 	 */
-	// this method makes the robot turn to the indicated angle the shortest way
+	static // this method makes the robot turn to the indicated angle the shortest way
 	void turnTo(double theta) {
 		// get current angle and convert to degrees
 		double currentTheta = Math.toDegrees(odometer.getTheta());
@@ -438,7 +440,7 @@ public class Navigation {
 	public void zipTraversal() {
 		FinalProject.leftMotor.setSpeed(300); // set speeds
 		FinalProject.rightMotor.setSpeed(300);
-		FinalProject.zipMotor.setSpeed(MOTOR_SPEED);
+		FinalProject.zipMotor.setSpeed(MOTOR_SPEED_LEFT);
 		FinalProject.zipMotor.forward();// travels about 3/4 the zipline
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), true);
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), false);
@@ -446,7 +448,7 @@ public class Navigation {
 			continue;
 		FinalProject.leftMotor.setSpeed(150); // slow down once getting to the downward slope
 		FinalProject.rightMotor.setSpeed(150);
-		FinalProject.zipMotor.setSpeed(MOTOR_SPEED / 2);
+		FinalProject.zipMotor.setSpeed(MOTOR_SPEED_LEFT / 2);
 		FinalProject.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), true);
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), false);
@@ -470,7 +472,7 @@ public class Navigation {
 	 * @param theta
 	 *            the theta
 	 */
-	// this method makes the robot turn the indicated angle
+	static // this method makes the robot turn the indicated angle
 	void turn(double theta) {
 		// set rotate speed for both motors
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
