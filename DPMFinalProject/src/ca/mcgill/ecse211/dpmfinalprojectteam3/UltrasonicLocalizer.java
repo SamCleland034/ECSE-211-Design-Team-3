@@ -172,7 +172,8 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();
 			// Fetch data
-			double dist = poller.getReading();
+
+			this.dist = poller.getReading();
 			;
 
 			filter_close(dist); // Filter out distances that are too close that's not meant to be

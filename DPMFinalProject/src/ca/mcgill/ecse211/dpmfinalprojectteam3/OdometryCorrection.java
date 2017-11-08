@@ -8,7 +8,6 @@ import lejos.hardware.Sound;
  * errors of the odometer using the light sensor to detect gridlines on the
  * floor
  * 
- * @version 1.0
  */
 public class OdometryCorrection extends Thread {
 
@@ -69,18 +68,20 @@ public class OdometryCorrection extends Thread {
 					gps.corrected = true;
 				} else {
 					if (lightValue[0] < 0.3) {
-						speed = FinalProject.leftMotor.getSpeed();
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
+						speed = FinalProject.leftMotor.getSpeed();
+
 						Sound.beep();
 						checkRightPoller(speed);
 						gps.corrected = true;
 
 					}
 					if (lightValue[1] < 0.3) {
-						speed = FinalProject.rightMotor.getSpeed();
 						FinalProject.rightMotor.stop(true);
 						FinalProject.leftMotor.stop(false);
+						speed = FinalProject.rightMotor.getSpeed();
+
 						Sound.beep();
 						checkLeftPoller(speed);
 						gps.corrected = true;
@@ -148,7 +149,7 @@ public class OdometryCorrection extends Thread {
 	}
 
 	private boolean timedOut(long startTime) {
-		if (System.currentTimeMillis() - startTime > 50)
+		if (System.currentTimeMillis() - startTime > 60)
 			return true;
 		return false;
 	}
@@ -156,7 +157,7 @@ public class OdometryCorrection extends Thread {
 	private void checkLeftPoller(int speed) {
 
 		FinalProject.leftMotor.setSpeed(50);
-		FinalProject.rightMotor.forward();
+		FinalProject.leftMotor.forward();
 		long startTime = System.currentTimeMillis();
 		while (jointPoller.getLeftValue() > 0.3) {
 			if (timedOut(startTime))

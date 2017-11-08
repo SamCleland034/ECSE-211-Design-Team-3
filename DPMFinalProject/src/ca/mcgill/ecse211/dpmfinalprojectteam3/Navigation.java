@@ -4,12 +4,19 @@ import java.util.LinkedList;
 
 import lejos.hardware.Sound;
 
+// TODO: Auto-generated Javadoc
 /***
  * Navigates the robot around using coordinates that get converted into
  * distances based on the length of the tiles. Other features include methods
  * for specific tasks such as avoiding an obstacle and searching for the flag.
+ * The startNav() method in this class will be the method that determines if we
+ * need to transition states based on the the coords our robot just travelled
+ * to. If there is a stage transition, then the stage will be set to whatever
+ * that stage is and the controller will know on the next iteration of the loop
+ * it has to execute the method call for whatever stage we are going to
+ * transition to.
  * 
- * @version 1.0
+ * 
  ***/
 
 public class Navigation {
@@ -17,6 +24,8 @@ public class Navigation {
 	/** The Constant MOTOR_SPEED. Default motor speed */
 	// Create constants
 	private static Avoidance master;
+
+	/** The Constant MOTOR_SPEED. */
 	private static final int MOTOR_SPEED = 225;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
@@ -39,7 +48,9 @@ public class Navigation {
 
 	/** The center offset. */
 	private static double CENTER_OFFSET = 1.95;
-	private double[] searchRegionPath;
+
+	/** The search region path. */
+	private LinkedList<Integer> searchRegionPath;
 	/** The Constant XMax. */
 	// the maximum and minimum x and y values possible
 	private static final double XMax = 3 * SQUARE_LENGTH;
@@ -52,6 +63,8 @@ public class Navigation {
 
 	/** The Constant YMin. */
 	private static final double YMin = -1 * SQUARE_LENGTH;
+
+	/** The Constant THRESHOLD. */
 	private static final int THRESHOLD = 40;
 
 	/** The path. */
@@ -59,11 +72,23 @@ public class Navigation {
 
 	/** The odometer. */
 	private Odometer odometer;
+
+	/** The has flag. */
 	private boolean hasFlag = false;
+
+	/** The poller. */
 	private UltrasonicPoller poller;
+
+	/** The sensor motor. */
 	private SensorRotation sensorMotor;
+
+	/** The colorpoller. */
 	private LightPoller colorpoller;
+
+	/** The oc. */
 	private OdometryCorrection oc;
+
+	/** The corrected. */
 	public boolean corrected = false;
 
 	/** The is navigating. */
@@ -77,13 +102,6 @@ public class Navigation {
 	 *
 	 * @param odometer
 	 *            the odometer
-	 * @param path
-	 *            coordinates that will be passed to this version of the navigation
-	 *            at the start
-	 * @param leftMotor
-	 *            the left motor
-	 * @param rightMotor
-	 *            the right motor
 	 */
 	public Navigation(Odometer odometer) {
 		this.odometer = odometer;
@@ -92,6 +110,12 @@ public class Navigation {
 
 	}
 
+	/**
+	 * Sets the path.
+	 *
+	 * @param coordsList
+	 *            the new path
+	 */
 	public void setPath(LinkedList<Integer> coordsList) {
 		this.path = coordsList;
 	}
@@ -108,6 +132,7 @@ public class Navigation {
 		while (!path.isEmpty()) {
 			coordX = path.removeFirst();
 			coordY = path.removeFirst();
+			oc.on();
 			travelTo(coordX, coordY);
 
 			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY
@@ -183,6 +208,14 @@ public class Navigation {
 
 	}
 
+	/**
+	 * Travel to without avoid.
+	 *
+	 * @param endX
+	 *            the end X
+	 * @param endY
+	 *            the end Y
+	 */
 	public void travelToWithoutAvoid(double endX, double endY) {
 
 		isNavigating = true;
@@ -271,7 +304,6 @@ public class Navigation {
 		// usSensor
 		// data
 		master.on();
-		oc.on();
 		while (!master.inDanger) {// far enough from block
 
 			// update distance from
@@ -410,6 +442,12 @@ public class Navigation {
 		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), false);
 	}
 
+	/**
+	 * Turn to with interrupt.
+	 *
+	 * @param theta
+	 *            the theta
+	 */
 	void turnToWithInterrupt(double theta) {
 		// get current angle and convert to degrees
 		double currentTheta = Math.toDegrees(odometer.getTheta());
@@ -497,34 +535,31 @@ public class Navigation {
 	}
 
 	/**
-	 * Method called once we reach one of the search regions (lower left of red
-	 * region or upper right of green region) Travels the x and y length of the
-	 * search region while simultaneously searching for the correct color block.
-	 * Once it travels the y or x length, it will then turn to the next corner and
-	 * travel to that corner until it finds the correct color block. Once the light
-	 * sensor comes across the correct block, the robot will then beep 3 times and
-	 * then travel to the upper left of the green region or lower right of the red
-	 * region to then figure out where it needs to go next.
-	 * 
-	 * @since 10/29/17
+	 * Method that will be called when we enter the flag search state. The robot
+	 * will perform a sweep of the search region starting at each corner. If the
+	 * ultrasonic sensor detects an object while sweeping, it will stop sweeping and
+	 * travel to that object and sweep again with the small motor to get readings
+	 * for the light sensor. If the light color readings (plural since using RGB
+	 * mode) we will signal that we have found that flag and it will then call
+	 * the @seetravelToAfterFlag() method to bring us to one of the corners of the
+	 * search region depending on where we currently are to then continue our path.
+	 *
 	 * @param correctColor
-	 *            the correct color
-	 * @return true, once it finds the correct flag, keep traversing along the
-	 *         search region until the robot reaches the upper left corner of the
-	 *         green search region or the lower right region of the search region to
-	 *         then continue where it has to go next
+	 *            the correct color the robot will be detecting
+	 * @return true once it finds the flag, will keep running if it doesn't find the
+	 *         flag
+	 * @since 10/29/17
 	 */
 	public boolean flagSearch(int correctColor) {
-		int i = 0;
 		int distance = 0;
 		while (!hasFlag) {
-			turnTo(Math.toDegrees(Math.atan2(searchRegionPath[i] % 8 * FinalProject.TILE_SPACING - odometer.getX(),
-					searchRegionPath[i + 1] % 8 * FinalProject.TILE_SPACING - odometer.getY())));
+			turnTo(Math.toDegrees(Math.atan2(searchRegionPath.get(2) * FinalProject.TILE_SPACING - odometer.getX(),
+					searchRegionPath.get(3) % 8 * FinalProject.TILE_SPACING - odometer.getY())));
 			while (isNavigating())
 				continue;
 			turnToWithInterrupt(
-					Math.toDegrees(Math.atan2(searchRegionPath[i] % 8 * FinalProject.TILE_SPACING - odometer.getX(),
-							searchRegionPath[i + 1] % 8 * FinalProject.TILE_SPACING - odometer.getY())));
+					Math.toDegrees(Math.atan2(searchRegionPath.get(6) * FinalProject.TILE_SPACING - odometer.getX(),
+							searchRegionPath.getLast() * FinalProject.TILE_SPACING - odometer.getY())));
 			while (poller.getReading() > THRESHOLD) {
 				continue;
 			}
@@ -549,12 +584,10 @@ public class Navigation {
 				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
 				while (isNavigating())
 					continue;
-				travelTo(searchRegionPath[(i) % 8], searchRegionPath[(i + 1) % 8]);
-				while (isNavigating())
-					continue;
+				travelToAfterFlag();
 				return true;
 			}
-			FinalProject.usMotor.rotate(-45);
+			FinalProject.usMotor.rotateTo(sensorMotor.reference - 45);
 			while (FinalProject.usMotor.isMoving()) {
 				if (colorpoller.getLightVal() == correctColor) {
 					for (int j = 0; j < 3; j++) {
@@ -569,13 +602,12 @@ public class Navigation {
 					FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
 					while (isNavigating())
 						continue;
-					travelTo(searchRegionPath[(i) % 8], searchRegionPath[(i + 1) % 8]);
-					while (isNavigating())
-						continue;
+					travelToAfterFlag();
 					return true;
+
 				}
 			}
-			FinalProject.usMotor.rotate(90);
+			FinalProject.usMotor.rotateTo(sensorMotor.reference + 45);
 			while (FinalProject.usMotor.isMoving()) {
 				if (colorpoller.getLightVal() == correctColor) {
 					for (int j = 0; j < 3; j++) {
@@ -590,34 +622,56 @@ public class Navigation {
 					FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
 					while (isNavigating())
 						continue;
-					travelTo(searchRegionPath[(i) % 8], searchRegionPath[(i + 1) % 8]);
-					while (isNavigating())
-						continue;
+					travelToAfterFlag();
 					return true;
 				}
 			}
-			i++;
+			searchRegionPath.addLast(searchRegionPath.removeFirst());
+			searchRegionPath.addLast(searchRegionPath.removeFirst());
 		}
 		return false;
 	}
 
 	/**
-	 * Travel in a continuous sequence (in a square/rectangle in this case), ending
-	 * in the same spot unless interupted by flag search, then travel to upper left
-	 * of green search region or lower right of red search region .
-	 * 
-	 * @since 10/29/17
-	 * @param coords,coords
-	 *            that will be traveled continously
-	 * @param whichZone,
-	 *            if in red zone or green zone have to traverse slightly different
+	 * After the robot finds the flag, this method will determine where the robot
+	 * should go next to allow it to be in an ideal position to continue traversing
+	 * the grid.
 	 */
-	public void travelInSequence(double[] coords, boolean whichZone) {
+	public void travelToAfterFlag() {
+		if (FinalProject.greenTeam == 3) {
+			if ((searchRegionPath.getFirst() == FinalProject.URSRRX && searchRegionPath.get(1) == FinalProject.URSRRY)
+					|| (searchRegionPath.getFirst() == FinalProject.URSRRX
+							&& searchRegionPath.get(1) == FinalProject.LLSRRY)) {
+				travelToWithoutAvoid(FinalProject.URSRRX, FinalProject.URSRRY);
+				while (isNavigating())
+					continue;
 
+			} else {
+				travelToWithoutAvoid(FinalProject.LLSRRX, FinalProject.URSRRY);
+				while (isNavigating())
+					continue;
+
+			}
+
+		} else {
+			if ((searchRegionPath.getFirst() == FinalProject.URSRGX && searchRegionPath.get(1) == FinalProject.URSRGY)
+					|| (searchRegionPath.getFirst() == FinalProject.URSRGX
+							&& searchRegionPath.get(1) == FinalProject.LLSRGY)) {
+				travelToWithoutAvoid(FinalProject.URSRGX, FinalProject.LLSRGY);
+				while (isNavigating())
+					continue;
+
+			} else {
+				travelToWithoutAvoid(FinalProject.LLSRGX, FinalProject.LLSRGY);
+				while (isNavigating())
+					continue;
+
+			}
+		}
 	}
 
 	/**
-	 * Checks if is navigating.
+	 * Checks if robot is moving.
 	 *
 	 * @return true, if both of the motors are moving
 	 */
@@ -626,20 +680,19 @@ public class Navigation {
 		return FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving();
 	}
 
+	public void setSearchRegionPath(LinkedList<Integer> coords) {
+		this.searchRegionPath = coords;
+	}
+
 	/**
 	 * Convert distance.
 	 *
 	 * @param radius
-	 *            the radius of the wheels
+	 *            the radius
 	 * @param distance
-	 *            the distance that needs to be traveled
-	 * @return rotations, the number of rotations each wheel has to rotate in order
-	 *         to go that distance
+	 *            the distance
+	 * @return the int
 	 */
-	public void setSearchRegionPath(double... coords) {
-		this.searchRegionPath = coords;
-	}
-
 	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
@@ -660,24 +713,54 @@ public class Navigation {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 
+	/**
+	 * Sets the avoidance.
+	 *
+	 * @param master
+	 *            the new avoidance
+	 */
 	public void setAvoidance(Avoidance master) {
 		this.master = master;
 	}
 
+	/**
+	 * Sets the poller.
+	 *
+	 * @param poller
+	 *            the new poller
+	 */
 	public void setPoller(UltrasonicPoller poller) {
 		this.poller = poller;
 	}
 
+	/**
+	 * Sets the sensor rotation.
+	 *
+	 * @param sensorRotation
+	 *            the new sensor rotation
+	 */
 	public void setSensorRotation(SensorRotation sensorRotation) {
 		this.sensorMotor = sensorRotation;
 
 	}
 
+	/**
+	 * Sets the color provider.
+	 *
+	 * @param colorpoller
+	 *            the new color provider
+	 */
 	public void setColorProvider(LightPoller colorpoller) {
 		this.colorpoller = colorpoller;
 
 	}
 
+	/**
+	 * Sets the odometry correction.
+	 *
+	 * @param oc
+	 *            the new odometry correction
+	 */
 	public void setOdometryCorrection(OdometryCorrection oc) {
 		this.oc = oc;
 	}
