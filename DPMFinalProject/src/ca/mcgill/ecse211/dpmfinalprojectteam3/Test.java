@@ -59,17 +59,29 @@ public class Test {
 		LightPoller leftpoller = new LightPoller(FinalProject.leftSensor, FinalProject.leftProvider);
 		LightPoller rightpoller = new LightPoller(FinalProject.rightSensor, FinalProject.rightProvider);
 		JointLightPoller jointpoller = new JointLightPoller(FinalProject.leftProvider, FinalProject.rightProvider);
-		jointpoller.on();
-		jointpoller.start();
-		leftpoller.start();
-		rightpoller.start();
+		Avoidance master = new Avoidance(gps);
+		LinkedList<Integer> coordsList = new LinkedList<Integer>();
+		FinalProject.odometer.setX(0);
+		FinalProject.odometer.setY(0);
+		coordsList.addLast(0);
+		coordsList.addLast(6);
+		gps.setPath(coordsList);
 		
 		OdometryCorrection oc = new OdometryCorrection(FinalProject.odometer, leftpoller, rightpoller, jointpoller);
 		oc.setNavigation(gps);
 		gps.setOdometryCorrection(oc);
+		gps.setAvoidance(master);
 		jointpoller.on();
+		leftpoller.on();
+		rightpoller.on();
+		jointpoller.start();
+		leftpoller.start();
+		rightpoller.start();
 		oc.on();
-		Navigation.travelTo(0, 6);
+		master.on();
+		//master.start();
+		oc.start();
+		//Navigation.travelTo(0, 6);
 		gps.startNav();
 
 	
