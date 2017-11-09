@@ -4,8 +4,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import java.util.LinkedList;
 
-import lejos.hardware.Button;
-import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -276,15 +274,22 @@ public class FinalProject extends Thread {
 		
 		
 		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
-		/* TEST */gps.setColorProvider(colorpoller);
 		Avoidance master = new Avoidance(gps);
 		LightPoller leftpoller = new LightPoller(leftSensor, leftProvider);
 		LightPoller rightpoller = new LightPoller(rightSensor, rightProvider);
 		JointLightPoller jointpoller = new JointLightPoller(leftProvider, rightProvider);
 		OdometryCorrection oc = new OdometryCorrection(odometer, leftpoller, rightpoller, jointpoller);
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller, jointpoller);
+		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
+		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
+		LocalizationType lt = LocalizationType.FALLINGEDGE;
+		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
+		Controller ctfcontroller = new Controller(master, jointpoller, lightLoc, rightpoller, oc, sensorMotor, usLoc,
+				uspoller, gps);
 		oc.setNavigation(gps);
+		gps.setColorProvider(colorpoller);
 		gps.setOdometryCorrection(oc);
+<<<<<<< HEAD
 		jointpoller.on();
 //		odometryDisplay.start();
 //		odometer.start();
@@ -298,202 +303,105 @@ public class FinalProject extends Thread {
 
 
 		
+=======
+>>>>>>> 15cb09ea8d462d3edae23a527d0582be88969111
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
+		getWiFiInfo(wifi);
+		odometer.start();
+		odometryDisplay.start();
+		if (greenTeam == 3) {
+			LinkedList<Integer> coordsList = new LinkedList<Integer>();
+			LinkedList<Integer> searchList = new LinkedList<Integer>();
+			coordsList.addLast(zipgreenXc);
+			coordsList.addLast(1);
+			coordsList.addLast(zipgreenXc);
+			coordsList.addLast(zipgreenYc);
+			coordsList.addLast(LLSRRX);
+			coordsList.addLast(zipredYc);
+			coordsList.addLast(LLSRRX);
+			coordsList.addLast(LLSRRY);
+			coordsList.addLast(SHLLX);
+			coordsList.addLast(11);
+			coordsList.addLast(SHLLX);
+			coordsList.addLast(SHLLY);
+			coordsList.addLast(SHURX);
+			coordsList.addLast(SHURY);
+			coordsList.addLast(SVLLX);
+			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(1);
+			searchList.addLast(LLSRRX);
+			searchList.addLast(LLSRRY);
+			searchList.addLast(LLSRRX);
+			searchList.addLast(URSRRY);
+			searchList.addLast(URSRRX);
+			searchList.addLast(URSRRY);
+			searchList.addLast(URSRRX);
+			searchList.addLast(LLSRRY);
+			gps.setPath(coordsList);
+			gps.setSearchRegionPath(searchList);
+			// gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY,
+			// URSRRX, LLSRRY);
+		} else {
+			LinkedList<Integer> coordsList = new LinkedList<Integer>();
+			LinkedList<Integer> searchList = new LinkedList<Integer>();
+			/*
+			 * coordsList.addLast(SHLLX); coordsList.addLast((int) (odometer.getY() /
+			 * TILE_SPACING)); coordsList.addLast(SHLLX); coordsList.addLast(SHLLY);
+			 * coordsList.addLast(SHURX); coordsList.addLast(SHURY);
+			 * coordsList.addLast(SVLLX); coordsList.addLast(SVLLY);
+			 * coordsList.addLast(URSRGX); coordsList.addLast((int) (odometer.getY() /
+			 * TILE_SPACING)); coordsList.addLast(URSRGX); coordsList.addLast(URSRGY);
+			 * coordsList.addLast(zipgreenXc); coordsList.addLast((int) (odometer.getY() /
+			 * TILE_SPACING)); coordsList.addLast(zipgreenYc); coordsList.addLast(1);
+			 * coordsList.addLast(11);
+			 */
+			coordsList.addLast(zipgreenXc);
+			coordsList.addLast(1);
+			coordsList.addLast(zipgreenXc);
+			coordsList.addLast(zipgreenYc);
+			coordsList.addLast(LLSRRX);
+			coordsList.addLast(zipredYc);
+			coordsList.addLast(LLSRRX);
+			coordsList.addLast(LLSRRY);
+			coordsList.addLast(SHLLX);
+			coordsList.addLast(11);
+			coordsList.addLast(SHLLX);
+			coordsList.addLast(SHLLY);
+			coordsList.addLast(SHURX);
+			coordsList.addLast(SHURY);
+			coordsList.addLast(SVLLX);
+			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(SVLLY);
+			coordsList.addLast(11);
+			coordsList.addLast(1);
+			searchList.addLast(URSRGX);
+			searchList.addLast(URSRGY);
+			searchList.addLast(URSRGX);
+			searchList.addLast(LLSRGY);
+			searchList.addLast(LLSRGX);
+			searchList.addLast(LLSRGY);
+			searchList.addLast(LLSRGX);
+			searchList.addLast(URSRGY);
+			gps.setPath(coordsList);
+			gps.setSearchRegionPath(searchList);
+			// gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY,
+			// LLSRGX, URSRGY);
+		}
+
+		ctfcontroller.startControlFlow();
+	}
+
+	private static void getWiFiInfo(WiFi wifi) {
 		wifi.getValues();
 		while (stage == Stage.WIFI) {
 			continue;
 		}
 
-		// instantiate threads controlling the robot
-
-		// TST //Navigation gps = new Navigation(odometer);
-		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
-
-		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
-		if (greenTeam == 3) {
-			LinkedList<Integer> coordsList = new LinkedList<Integer>();
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(zipgreenYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(LLSRRY);
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(SHLLY);
-			coordsList.addLast(SHURX);
-			coordsList.addLast(SHURY);
-			coordsList.addLast(SVLLX);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(11);
-			coordsList.addLast(1);
-			gps.setPath(coordsList);
-			gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY, URSRRX, LLSRRY);
-		} else {
-			LinkedList<Integer> coordsList = new LinkedList<Integer>();
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(SHLLY);
-			coordsList.addLast(SHURX);
-			coordsList.addLast(SHURY);
-			coordsList.addLast(SVLLX);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(URSRGX);
-			coordsList.addLast(URSRGY);
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(zipgreenYc);
-			coordsList.addLast(1);
-			coordsList.addLast(11);
-
-			gps.setPath(coordsList);
-			gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY, LLSRGX, URSRGY);
-		}
-		stage = Stage.STARTINGLOCALIZATION;
-		LocalizationType lt = LocalizationType.FALLINGEDGE;
-		uspoller.on();
-		uspoller.start();
-		odometer.start();
-		odometryDisplay.start();
-		master.start();
-		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
-
-		usLoc.doLocalization();
-		while (usLoc.localizing)
-			continue;
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
-		uspoller.off();
-		jointpoller.on();
-		jointpoller.start();
-		lightLoc.startLightLOC4();
-
-		Button.waitForAnyPress();
-		if (greenTeam == 3) {
-			odometer.setX(11 * TILE_SPACING);
-			odometer.setY(TILE_SPACING);
-			odometer.setTheta(3 * Math.PI / 2);
-		} else {
-			odometer.setX(TILE_SPACING);
-			odometer.setY(11 * TILE_SPACING);
-			odometer.setTheta(Math.PI / 2);
-		}
-		stage = Stage.NAVIGATION;
-		sensorMotor.start();
-		leftpoller.start();
-		rightpoller.start();
-		master.start();
-		while (true) {
-			if (stage == Stage.NAVIGATION) {
-
-				navigating(gps, sensorMotor, leftpoller, rightpoller);
-			} else if (stage == Stage.FLAGSEARCH) {
-				flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller, jointpoller);
-				stage = Stage.NAVIGATION;
-			} else if (stage == Stage.ZIPLOCALIZATION) {
-				ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor, colorpoller, jointpoller);
-				stage = Stage.NAVIGATION;
-			} else if (stage == Stage.FINISHED) {
-				Sound.beepSequenceUp();
-				System.exit(0);
-			}
-		}
-
-		/*
-		 * while (stage != Stage.NAVIGATION) { if (stage == Stage.FLAGSEARCH) {
-		 * flagsearch(gps, leftpoller, rightpoller, master, sensorMotor, colorpoller);
-		 * stage = Stage.NAVIGATION; } else if (stage == Stage.ZIPLOCALIZATION) {
-		 * ziplocalization(gps, leftpoller, rightpoller, master, lightLoc, sensorMotor,
-		 * colorpoller); stage = Stage.NAVIGATION; } } while (stage != Stage.FINISHED) {
-		 * sensorMotor.on(); leftpoller.on(); rightpoller.on(); navigating(gps); } while
-		 * (Button.waitForAnyPress() != Button.ID_ESCAPE) ; System.exit(0);
-		 */}
-
-	/**
-	 * This method will be called when the robot is in the flagsearch state after
-	 * reaching one of the search region corners. We will then turn off the line
-	 * detector threads such as odometry correction and left poller and turn on the
-	 * ultrasonic related threads except avoidance.
-	 *
-	 * @param gps
-	 *            the gps
-	 * @param leftpoller
-	 *            the leftpoller
-	 * @param rightpoller
-	 *            the rightpoller
-	 * @param master
-	 *            the master
-	 * @param sensorMotor
-	 *            the sensor motor
-	 * @param colorpoller
-	 *            the colorpoller
-	 */
-	public static void flagsearch(Navigation gps, LightPoller leftpoller, LightPoller rightpoller, Avoidance master,
-			SensorRotation sensorMotor, LightPoller colorpoller, JointLightPoller jointpoller) {
-		boolean foundFlag = false;
-		leftpoller.off();
-		rightpoller.off();
-		jointpoller.off();
-		master.off();
-		sensorMotor.off();
-		colorpoller.on();
-		colorpoller.start();
-		if (greenTeam == 3)
-			foundFlag = gps.flagSearch(greenColor);
-		else
-			foundFlag = gps.flagSearch(redColor);
-		if (foundFlag)
-			return;
 	}
 
-	/**
-	 * This robot will be called if the robot switches into the ziplocalization
-	 * stage, which will then turn off all the threads that we don't want on for the
-	 * zip traversal such as odometry correction, avoidance and ultrasonic poller.
-	 *
-	 * @param gps
-	 * @param leftpoller
-	 * @param rightpoller
-	 * @param master
-	 * @param loc
-	 * @param sensorMotor
-	 * @param colorpoller
-	 */
-	public static void ziplocalization(Navigation gps, LightPoller leftpoller, LightPoller rightpoller,
-			Avoidance master, LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller,
-			JointLightPoller jointlightpoller) {
-		jointlightpoller.on();
-		master.off();
-		sensorMotor.off();
-		colorpoller.off();
-		loc.lightLocWithError();
-		odometer.setX(zipgreenXc);
-		odometer.setY(zipgreenYc);
-		gps.travelTo(zipgreenX, zipgreenY);
-		gps.zipTraversal();
-		odometer.setX(zipredX);
-		odometer.setY(zipredY);
-		gps.travelTo(zipredXc, zipredYc);
-		loc.lightLocWithError();
-		odometer.setX(zipredXc);
-		odometer.setY(zipredYc);
-		stage = Stage.NAVIGATION;
-	}
-
-	/**
-	 * This method will be called if the robot is in the navigation phase of the
-	 * project. Continuously cycles through the coordinates passed in through the
-	 * wifi class. Turns on the threads that will be used during this stage
-	 *
-	 * @param gps
-	 * @param motor
-	 * @param leftPoller
-	 * @param rightPoller
-	 */
-	public static void navigating(Navigation gps, SensorRotation motor, LightPoller leftPoller,
-			LightPoller rightPoller) {
-		motor.on();
-		leftPoller.on();
-		rightPoller.on();
-		stage = Stage.NAVIGATION;
-		gps.startNav();
-	}
 }

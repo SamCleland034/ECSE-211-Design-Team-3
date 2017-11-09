@@ -172,6 +172,10 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();
 			// Fetch data
+<<<<<<< HEAD
+=======
+
+>>>>>>> 15cb09ea8d462d3edae23a527d0582be88969111
 			this.dist = poller.getReading();
 			;
 

@@ -91,6 +91,8 @@ public class Avoidance extends Thread {
 			} else if (avoiding && inDanger) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
+				FinalProject.leftMotor.rotate(45, true);
+				FinalProject.rightMotor.rotate(45, false);
 				sensorMotor.off();
 				sleepFor(0.5);
 				while (FinalProject.usMotor.isMoving())
