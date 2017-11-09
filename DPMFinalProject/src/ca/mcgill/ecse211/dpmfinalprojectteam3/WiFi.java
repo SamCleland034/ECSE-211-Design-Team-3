@@ -3,7 +3,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
-import lejos.hardware.Button;
 
 /**
  * Example class using WifiConnection to communicate with a server and receive
@@ -36,7 +35,7 @@ import lejos.hardware.Button;
  */
 public class WiFi {
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.42";
+	private static final String SERVER_IP = "192.168.2.21";
 	private static final int TEAM_NUMBER = 3;
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
@@ -47,7 +46,7 @@ public class WiFi {
 		System.out.println("Running..");
 
 		// Initialize WifiConnection class
-		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);
+		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, !ENABLE_DEBUG_WIFI_PRINT);
 
 		// Connect to server and get the data, catching any errors that might occur
 		try {
@@ -67,7 +66,7 @@ public class WiFi {
 			Map data = conn.getData();
 
 			// Example 1: Print out all received data
-			System.out.println("Map:\n" + data);
+			// System.out.println("Map:\n" + data);
 			FinalProject.SHLLX = ((Long) data.get("SH_LL_x")).intValue();
 			FinalProject.SHLLY = ((Long) data.get("SH_LL_y")).intValue();
 			FinalProject.LLSRGX = ((Long) data.get("Red_LL_x")).intValue();
@@ -114,7 +113,6 @@ public class WiFi {
 			System.err.println("Error: " + e.getMessage());
 		}
 		// Wait until user decides to end program
-		Button.waitForAnyPress();
-		FinalProject.stage = Stage.IDLE;
+
 	}
 }

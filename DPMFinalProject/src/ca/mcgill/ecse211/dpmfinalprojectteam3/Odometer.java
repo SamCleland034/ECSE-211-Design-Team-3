@@ -45,7 +45,7 @@ public class Odometer extends Thread {
 	private EV3LargeRegulatedMotor rightMotor;
 
 	/** The Constant ODOMETER_PERIOD. */
-	private static final long ODOMETER_PERIOD = 22; /*
+	private static final long ODOMETER_PERIOD = 21; /*
 													 * odometer update period, in ms
 													 */
 
@@ -111,14 +111,19 @@ public class Odometer extends Thread {
 				 * values of x, y, and theta in this block. Do not perform complex math
 				 */
 
-				setX(getX() + dX); // update estimates of X and Y position
-				setY(getY() + dY);
-				setTheta((getTheta() + deltaT));
+				// setX(getX() + dX);
+				x = getX() + dX;// update estimates of X and Y position
+				// setY(getY() + dY);
+				y = getY() + dY;
+				theta = getTheta() + deltaT;
+				// setTheta((getTheta() + deltaT));
 
 				if (getTheta() < 0) { // Keep theta (in radians) between 0 and 2pi
-					setTheta(getTheta() + 2 * Math.PI);
+					// setTheta(getTheta() + 2 * Math.PI);
+					theta = getTheta() + 2 * Math.PI;
 				} else if (getTheta() > 2 * Math.PI) {
-					setTheta(getTheta() - 2 * Math.PI);
+					// setTheta(getTheta() - 2 * Math.PI);
+					theta = getTheta() - 2 * Math.PI;
 				}
 
 			}

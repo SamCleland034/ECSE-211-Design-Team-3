@@ -7,7 +7,7 @@ import lejos.hardware.Sound;
  * This class is used in the start to approximate a suitable heading to then
  * perform light localization using the light sensor.
  * 
- * @version 1.0
+ * 
  */
 public class UltrasonicLocalizer {
 
@@ -54,6 +54,8 @@ public class UltrasonicLocalizer {
 	/** The filter control. */
 	private int filterControl;
 
+	public boolean localizing;
+
 	/**
 	 * Instantiates a new ultrasonic localizer.
 	 *
@@ -76,6 +78,7 @@ public class UltrasonicLocalizer {
 		this.localizationType = lt;
 		this.navigation = navigation;
 		this.poller = poller;
+		this.localizing = true;
 
 	}
 
@@ -102,7 +105,8 @@ public class UltrasonicLocalizer {
 
 		double FIRST_ANGLE = 0, SECOND_ANGLE = 0; // To store two angles when it changes from seeing the wall to facing
 		// away or vice versa
-
+		FinalProject.leftMotor.setSpeed(200);
+		FinalProject.rightMotor.setSpeed(200);
 		if (localizationType == LocalizationType.RISINGEDGE) { // Starts by facing the wall
 			navigation.turn(360); // Turns
 			// Get data from ultrasonic sensor
@@ -163,11 +167,13 @@ public class UltrasonicLocalizer {
 		// Not facing the wall
 		// The robot should turn until it sees a wall
 		else if (localizationType == LocalizationType.FALLINGEDGE) {
-
+			FinalProject.leftMotor.setSpeed(150);
+			FinalProject.rightMotor.setSpeed(150);
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();
 			// Fetch data
-			double dist = poller.getReading();
+
+			this.dist = poller.getReading();
 			;
 
 			filter_close(dist); // Filter out distances that are too close that's not meant to be
@@ -193,7 +199,7 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.forward();
 			try {
-				Thread.sleep(2500);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// there is nothing to be done here because it is not expected
 				// that
@@ -223,7 +229,7 @@ public class UltrasonicLocalizer {
 			updateAngle(FIRST_ANGLE, SECOND_ANGLE); // turn to face (0 axis)
 
 		}
-
+		this.localizing = false;
 	}
 
 	/**
@@ -248,7 +254,7 @@ public class UltrasonicLocalizer {
 		}
 
 		if (localizationType == LocalizationType.FALLINGEDGE) {
-			UPDATED_ANGLE = UPDATED_ANGLE + 2; // This value is found experimentally
+			UPDATED_ANGLE = UPDATED_ANGLE + 12; // This value is found experimentally
 			navigation.turn(UPDATED_ANGLE);
 		}
 
