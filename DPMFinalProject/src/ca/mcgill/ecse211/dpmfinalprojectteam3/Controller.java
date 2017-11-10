@@ -89,22 +89,52 @@ public class Controller {
 	}
 
 	/**
-	 * Start control flow.
+	 * Starts the state machine logic that we display in our state machine model of
+	 * the capture the flag game. Will start from the startinglocalization state
+	 * initally.
+	 * 
 	 */
 	public void startControlFlow() {
 		FinalProject.stage = Stage.STARTINGLOCALIZATION;
 		startingLocalization(uspoller, jointpoller, gps, usLoc, lightLoc);
-		sleepFor(2);
+		waitForLightLOC(lightLoc);
 		if (FinalProject.greenTeam == 3) {
-			FinalProject.odometer.setX(11 * FinalProject.TILE_SPACING);
-			FinalProject.odometer.setY(FinalProject.TILE_SPACING);
-			FinalProject.odometer.setTheta(3 * Math.PI / 2);
+			if (FinalProject.greenCorner == 1) {
+				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(0);
+			} else if (FinalProject.greenCorner == 2) {
+				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(3 * Math.PI / 2);
+			} else if (FinalProject.greenCorner == 2) {
+				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(Math.PI);
+			} else {
+				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(Math.PI / 2);
+			}
 		} else {
-			FinalProject.odometer.setX(FinalProject.TILE_SPACING);
-			FinalProject.odometer.setY(11 * FinalProject.TILE_SPACING);
-			FinalProject.odometer.setTheta(Math.PI / 2);
+			if (FinalProject.redCorner == 1) {
+				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(0);
+			} else if (FinalProject.redCorner == 2) {
+				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(3 * Math.PI / 2);
+			} else if (FinalProject.redCorner == 2) {
+				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(Math.PI);
+			} else {
+				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setTheta(Math.PI / 2);
+			}
 		}
-		FinalProject.stage = Stage.NAVIGATION;
 		FinalProject.stage = Stage.NAVIGATION;
 		sensormotor.start();
 		oc.start();
@@ -115,10 +145,11 @@ public class Controller {
 			if (FinalProject.stage == Stage.NAVIGATION) {
 				navigating(gps, sensormotor, colorpoller, colorpoller, jointpoller, oc, uspoller, colorpoller);
 			} else if (FinalProject.stage == Stage.FLAGSEARCH) {
+				System.exit(0);
 				flagsearch(gps, master, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
-			} else if (FinalProject.stage == Stage.ZIPLOCALIZATION) {
-				ziplocalization(gps, colorpoller, colorpoller, master, lightLoc, sensormotor, colorpoller, jointpoller);
+			} else if (FinalProject.stage == Stage.ZIPTRAVERSAL) {
+				ziptraversal(gps, colorpoller, colorpoller, master, lightLoc, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {
 				Sound.beepSequenceUp();
@@ -127,11 +158,20 @@ public class Controller {
 		}
 	}
 
+	private static void waitForLightLOC(LightLocalizer lightLoc) {
+		while (lightLoc.localizing)
+			continue;
+		sleepFor(2);
+
+	}
+
 	/**
-	 * Sleep for.
+	 * Sleep for period of time, created this method because sleep between
+	 * transitions of threads very often to makes sure all the actions are smoothly
+	 * transitioned between.
 	 *
 	 * @param i
-	 *            the i
+	 *            the amount we want to sleep for (in seconds)
 	 */
 	private static void sleepFor(int i) {
 		try {
@@ -161,16 +201,11 @@ public class Controller {
 		uspoller.start();
 		jointpoller.off();
 		usLoc.doLocalization();
-		while (usLoc.localizing)
-			continue;
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
 		uspoller.off();
 		jointpoller.on();
 		jointpoller.start();
 		lightLoc.startLightLOC4();
+		waitForLightLOC(lightLoc);
 
 	}
 
@@ -193,7 +228,6 @@ public class Controller {
 	 */
 	public static void flagsearch(Navigation gps, Avoidance master, SensorRotation sensorMotor, LightPoller colorpoller,
 			JointLightPoller jointpoller) {
-		boolean foundFlag = false;
 		// leftpoller.off();
 		// rightpoller.off();
 		jointpoller.off();
@@ -202,15 +236,14 @@ public class Controller {
 		colorpoller.on();
 		colorpoller.start();
 		if (FinalProject.greenTeam == 3)
-			foundFlag = gps.flagSearch(FinalProject.greenColor);
+			gps.flagSearch(FinalProject.greenColor);
 		else
-			foundFlag = gps.flagSearch(FinalProject.redColor);
-		if (foundFlag)
-			return;
+			gps.flagSearch(FinalProject.redColor);
+
 	}
 
 	/**
-	 * This robot will be called if the robot switches into the ziplocalization
+	 * This robot will be called if the robot switches into the ziptraversal
 	 * FinalProject.stage, which will then turn off all the threads that we don't
 	 * want on for the zip traversal such as odometry correction, avoidance and
 	 * ultrasonic poller.
@@ -232,24 +265,46 @@ public class Controller {
 	 * @param jointlightpoller
 	 *            the jointlightpoller
 	 */
-	public static void ziplocalization(Navigation gps, LightPoller leftpoller, LightPoller rightpoller,
-			Avoidance master, LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller,
+	private static void ziptraversal(Navigation gps, LightPoller leftpoller, LightPoller rightpoller, Avoidance master,
+			LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller,
 			JointLightPoller jointlightpoller) {
 		jointlightpoller.on();
 		master.off();
 		sensorMotor.off();
 		colorpoller.off();
-		loc.lightLocWithError();
-		FinalProject.odometer.setX(FinalProject.zipgreenXc);
-		FinalProject.odometer.setY(FinalProject.zipgreenYc);
-		gps.travelTo(FinalProject.zipgreenX, FinalProject.zipgreenY);
+		gps.turnTo(0);
+		while (Navigation.isNavigating())
+			continue;
+		sleepFor(2);
+		loc.startLightLOC4();
+		waitForLightLOC(loc);
+		jointlightpoller.off();
+		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipgreenXc);
+		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipgreenYc);
+		gps.travelToWithoutAvoid(FinalProject.zipgreenX, FinalProject.zipgreenY);
+		while (Navigation.isNavigating())
+			continue;
+		sleepFor(1);
 		gps.zipTraversal();
-		FinalProject.odometer.setX(FinalProject.zipredX);
-		FinalProject.odometer.setY(FinalProject.zipredY);
-		gps.travelTo(FinalProject.zipredXc, FinalProject.zipredYc);
-		loc.lightLocWithError();
-		FinalProject.odometer.setX(FinalProject.zipredXc);
-		FinalProject.odometer.setY(FinalProject.zipredYc);
+		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipredX);
+		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipredY);
+		if (FinalProject.odometer.getTheta() <= Math.PI / 4)
+			gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
+		else
+			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY + 1);
+		while (Navigation.isNavigating())
+			continue;
+		sleepFor(2);
+		gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
+		gps.turnTo(0);
+		while (Navigation.isNavigating())
+			continue;
+		jointlightpoller.on();
+		loc.startLightLOC4();
+		waitForLightLOC(loc);
+		FinalProject.odometer.setX(FinalProject.TILE_SPACING * (FinalProject.zipredX + 1));
+		FinalProject.odometer.setY(FinalProject.TILE_SPACING * (FinalProject.zipredY + 1));
+		FinalProject.odometer.setTheta(0);
 		FinalProject.stage = Stage.NAVIGATION;
 	}
 
@@ -284,7 +339,6 @@ public class Controller {
 		// leftPoller.on();
 		// rightPoller.on();
 		jointpoller.on();
-		oc.on();
 		FinalProject.stage = Stage.NAVIGATION;
 		gps.startNav();
 	}

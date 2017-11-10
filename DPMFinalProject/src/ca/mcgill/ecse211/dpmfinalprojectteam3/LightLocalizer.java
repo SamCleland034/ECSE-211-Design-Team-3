@@ -70,6 +70,8 @@ public class LightLocalizer {
 
 	/** The joint poller. */
 	private JointLightPoller jointPoller;
+
+	public boolean localizing;
 	// assign port to light sensor
 
 	/**
@@ -108,6 +110,7 @@ public class LightLocalizer {
 		odometer.setTheta(0);
 		// initialize color sensor
 		Sound.beepSequenceUp();
+		localizing = true;
 
 		// Initialize theta, it will be corrected
 
@@ -163,7 +166,7 @@ public class LightLocalizer {
 		}
 
 		// once the sensor sees the black line, drive 25 cm backwards
-		navigation.driveWithoutAvoid(-25);
+		// navigation.driveWithoutAvoid(-25);
 
 		navigation.turnTo(90); // turn to 90 degrees
 
@@ -202,11 +205,10 @@ public class LightLocalizer {
 				Sound.beep();
 				int speed = FinalProject.leftMotor.getSpeed();
 				checkLeftPoller2(speed);
-				FinalProject.rightMotor.stop(false);
+				FinalProject.leftMotor.stop(false);
 				Sound.beep();
 				odometer.setTheta(Math.PI / 2);
 				odometer.setX(FinalProject.TILE_SPACING + SENSOR_OFFSET);
-
 				break;
 			}
 
@@ -290,8 +292,11 @@ public class LightLocalizer {
 		// travel to the 0,0 point and turn to 0 degrees
 		navigation.travelToWithoutAvoid(1, 1);
 		navigation.turnTo(0);
+		while (navigation.isNavigating())
+			continue;
 		// navigation.turnTo(deltaTheta);
 		Sound.playNote(Sound.XYLOPHONE, 500, 500);
+		localizing = false;
 	}
 
 	/**
@@ -753,6 +758,7 @@ public class LightLocalizer {
 	 * @version outdated
 	 */
 	public void startLightLOC() {
+
 		long correctionStart, correctionEnd;
 		float[] leftsample = new float[1];
 		float[] rightsample = new float[1];

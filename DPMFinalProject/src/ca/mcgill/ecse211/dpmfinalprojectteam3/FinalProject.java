@@ -4,6 +4,7 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import java.util.LinkedList;
 
+import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -91,7 +92,10 @@ import lejos.robotics.SampleProvider;
  * on how the the robot changes states.
  * 
  * @author Sam Cleland, Yiming Wu, Charles Brana
- * @version 2.0: Code estimation: 1600 lines of code(lines meaning number of
+ * @version 2.1: Changes from 2.0, added controller class to display the flow
+ *          from different stages more clearly instead of doing it directly in
+ *          the main method, implemented odometry correction while navigating
+ *          Code estimation: 1600 lines of code(lines meaning number of
  *          semicolons).
  */
 public class FinalProject extends Thread {
@@ -252,6 +256,10 @@ public class FinalProject extends Thread {
 	/** The color provider, used for detecting the colors of blocks. */
 	static SampleProvider colorProvider = colorSensor.getRGBMode();
 
+	public static int startingY;
+
+	public static int startingX;
+
 	/**
 	 * The main method.
 	 *
@@ -259,6 +267,7 @@ public class FinalProject extends Thread {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		// INITALIZE COMPONENTS
 		Navigation gps = new Navigation(odometer);
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
@@ -278,93 +287,104 @@ public class FinalProject extends Thread {
 		oc.setNavigation(gps);
 		gps.setColorProvider(colorpoller);
 		gps.setOdometryCorrection(oc);
+		gps.setAvoidance(master);
+		/*
+		 * Getting info from wifi, if you want to test something individually, such as
+		 * navigation or odometry correction, test before this comment (but after the
+		 * gps.setOdometryCorrection(oc), don't change anything below. Don't get rid of
+		 * this button.waitForAnyPress() below if you are testing
+		 */
+		Button.waitForAnyPress();
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
 		getWiFiInfo(wifi);
 		odometer.start();
 		odometryDisplay.start();
 		if (greenTeam == 3) {
-			LinkedList<Integer> coordsList = new LinkedList<Integer>();
-			LinkedList<Integer> searchList = new LinkedList<Integer>();
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(1);
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(zipgreenYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(zipredYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(LLSRRY);
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(11);
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(SHLLY);
-			coordsList.addLast(SHURX);
-			coordsList.addLast(SHURY);
-			coordsList.addLast(SVLLX);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(11);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(11);
-			coordsList.addLast(1);
-			searchList.addLast(LLSRRX);
-			searchList.addLast(LLSRRY);
-			searchList.addLast(LLSRRX);
-			searchList.addLast(URSRRY);
-			searchList.addLast(URSRRX);
-			searchList.addLast(URSRRY);
-			searchList.addLast(URSRRX);
-			searchList.addLast(LLSRRY);
-			gps.setPath(coordsList);
-			gps.setSearchRegionPath(searchList);
-			// gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY,
-			// URSRRX, LLSRRY);
+			if (greenCorner == 1) {
+				startingX = 1;
+				startingY = 1;
+			} else if (greenCorner == 2) {
+				startingX = 7;
+				startingY = 1;
+			} else if (greenCorner == 3) {
+				startingX = 7;
+				startingY = 7;
+			} else {
+				startingX = 1;
+				startingY = 7;
+			}
 		} else {
-			LinkedList<Integer> coordsList = new LinkedList<Integer>();
-			LinkedList<Integer> searchList = new LinkedList<Integer>();
-			/*
-			 * coordsList.addLast(SHLLX); coordsList.addLast((int) (odometer.getY() /
-			 * TILE_SPACING)); coordsList.addLast(SHLLX); coordsList.addLast(SHLLY);
-			 * coordsList.addLast(SHURX); coordsList.addLast(SHURY);
-			 * coordsList.addLast(SVLLX); coordsList.addLast(SVLLY);
-			 * coordsList.addLast(URSRGX); coordsList.addLast((int) (odometer.getY() /
-			 * TILE_SPACING)); coordsList.addLast(URSRGX); coordsList.addLast(URSRGY);
-			 * coordsList.addLast(zipgreenXc); coordsList.addLast((int) (odometer.getY() /
-			 * TILE_SPACING)); coordsList.addLast(zipgreenYc); coordsList.addLast(1);
-			 * coordsList.addLast(11);
-			 */
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(1);
-			coordsList.addLast(zipgreenXc);
-			coordsList.addLast(zipgreenYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(zipredYc);
-			coordsList.addLast(LLSRRX);
-			coordsList.addLast(LLSRRY);
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(11);
-			coordsList.addLast(SHLLX);
-			coordsList.addLast(SHLLY);
-			coordsList.addLast(SHURX);
-			coordsList.addLast(SHURY);
-			coordsList.addLast(SVLLX);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(11);
-			coordsList.addLast(SVLLY);
-			coordsList.addLast(11);
-			coordsList.addLast(1);
-			searchList.addLast(URSRGX);
-			searchList.addLast(URSRGY);
-			searchList.addLast(URSRGX);
-			searchList.addLast(LLSRGY);
-			searchList.addLast(LLSRGX);
-			searchList.addLast(LLSRGY);
-			searchList.addLast(LLSRGX);
-			searchList.addLast(URSRGY);
-			gps.setPath(coordsList);
-			gps.setSearchRegionPath(searchList);
-			// gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY,
-			// LLSRGX, URSRGY);
+			if (redCorner == 1) {
+				startingX = 1;
+				startingY = 1;
+			} else if (redCorner == 2) {
+				startingX = 7;
+				startingY = 1;
+			} else if (redCorner == 3) {
+				startingX = 7;
+				startingY = 7;
+			} else {
+				startingX = 1;
+				startingY = 7;
+			}
 		}
+
+		LinkedList<Integer> coordsList = new LinkedList<Integer>();
+		coordsList.add(zipgreenXc);
+		coordsList.add(startingY);
+		coordsList.add(zipgreenXc);
+		coordsList.add(zipgreenYc);
+		coordsList.add(LLSRRX);
+		coordsList.add(zipredYc);
+		coordsList.add(LLSRRX);
+		coordsList.add(LLSRRY);
+		gps.setPath(coordsList);
+
+		/*
+		 * if (greenTeam == 3) { LinkedList<Integer> coordsList = new
+		 * LinkedList<Integer>(); LinkedList<Integer> searchList = new
+		 * LinkedList<Integer>(); coordsList.add(startingX); coordsList.add(zipgreenYc);
+		 * coordsList.add(zipgreenXc); coordsList.add(zipgreenYc);
+		 * coordsList.add(LLSRRX); coordsList.add(zipredYc); coordsList.add(LLSRRX);
+		 * coordsList.add(LLSRRY); coordsList.add(SHLLX); coordsList.add(11);
+		 * coordsList.add(SHLLX); coordsList.add(SHLLY); coordsList.add(SHURX);
+		 * coordsList.add(SHURY); coordsList.add(SVLLX); coordsList.add(SVLLY);
+		 * coordsList.add(startingX); coordsList.add(SVLLY); coordsList.add(startingX);
+		 * coordsList.add(startingY); searchList.add(LLSRRX); searchList.add(LLSRRY);
+		 * searchList.add(LLSRRX); searchList.add(URSRRY); searchList.add(URSRRX);
+		 * searchList.add(URSRRY); searchList.add(URSRRX); searchList.add(LLSRRY);
+		 * gps.setPath(coordsList); gps.setSearchRegionPath(searchList); //
+		 * gps.setSearchRegionPath(LLSRRX, LLSRRY, LLSRRX, URSRRY, URSRRX, URSRRY, //
+		 * URSRRX, LLSRRY); } else {
+		 */
+		// LinkedList<Integer> coordsList = new LinkedList<Integer>();
+		// LinkedList<Integer> searchList = new LinkedList<Integer>();
+		/*
+		 * coordsList.add(SHLLX); coordsList.add((int) (odometer.getY() /
+		 * TILE_SPACING)); coordsList.add(SHLLX); coordsList.add(SHLLY);
+		 * coordsList.add(SHURX); coordsList.add(SHURY); coordsList.add(SVLLX);
+		 * coordsList.add(SVLLY); coordsList.add(URSRGX); coordsList.add((int)
+		 * (odometer.getY() / TILE_SPACING)); coordsList.add(URSRGX);
+		 * coordsList.add(URSRGY); coordsList.add(zipgreenXc); coordsList.add((int)
+		 * (odometer.getY() / TILE_SPACING)); coordsList.add(zipgreenYc);
+		 * coordsList.add(1); coordsList.add(11);
+		 */
+		/*
+		 * coordsList.add(startingX); coordsList.add(zipgreenYc);
+		 * coordsList.add(zipgreenXc); coordsList.add(zipgreenYc);
+		 * coordsList.add(LLSRRX); coordsList.add(zipredYc); coordsList.add(LLSRRX);
+		 * coordsList.add(LLSRRY); coordsList.add(SHLLX); coordsList.add(11);
+		 * coordsList.add(SHLLX); coordsList.add(SHLLY); coordsList.add(SHURX);
+		 * coordsList.add(SHURY); coordsList.add(SVLLX); coordsList.add(SVLLY);
+		 * coordsList.add(startingX); coordsList.add(SVLLY); coordsList.add(startingX);
+		 * coordsList.add(startingY); searchList.add(URSRGX); searchList.add(URSRGY);
+		 * searchList.add(URSRGX); searchList.add(LLSRGY); searchList.add(LLSRGX);
+		 * searchList.add(LLSRGY); searchList.add(LLSRGX); searchList.add(URSRGY);
+		 * gps.setPath(coordsList); gps.setSearchRegionPath(searchList); //
+		 * gps.setSearchRegionPath(URSRGX, URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY, //
+		 * LLSRGX, URSRGY); }
+		 */
 
 		ctfcontroller.startControlFlow();
 	}

@@ -26,7 +26,7 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	private static final int MOTOR_SPEED = 225;
+	public static final int MOTOR_SPEED = 225;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 150;
@@ -48,6 +48,8 @@ public class Navigation {
 
 	/** The center offset. */
 	private static double CENTER_OFFSET = 1.95;
+	public static double RIGHT_OFFSET = 1.009;
+	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
 
 	/** The search region path. */
 	private LinkedList<Integer> searchRegionPath;
@@ -66,6 +68,8 @@ public class Navigation {
 
 	/** The Constant THRESHOLD. */
 	private static final int THRESHOLD = 40;
+
+	private static final long SAMPLING_PERIOD = 10;
 
 	/** The path. */
 	private static LinkedList<Integer> path; // For demo coordinates
@@ -90,6 +94,8 @@ public class Navigation {
 
 	/** The corrected. */
 	public boolean corrected = false;
+
+	private boolean avoided;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -132,7 +138,7 @@ public class Navigation {
 		while (!path.isEmpty()) {
 			coordX = path.removeFirst();
 			coordY = path.removeFirst();
-			oc.on();
+			avoided = false;
 			travelTo(coordX, coordY);
 
 			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY
@@ -140,8 +146,8 @@ public class Navigation {
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
 			} else if (coordX == FinalProject.zipgreenXc && coordY == FinalProject.zipgreenYc
-					&& FinalProject.stage != Stage.ZIPLOCALIZATION) {
-				FinalProject.stage = Stage.ZIPLOCALIZATION;
+					&& FinalProject.stage != Stage.ZIPTRAVERSAL) {
+				FinalProject.stage = Stage.ZIPTRAVERSAL;
 				break;
 			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY
 					&& FinalProject.stage != Stage.FLAGSEARCH) {
@@ -269,14 +275,15 @@ public class Navigation {
 	 */
 	public void driveWithoutAvoid(double distanceToTravel) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
+
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
 				true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
-				false);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+				(distanceToTravel + CENTER_OFFSET) * (Navigation.RIGHT_OFFSET)), false);
 
 	}
 
@@ -293,33 +300,45 @@ public class Navigation {
 	// this method makes the robot drive a certain distance
 	public void drive(double distanceToTravel, double endX, double endY) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
-
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+				(distanceToTravel * RIGHT_OFFSET) * (Navigation.RIGHT_OFFSET)), true);
 
 		// fetch
 		// usSensor
 		// data
+		if (!avoided)
+			oc.on();
 		master.on();
+		long startTime;
+		long endTime;
 		while (!master.inDanger) {// far enough from block
-
+			startTime = System.currentTimeMillis();
 			// update distance from
 			// wall
-			if (corrected) {
+			if (oc.corrected) {
 				FinalProject.leftMotor.forward();
 				FinalProject.rightMotor.forward();
-				corrected = false;
+				oc.corrected = false;
 			}
-			if (Math.abs(endX - odometer.getX()) <= 2 && Math.abs(endY - odometer.getY()) <= 2) {
+			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 2) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
+				oc.off();
 				return; // break out of while loop if has reached destination
 			}
 
+			endTime = System.currentTimeMillis();
+			if (endTime - startTime < SAMPLING_PERIOD) {
+				try {
+					Thread.sleep(SAMPLING_PERIOD - (endTime - startTime));
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 		// if too close to obstacle
 		oc.off();
@@ -331,6 +350,7 @@ public class Navigation {
 			continue;
 		}
 		master.off();
+		avoided = true;
 		travelTo(endX / 30.48, endY / 30.48);
 	}
 
@@ -550,7 +570,7 @@ public class Navigation {
 	 *         flag
 	 * @since 10/29/17
 	 */
-	public boolean flagSearch(int correctColor) {
+	public void flagSearch(int correctColor) {
 		int distance = 0;
 		while (!hasFlag) {
 			turnTo(Math.toDegrees(Math.atan2(searchRegionPath.get(2) * FinalProject.TILE_SPACING - odometer.getX(),
@@ -585,7 +605,7 @@ public class Navigation {
 				while (isNavigating())
 					continue;
 				travelToAfterFlag();
-				return true;
+				return;
 			}
 			FinalProject.usMotor.rotateTo(sensorMotor.reference - 45);
 			while (FinalProject.usMotor.isMoving()) {
@@ -603,7 +623,7 @@ public class Navigation {
 					while (isNavigating())
 						continue;
 					travelToAfterFlag();
-					return true;
+					return;
 
 				}
 			}
@@ -623,13 +643,13 @@ public class Navigation {
 					while (isNavigating())
 						continue;
 					travelToAfterFlag();
-					return true;
+					return;
 				}
 			}
 			searchRegionPath.addLast(searchRegionPath.removeFirst());
 			searchRegionPath.addLast(searchRegionPath.removeFirst());
 		}
-		return false;
+
 	}
 
 	/**
