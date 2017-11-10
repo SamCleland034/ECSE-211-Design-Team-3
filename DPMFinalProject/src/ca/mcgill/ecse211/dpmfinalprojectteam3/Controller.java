@@ -89,7 +89,10 @@ public class Controller {
 	}
 
 	/**
-	 * Start control flow.
+	 * Starts the state machine logic that we display in our state machine model of
+	 * the capture the flag game. Will start from the startinglocalization state
+	 * initally.
+	 * 
 	 */
 	public void startControlFlow() {
 		FinalProject.stage = Stage.STARTINGLOCALIZATION;
@@ -145,7 +148,7 @@ public class Controller {
 				System.exit(0);
 				flagsearch(gps, master, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
-			} else if (FinalProject.stage == Stage.ZIPLOCALIZATION) {
+			} else if (FinalProject.stage == Stage.ZIPTRAVERSAL) {
 				ziptraversal(gps, colorpoller, colorpoller, master, lightLoc, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {

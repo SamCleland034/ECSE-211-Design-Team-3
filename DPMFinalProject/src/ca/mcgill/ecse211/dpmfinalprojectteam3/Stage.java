@@ -19,7 +19,7 @@ public enum Stage {
 
 	NAVIGATION,
 
-	ZIPLOCALIZATION,
+	ZIPTRAVERSAL,
 
 	FLAGSEARCH,
 

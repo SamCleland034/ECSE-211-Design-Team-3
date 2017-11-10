@@ -112,18 +112,18 @@ public class Odometer extends Thread {
 				 */
 
 				// setX(getX() + dX);
-				x = getX() + dX;// update estimates of X and Y position
+				x = x + dX;// update estimates of X and Y position
 				// setY(getY() + dY);
-				y = getY() + dY;
-				theta = getTheta() + deltaT;
+				y = y + dY;
+				theta = theta + deltaT;
 				// setTheta((getTheta() + deltaT));
 
-				if (getTheta() < 0) { // Keep theta (in radians) between 0 and 2pi
+				if (theta < 0) { // Keep theta (in radians) between 0 and 2pi
 					// setTheta(getTheta() + 2 * Math.PI);
-					theta = getTheta() + 2 * Math.PI;
-				} else if (getTheta() > 2 * Math.PI) {
+					theta = theta + 2 * Math.PI;
+				} else if (theta > 2 * Math.PI) {
 					// setTheta(getTheta() - 2 * Math.PI);
-					theta = getTheta() - 2 * Math.PI;
+					theta = theta - 2 * Math.PI;
 				}
 
 			}

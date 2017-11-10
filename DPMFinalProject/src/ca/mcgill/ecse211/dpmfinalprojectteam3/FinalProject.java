@@ -4,6 +4,7 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import java.util.LinkedList;
 
+import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -91,7 +92,10 @@ import lejos.robotics.SampleProvider;
  * on how the the robot changes states.
  * 
  * @author Sam Cleland, Yiming Wu, Charles Brana
- * @version 2.0: Code estimation: 1600 lines of code(lines meaning number of
+ * @version 2.1: Changes from 2.0, added controller class to display the flow
+ *          from different stages more clearly instead of doing it directly in
+ *          the main method, implemented odometry correction while navigating
+ *          Code estimation: 1600 lines of code(lines meaning number of
  *          semicolons).
  */
 public class FinalProject extends Thread {
@@ -263,6 +267,7 @@ public class FinalProject extends Thread {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		// INITALIZE COMPONENTS
 		Navigation gps = new Navigation(odometer);
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
@@ -282,6 +287,14 @@ public class FinalProject extends Thread {
 		oc.setNavigation(gps);
 		gps.setColorProvider(colorpoller);
 		gps.setOdometryCorrection(oc);
+		gps.setAvoidance(master);
+		/*
+		 * Getting info from wifi, if you want to test something individually, such as
+		 * navigation or odometry correction, test before this comment (but after the
+		 * gps.setOdometryCorrection(oc), don't change anything below. Don't get rid of
+		 * this button.waitForAnyPress() below if you are testing
+		 */
+		Button.waitForAnyPress();
 		stage = Stage.WIFI;
 		WiFi wifi = new WiFi();
 		getWiFiInfo(wifi);
@@ -324,6 +337,8 @@ public class FinalProject extends Thread {
 		coordsList.add(zipgreenYc);
 		coordsList.add(LLSRRX);
 		coordsList.add(zipredYc);
+		coordsList.add(LLSRRX);
+		coordsList.add(LLSRRY);
 		gps.setPath(coordsList);
 
 		/*

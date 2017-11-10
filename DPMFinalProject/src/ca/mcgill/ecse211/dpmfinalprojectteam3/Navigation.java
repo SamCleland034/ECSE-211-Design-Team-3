@@ -67,6 +67,8 @@ public class Navigation {
 	/** The Constant THRESHOLD. */
 	private static final int THRESHOLD = 40;
 
+	private static final long SAMPLING_PERIOD = 10;
+
 	/** The path. */
 	private static LinkedList<Integer> path; // For demo coordinates
 
@@ -90,6 +92,8 @@ public class Navigation {
 
 	/** The corrected. */
 	public boolean corrected = false;
+
+	private boolean avoided;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -132,7 +136,7 @@ public class Navigation {
 		while (!path.isEmpty()) {
 			coordX = path.removeFirst();
 			coordY = path.removeFirst();
-			oc.on();
+			avoided = false;
 			travelTo(coordX, coordY);
 
 			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY
@@ -140,8 +144,8 @@ public class Navigation {
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
 			} else if (coordX == FinalProject.zipgreenXc && coordY == FinalProject.zipgreenYc
-					&& FinalProject.stage != Stage.ZIPLOCALIZATION) {
-				FinalProject.stage = Stage.ZIPLOCALIZATION;
+					&& FinalProject.stage != Stage.ZIPTRAVERSAL) {
+				FinalProject.stage = Stage.ZIPTRAVERSAL;
 				break;
 			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY
 					&& FinalProject.stage != Stage.FLAGSEARCH) {
@@ -303,17 +307,21 @@ public class Navigation {
 		// fetch
 		// usSensor
 		// data
+		if (!avoided)
+			oc.on();
 		master.on();
+		long startTime;
+		long endTime;
 		while (!master.inDanger) {// far enough from block
-
+			startTime = System.currentTimeMillis();
 			// update distance from
 			// wall
-			if (corrected) {
+			if (oc.corrected) {
 				FinalProject.leftMotor.forward();
 				FinalProject.rightMotor.forward();
-				corrected = false;
+				oc.corrected = false;
 			}
-			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 4) {
+			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 2) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
@@ -321,6 +329,13 @@ public class Navigation {
 				return; // break out of while loop if has reached destination
 			}
 
+			endTime = System.currentTimeMillis();
+			if (endTime - startTime < SAMPLING_PERIOD) {
+				try {
+					Thread.sleep(SAMPLING_PERIOD - (endTime - startTime));
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 		// if too close to obstacle
 		oc.off();
@@ -332,6 +347,7 @@ public class Navigation {
 			continue;
 		}
 		master.off();
+		avoided = true;
 		travelTo(endX / 30.48, endY / 30.48);
 	}
 
