@@ -116,8 +116,8 @@ public class LightLocalizer {
 
 		// the following code enables the robot to position itself so that the
 		// light sensor will hit all four lines
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED);
+		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED); // set speeds
+		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 
 		FinalProject.leftMotor.forward(); // Run forward
 		FinalProject.rightMotor.forward();
@@ -140,8 +140,8 @@ public class LightLocalizer {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.beep();
-				int speed = FinalProject.rightMotor.getSpeed();
-				checkRightPoller2(speed);
+
+				checkRightPoller2();
 				FinalProject.rightMotor.stop(false);
 				Sound.beep();
 				odometer.setTheta(0);
@@ -153,8 +153,8 @@ public class LightLocalizer {
 				FinalProject.rightMotor.stop(true);
 				FinalProject.leftMotor.stop(false);
 				Sound.beep();
-				int speed = FinalProject.leftMotor.getSpeed();
-				checkLeftPoller2(speed);
+
+				checkLeftPoller2();
 				FinalProject.rightMotor.stop(false);
 				Sound.beep();
 				odometer.setTheta(0);
@@ -190,8 +190,8 @@ public class LightLocalizer {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.beep();
-				int speed = FinalProject.rightMotor.getSpeed();
-				checkRightPoller2(speed);
+
+				checkRightPoller2();
 				FinalProject.rightMotor.stop(false);
 				Sound.beep();
 				odometer.setTheta(Math.PI / 2);
@@ -203,8 +203,8 @@ public class LightLocalizer {
 				FinalProject.rightMotor.stop(true);
 				FinalProject.leftMotor.stop(false);
 				Sound.beep();
-				int speed = FinalProject.leftMotor.getSpeed();
-				checkLeftPoller2(speed);
+
+				checkLeftPoller2();
 				FinalProject.leftMotor.stop(false);
 				Sound.beep();
 				odometer.setTheta(Math.PI / 2);
@@ -691,13 +691,13 @@ public class LightLocalizer {
 	 * @param speed
 	 *            the speed
 	 */
-	private void checkRightPoller2(int speed) {
+	private void checkRightPoller2() {
 		FinalProject.rightMotor.setSpeed(40);
 		FinalProject.rightMotor.forward();
 		while (jointPoller.getRightValue() > 0.3)
 			continue;
 		FinalProject.rightMotor.stop(false);
-		FinalProject.rightMotor.setSpeed(speed);
+		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 
 	}
 
@@ -707,13 +707,13 @@ public class LightLocalizer {
 	 * @param speed
 	 *            the speed
 	 */
-	private void checkLeftPoller2(int speed) {
+	private void checkLeftPoller2() {
 		FinalProject.leftMotor.setSpeed(40);
 		FinalProject.leftMotor.forward();
 		while (jointPoller.getLeftValue() > 0.3)
 			continue;
 		FinalProject.leftMotor.stop(false);
-		FinalProject.leftMotor.setSpeed(speed);
+		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
 	}
 
 	/**

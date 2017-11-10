@@ -78,9 +78,9 @@ public class OdometryCorrection extends Thread {
 					if (counter == 0) {
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
-						speed = FinalProject.leftMotor.getSpeed();
+
 						Sound.beep();
-						checkRightPoller(speed);
+						checkRightPoller();
 						corrected = true;
 						counter = 2;
 					} else {
@@ -95,7 +95,7 @@ public class OdometryCorrection extends Thread {
 						FinalProject.leftMotor.stop(false);
 						speed = FinalProject.rightMotor.getSpeed();
 						Sound.beep();
-						checkLeftPoller(speed);
+						checkLeftPoller();
 						corrected = true;
 						counter = 2;
 					} else {
@@ -154,20 +154,29 @@ public class OdometryCorrection extends Thread {
 		}
 	}
 
-	private void checkRightPoller(int speed) {
+	private void checkRightPoller() {
+		// FinalProject.rightMotor.setSpeed(50);
+		// FinalProject.rightMotor.forward();
+		// long startTime = System.currentTimeMillis();
+		FinalProject.rightMotor.setSpeed(25);
+		FinalProject.leftMotor.setSpeed(25);
+		while (jointPoller.getLeftValue() > 0.3) {
+			continue;
+		}
+		FinalProject.leftMotor.stop(true);
+		FinalProject.rightMotor.stop(false);
 		FinalProject.rightMotor.setSpeed(50);
 		FinalProject.rightMotor.forward();
-		long startTime = System.currentTimeMillis();
 		while (jointPoller.getRightValue() > 0.3) {
-			if (timedOut(startTime))
-				break;
 			continue;
+			/*
+			 * if (timedOut(startTime)) break; continue;
+			 */
 		}
 		FinalProject.rightMotor.stop(false);
 		checkOrientation();
-		FinalProject.leftMotor.setSpeed(speed);
-		FinalProject.rightMotor.setSpeed(speed);
-
+		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
+		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 	}
 
 	private boolean timedOut(long startTime) {
@@ -176,20 +185,30 @@ public class OdometryCorrection extends Thread {
 		return false;
 	}
 
-	private void checkLeftPoller(int speed) {
-
+	private void checkLeftPoller() {
+		FinalProject.rightMotor.setSpeed(25);
+		FinalProject.leftMotor.setSpeed(25);
+		FinalProject.rightMotor.backward();
+		FinalProject.leftMotor.backward();
+		while (jointPoller.getRightValue() > 0.3)
+			continue;
+		FinalProject.leftMotor.stop(true);
+		FinalProject.rightMotor.stop(false);
 		FinalProject.leftMotor.setSpeed(50);
 		FinalProject.leftMotor.forward();
-		long startTime = System.currentTimeMillis();
+		// FinalProject.leftMotor.setSpeed(50);
+		// FinalProject.leftMotor.forward();
+		// long startTime = System.currentTimeMillis();
 		while (jointPoller.getLeftValue() > 0.3) {
-			if (timedOut(startTime))
-				break;
+			/*
+			 * if (timedOut(startTime)) break;
+			 */
 			continue;
 		}
 		FinalProject.leftMotor.stop(false);
 		checkOrientation();
-		FinalProject.leftMotor.setSpeed(speed);
-		FinalProject.rightMotor.setSpeed(speed);
+		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
+		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 
 	}
 

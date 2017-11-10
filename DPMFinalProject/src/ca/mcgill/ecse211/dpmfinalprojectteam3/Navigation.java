@@ -26,7 +26,7 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	private static final int MOTOR_SPEED = 225;
+	public static final int MOTOR_SPEED = 160;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 150;
@@ -48,6 +48,8 @@ public class Navigation {
 
 	/** The center offset. */
 	private static double CENTER_OFFSET = 1.95;
+	public static double RIGHT_OFFSET = 1.009;
+	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
 
 	/** The search region path. */
 	private LinkedList<Integer> searchRegionPath;
@@ -273,14 +275,15 @@ public class Navigation {
 	 */
 	public void driveWithoutAvoid(double distanceToTravel) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
+
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
 				true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET),
-				false);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+				(distanceToTravel + CENTER_OFFSET) * (Navigation.RIGHT_OFFSET)), false);
 
 	}
 
@@ -297,12 +300,12 @@ public class Navigation {
 	// this method makes the robot drive a certain distance
 	public void drive(double distanceToTravel, double endX, double endY) {
 
-		FinalProject.leftMotor.setSpeed(MOTOR_SPEED / 2); // set speeds
-		FinalProject.rightMotor.setSpeed(MOTOR_SPEED / 2);
-
+		FinalProject.leftMotor.setSpeed(MOTOR_SPEED); // set speeds
+		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+				(distanceToTravel * RIGHT_OFFSET) * (Navigation.RIGHT_OFFSET)), true);
 
 		// fetch
 		// usSensor
