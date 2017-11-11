@@ -215,7 +215,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.435; // Width of car
+	public static final double TRACK = 11.975; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 20;
@@ -267,6 +267,7 @@ public class FinalProject extends Thread {
 		odometryDisplay.start();
 		odometer.start();
 		
+		//Button.waitForAnyPress();
 //		Test.NavigationTest();
 //		Test.UltrasonicTest();
 		Test.CorrectionTest();

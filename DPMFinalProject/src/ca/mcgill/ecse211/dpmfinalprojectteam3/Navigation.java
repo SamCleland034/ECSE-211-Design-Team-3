@@ -18,7 +18,7 @@ public class Navigation {
 	// Create constants
 	private static Avoidance master;
 	private static final int MOTOR_SPEED_LEFT = 225;
-	static final double RIGHT_OFFSET = 1.0090;
+	static final double RIGHT_OFFSET = 1.0091;
 	private static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED_LEFT * RIGHT_OFFSET);
 	
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
@@ -70,6 +70,7 @@ public class Navigation {
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
+	public static boolean isTurning =false;
 
 	/** The distance to travel. */
 	private static double distanceToTravel; // Distance to travel between points
@@ -106,6 +107,7 @@ public class Navigation {
 	 * of the project which will execute the code for the ziptraversal algorithm.
 	 */
 	public void startNav() {
+		OdometryCorrection.counter2 = 0;
 		while (!path.isEmpty()) {
 			coordX = path.removeFirst();
 			coordY = path.removeFirst();
@@ -156,12 +158,12 @@ public class Navigation {
 		double distanceY = endY - odometer.getY();
 
 		// If reached destination, then stop
-		if (Math.abs(distanceX) <= 0.3 && Math.abs(distanceY) <= 0.3) {
-			FinalProject.leftMotor.stop(true);
-			FinalProject.rightMotor.stop(false);
-		}
+//		if (Math.abs(distanceX) <= 0.3 && Math.abs(distanceY) <= 0.3) {
+//			FinalProject.leftMotor.stop(true);
+//			FinalProject.rightMotor.stop(false);
+//		}
 
-		else { // has not reached destination
+//		else { // has not reached destination
 
 			turnTo(Math.toDegrees(Math.atan2(distanceX, distanceY))); // turn to
 			// the
@@ -175,13 +177,15 @@ public class Navigation {
 			// function to move the robot forward forward
 			drive(distanceToTravel, endX, endY);
 			//travelToWithoutAvoid(endX, endY);
-
-			isNavigating = false;
-			while (isNavigating())
-				continue;
+//			while (isNavigating()) 
+//				continue;
+			
 			// make a sound when has reached destination
 			Sound.beep();
-		}
+			
+			isNavigating = false;
+			
+//		}
 
 	}
 
@@ -218,11 +222,12 @@ public class Navigation {
 			// function to move the robot forward forward
 			driveWithoutAvoid(distanceToTravel);
 
-			isNavigating = false;
+			
 			while (isNavigating())
 				continue;
 			// make a sound when has reached destination
 			Sound.beep();
+			isNavigating = false;
 		}
 
 	}
@@ -265,9 +270,9 @@ public class Navigation {
 		FinalProject.leftMotor.setSpeed(MOTOR_SPEED_LEFT); // set speeds
 		FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 
-		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
+		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), true); // move
 		// forward
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel*RIGHT_OFFSET), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel*RIGHT_OFFSET + CENTER_OFFSET), false);
 
 		// fetch
 		// usSensor
@@ -281,25 +286,27 @@ public class Navigation {
 			// update distance from
 			// wall
 			if (corrected) {
+				
 				double distanceX = endX - odometer.getX();
 				double distanceY = endY - odometer.getY();
 				distanceToTravel = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
 				
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel + CENTER_OFFSET), true); // move
 				// forward
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel*RIGHT_OFFSET), true);
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel*RIGHT_OFFSET + CENTER_OFFSET), false);
 				
 				
 //				FinalProject.leftMotor.forward();
 //				FinalProject.rightMotor.forward();
 				
-				
 				corrected = false;
+				//return;
 			}
 			if (Math.abs(endX - odometer.getX()) <= 2 && Math.abs(endY - odometer.getY()) <= 2) {
 				FinalProject.leftMotor.stop(true);
-				FinalProject.rightMotor.stop(false);
+				FinalProject.rightMotor.stop(true);
 				Sound.buzz();
+				
 				return; // break out of while loop if has reached destination
 			}
 
@@ -405,6 +412,7 @@ public class Navigation {
 	static // this method makes the robot turn to the indicated angle the shortest way
 	void turnTo(double theta) {
 		// get current angle and convert to degrees
+		isTurning =true;
 		double currentTheta = Math.toDegrees(odometer.getTheta());
 		// angle that robot needs to turn
 		double turnTheta = theta - currentTheta;
@@ -423,10 +431,15 @@ public class Navigation {
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
 		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), false);
+		
+		isTurning = false;
 	}
+		
+	
 
 	void turnToWithInterrupt(double theta) {
 		// get current angle and convert to degrees
+		isTurning =true;
 		double currentTheta = Math.toDegrees(odometer.getTheta());
 		// angle that robot needs to turn
 		double turnTheta = theta - currentTheta;
@@ -445,6 +458,8 @@ public class Navigation {
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
 		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
+		
+		isTurning =false;
 	}
 
 	/**
@@ -487,13 +502,16 @@ public class Navigation {
 	 */
 	static // this method makes the robot turn the indicated angle
 	void turn(double theta) {
+		isTurning =true;
 		// set rotate speed for both motors
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
 		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
-		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
+		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), false);
+		
+		isTurning =false;
 	}
 
 	/**
@@ -503,12 +521,17 @@ public class Navigation {
 	 *            the theta
 	 */
 	void turnWithoutInterruption(double theta) {
+		
+		isTurning =true;
+		
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
 		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
 		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), false);
+		
+		isTurning =false;
 	}
 
 	/**

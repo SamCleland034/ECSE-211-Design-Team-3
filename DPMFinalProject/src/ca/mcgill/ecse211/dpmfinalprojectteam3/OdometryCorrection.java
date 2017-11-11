@@ -24,6 +24,7 @@ public class OdometryCorrection extends Thread {
 	private static double TILE_SPACING = 30;
 	public boolean corrected = false;
 	private Navigation gps;
+	public static int counter2 = 0;
 
 
 	// private EV3ColorSensor colorSensor;
@@ -61,90 +62,114 @@ public class OdometryCorrection extends Thread {
 //		long endTime;
 //		double[] lightValue;
 		int counter = 0;
+		counter2 = 0; 
 		double LeftLightValue;
 		double RightLightValue;
 //		long RightTime;
 //		long LeftTime;
 		
 		while (true) {
-			if (on) {
+			//if (on) {
 
-				startTime = System.currentTimeMillis();
-				while(Navigation.corrected == false){
-					LeftLightValue = jointPoller.getLeftValue();
-					RightLightValue = jointPoller.getRightValue();
-					if (LeftLightValue < 0.2 && RightLightValue < 0.2) {
-						Sound.beepSequence();
-						checkOrientation();
-						counter = 0;
-						Navigation.corrected = true;
+				startTime = System.currentTimeMillis();				
+				//while(Navigation.corrected == false){
+					if(Navigation.isTurning == false) {
+						LeftLightValue = jointPoller.getLeftValue();
+						RightLightValue = jointPoller.getRightValue();
+						
+						if (LeftLightValue < 0.23 && RightLightValue < 0.23) {
+							if (counter2 == 0){
 
-					} 
-					else if (counter >2500) { //counter value is high because it increments very fast
-						if(LeftLightValue < 0.2 && RightLightValue > 0.2 ) {
-//							LeftTime = System.currentTimeMillis();
-//							while(RightLightValue > 0.2) {
-//			
-//							}
-//							RightTime = System.currentTimeMillis();
-//
-//							if ( RightTime-LeftTime> 0.01) {
-								FinalProject.rightMotor.stop(true);
-								FinalProject.leftMotor.stop(false);
-								
-								speed = FinalProject.leftMotor.getSpeed();
-
-								Sound.buzz();
-
-								checkRightPoller(speed);
+								Sound.beepSequence();
+								checkOrientation();
 								counter = 0;
+								counter2 = 1;
 								Navigation.corrected = true;
+								sleepFor(1);
+							}
+							else {
+								counter2--;
+								sleepFor(2);
+							}
 
-//							}
-//							else checkOrientation();
-//							Navigation.corrected = true;
+
+						} 
+						else if (counter > 2000) { //counter value is high because it increments very fast
+							if(LeftLightValue < 0.23 && RightLightValue > 0.23 ) {
+								if(counter2 == 0) {
+									//							LeftTime = System.currentTimeMillis();
+									//							while(RightLightValue > 0.23) {
+									//			
+									//							}
+									//							RightTime = System.currentTimeMillis();
+									//
+									//							if ( RightTime-LeftTime> 0.01) {
+									FinalProject.rightMotor.stop(true);
+									FinalProject.leftMotor.stop(false);
+
+									speed = FinalProject.leftMotor.getSpeed();
+
+									Sound.buzz();
+
+									checkRightPoller(speed);
+									counter = 0;
+									counter2 = 1;
+									Navigation.corrected = true;
+									sleepFor(1);
+								}
+								else counter2--;
+								sleepFor(2);
+								//							}
+								//							else checkOrientation();
+								//							Navigation.corrected = true;
+							}
+							else if (RightLightValue < 0.23 && LeftLightValue > 0.23) {
+								if(counter2 == 0) {
+									//							RightTime = System.currentTimeMillis();
+									//							while(RightLightValue > 0.23) {
+									//						
+									//							}
+									//							LeftTime = System.currentTimeMillis();
+									//
+									//							if (LeftTime-RightTime > 0.01) {
+									FinalProject.leftMotor.stop(true);
+									FinalProject.rightMotor.stop(false);
+
+									speed = FinalProject.leftMotor.getSpeed();
+
+									Sound.beep();
+									checkLeftPoller(speed);
+									counter = 0;
+									counter2 = 1;
+									Navigation.corrected = true;
+									sleepFor(1);
+								}
+								else counter2--;
+								sleepFor(2);
+								//							}
+								//							else checkOrientation();
+								//							Navigation.corrected = true;
+							}
 						}
-						else if (RightLightValue < 0.2 && LeftLightValue > 0.2) {
-//							RightTime = System.currentTimeMillis();
-//							while(RightLightValue > 0.2) {
-//						
-//							}
-//							LeftTime = System.currentTimeMillis();
-//
-//							if (LeftTime-RightTime > 0.01) {
-								FinalProject.leftMotor.stop(true);
-								FinalProject.rightMotor.stop(false);
-								
-								speed = FinalProject.leftMotor.getSpeed();
-
-								Sound.beep();
-								checkLeftPoller(speed);
-								counter = 0;
-								Navigation.corrected = true;
-
-//							}
-//							else checkOrientation();
-//							Navigation.corrected = true;
-						}
+						else counter++;
 					}
-					else counter++;
 				}
-			}
-//			endTime = System.currentTimeMillis();
-//			if (endTime - startTime < SAMPLINGPERIOD) {
-//				try {
-//					Thread.sleep((SAMPLINGPERIOD - (endTime - startTime)));
-//				} catch (InterruptedException e) {
-//				}
-//			}
-//			else {
-//				try {
-//					Thread.sleep(1000);
-//				} catch (InterruptedException e) {
-//				}
-//			}
+				//			endTime = System.currentTimeMillis();
+				//			if (endTime - startTime < SAMPLINGPERIOD) {
+				//				try {
+				//					Thread.sleep((SAMPLINGPERIOD - (endTime - startTime)));
+				//				} catch (InterruptedException e) {
+				//				}
+				//			}
+				//			else {
+				//				try {
+				//					Thread.sleep(1000);
+				//				} catch (InterruptedException e) {
+				//				}
+				//			}
 
-		}
+			//}
+		//}
 	}
 
 	private void checkOrientation() {
@@ -178,9 +203,11 @@ public class OdometryCorrection extends Thread {
 		float right_speed = (float) (speed * Navigation.RIGHT_OFFSET);	
 	
 		long startTime = System.currentTimeMillis();
-		while (jointPoller.getLeftValue()>0.2) {
-			FinalProject.rightMotor.setSpeed(25);
-			FinalProject.leftMotor.setSpeed(25);
+		
+		FinalProject.rightMotor.setSpeed(45);
+		FinalProject.leftMotor.setSpeed(45);
+		
+		while (jointPoller.getLeftValue()>0.23) {
 			
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.backward();
@@ -188,8 +215,10 @@ public class OdometryCorrection extends Thread {
 		FinalProject.leftMotor.stop(true);
 		FinalProject.rightMotor.stop(false);
 		
-		while (jointPoller.getRightValue() > 0.2) {
-			FinalProject.rightMotor.setSpeed(50);
+		FinalProject.rightMotor.setSpeed(50);
+		
+		while (jointPoller.getRightValue() > 0.23) {
+			
 			FinalProject.rightMotor.forward();
 			//			if (timedOut(startTime))
 			//				break;
@@ -216,18 +245,21 @@ public class OdometryCorrection extends Thread {
 
 		long startTime = System.currentTimeMillis();
 		
-		while (jointPoller.getRightValue()>0.2) {
-			FinalProject.rightMotor.setSpeed(25);
-			FinalProject.leftMotor.setSpeed(25);
-			
+		FinalProject.rightMotor.setSpeed(45);
+		FinalProject.leftMotor.setSpeed(45);
+		
+		while (jointPoller.getRightValue()>0.23) {
+						
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.backward();
 		}
 		FinalProject.leftMotor.stop(true);
 		FinalProject.rightMotor.stop(false);
 		
-		while (jointPoller.getLeftValue() > 0.2) {
-			FinalProject.leftMotor.setSpeed(50);
+		FinalProject.leftMotor.setSpeed(50);
+		
+		while (jointPoller.getLeftValue() > 0.23) {
+
 			
 			FinalProject.leftMotor.forward();
 			//			if (timedOut(startTime))
@@ -252,5 +284,11 @@ public class OdometryCorrection extends Thread {
 
 	public void off() {
 		this.on = false;
+	}
+	private void sleepFor(int i) {
+		try {
+			sleep(1000 * i);
+		} catch (InterruptedException e) {
+		}
 	}
 }

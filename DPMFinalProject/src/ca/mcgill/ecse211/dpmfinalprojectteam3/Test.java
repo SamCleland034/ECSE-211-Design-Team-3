@@ -22,15 +22,22 @@ public class Test {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 		}
-		Navigation.turn(1080);
-		Button.waitForAnyPress();
+//		Navigation.turn(1080);
+//		Button.waitForAnyPress();
 		
-		Navigation.travelToWithoutAvoid(0,6);
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-		}
-		Navigation.travelToWithoutAvoid(0,0);
+//		Navigation.travelToWithoutAvoid(0,6);
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//		}
+//		Navigation.travelToWithoutAvoid(0,0);
+		
+		Navigation.travelToWithoutAvoid(0, 2);
+		Navigation.travelToWithoutAvoid(4, 2);
+		Sound.beepSequenceUp();
+		Navigation.travelToWithoutAvoid(4, 0);
+		Sound.beepSequenceUp();
+		Navigation.travelToWithoutAvoid(0, 0);
 	}
 	public static void UltrasonicTest() {
 		Navigation gps = new Navigation(FinalProject.odometer);
@@ -64,7 +71,7 @@ public class Test {
 		FinalProject.odometer.setX(0);
 		FinalProject.odometer.setY(0);
 		coordsList.addLast(0);
-		coordsList.addLast(6);
+		coordsList.addLast(2);
 		gps.setPath(coordsList);
 		
 		OdometryCorrection oc = new OdometryCorrection(FinalProject.odometer, leftpoller, rightpoller, jointpoller);
@@ -81,9 +88,43 @@ public class Test {
 		master.on();
 		//master.start();
 		oc.start();
-		//Navigation.travelTo(0, 6);
 		gps.startNav();
+		Sound.beepSequenceUp();
+		Button.waitForAnyPress();
+		oc.off();
+		
+		coordsList.clear();
+		coordsList.addLast(4);
+		coordsList.addLast(2);
+		gps.setPath(coordsList);
+		oc.on();
+		gps.startNav();
+		Sound.beepSequenceUp();
+		oc.off();
+		Button.waitForAnyPress();
+		
+		coordsList.clear();
+		coordsList.addLast(4);
+		coordsList.addLast(0);
+		gps.setPath(coordsList);
+		//oc.on();
+		gps.startNav();
+		Sound.beepSequence();
+		//oc.off();
+		Button.waitForAnyPress();
+		coordsList.clear();
+		coordsList.addLast(0);
+		coordsList.addLast(0);
+		gps.setPath(coordsList);
+		//oc.on();
+		//Sound.beepSequence();
+		gps.startNav();
+		Sound.beepSequence();
+		oc.off();
+		//Navigation.turnTo(0);
+		
+		
+		
 
-	
 	}
 }
