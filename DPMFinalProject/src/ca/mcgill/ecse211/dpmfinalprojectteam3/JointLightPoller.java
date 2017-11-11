@@ -80,7 +80,7 @@ public class JointLightPoller extends Thread {
 				}
 
 				try {
-					Thread.sleep(20);
+					Thread.sleep(18);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {

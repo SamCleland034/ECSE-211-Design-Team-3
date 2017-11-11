@@ -136,22 +136,26 @@ public class Controller {
 			}
 		}
 		FinalProject.stage = Stage.NAVIGATION;
-		sensormotor.start();
+		// sensormotor.start();
 		oc.start();
 		// leftpoller.start();
 		// rightpoller.start();
-		master.start();
+		// master.start();
 		while (true) {
+
 			if (FinalProject.stage == Stage.NAVIGATION) {
+
 				navigating(gps, sensormotor, colorpoller, colorpoller, jointpoller, oc, uspoller, colorpoller);
 			} else if (FinalProject.stage == Stage.FLAGSEARCH) {
 				System.exit(0);
 				flagsearch(gps, master, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.ZIPTRAVERSAL) {
+
 				ziptraversal(gps, colorpoller, colorpoller, master, lightLoc, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {
+
 				Sound.beepSequenceUp();
 				System.exit(0);
 			}
@@ -199,8 +203,10 @@ public class Controller {
 			UltrasonicLocalizer usLoc, LightLocalizer lightLoc) {
 		uspoller.on();
 		uspoller.start();
+		sleepFor(1);
 		jointpoller.off();
 		usLoc.doLocalization();
+		sleepFor(1);
 		uspoller.off();
 		jointpoller.on();
 		jointpoller.start();
@@ -282,15 +288,20 @@ public class Controller {
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipgreenXc);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipgreenYc);
 		gps.travelToWithoutAvoid(FinalProject.zipgreenX, FinalProject.zipgreenY);
-		while (Navigation.isNavigating())
-			continue;
+
 		sleepFor(1);
 		gps.zipTraversal();
+		while (Navigation.isNavigating())
+			continue;
+		while (gps.ziptraversing)
+			continue;
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipredX);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipredY);
-		if (FinalProject.odometer.getTheta() <= Math.PI / 4)
+		double theta = FinalProject.odometer.getTheta();
+		if (theta >= Math.PI / 4 && theta <= 3 * Math.PI / 4) {
+			FinalProject.odometer.setTheta(Math.PI / 2);
 			gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
-		else
+		} else
 			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY + 1);
 		while (Navigation.isNavigating())
 			continue;
@@ -300,6 +311,7 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		jointlightpoller.on();
+		sleepFor(1);
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * (FinalProject.zipredX + 1));
@@ -339,7 +351,6 @@ public class Controller {
 		// leftPoller.on();
 		// rightPoller.on();
 		jointpoller.on();
-		FinalProject.stage = Stage.NAVIGATION;
 		gps.startNav();
 	}
 }

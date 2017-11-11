@@ -68,7 +68,7 @@ public class SensorRotation extends Thread {
 			if (on) {
 				startTime = System.currentTimeMillis();
 				if (!movedLeft && !halfturn) {
-					motor.rotateTo(reference - 35);
+					motor.rotateTo(reference - 2);
 					while (motor.isMoving())
 						continue;
 					movedLeft = true;
@@ -77,7 +77,7 @@ public class SensorRotation extends Thread {
 					corrected = false;
 
 				} else if (!movedLeft && halfturn) {
-					motor.rotateTo(reference - 35);
+					motor.rotateTo(reference - 20);
 					while (motor.isMoving())
 						continue;
 					movedLeft = true;
@@ -86,7 +86,7 @@ public class SensorRotation extends Thread {
 					corrected = false;
 
 				} else if (!movedRight && halfturn) {
-					motor.rotateTo(reference + 35);
+					motor.rotateTo(reference + 20);
 					while (motor.isMoving())
 						continue;
 					movedLeft = false;

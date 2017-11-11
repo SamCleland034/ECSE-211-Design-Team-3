@@ -254,13 +254,13 @@ public class UltrasonicLocalizer {
 		}
 
 		if (localizationType == LocalizationType.FALLINGEDGE) {
-			UPDATED_ANGLE = UPDATED_ANGLE + 12; // This value is found experimentally
-			navigation.turn(UPDATED_ANGLE);
+			UPDATED_ANGLE = UPDATED_ANGLE + 16; // This value is found experimentally
+			navigation.turnWithoutInterruption(UPDATED_ANGLE);
 		}
 
 		else if (localizationType == LocalizationType.RISINGEDGE) {
 			UPDATED_ANGLE = UPDATED_ANGLE + 200; // This value is found experimentally
-			navigation.turn(UPDATED_ANGLE);
+			navigation.turnWithoutInterruption(UPDATED_ANGLE);
 		}
 	}
 

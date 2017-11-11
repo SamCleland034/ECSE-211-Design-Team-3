@@ -26,7 +26,7 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	public static final int MOTOR_SPEED = 160;
+	public static final int MOTOR_SPEED = 150;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 150;
@@ -47,8 +47,8 @@ public class Navigation {
 	private static final double SQUARE_LENGTH = 30.48;
 
 	/** The center offset. */
-	private static double CENTER_OFFSET = 1.95;
-	public static double RIGHT_OFFSET = 1.009;
+	private static double CENTER_OFFSET = 1.96;
+	public static double RIGHT_OFFSET = 1.0093;
 	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
 
 	/** The search region path. */
@@ -72,7 +72,7 @@ public class Navigation {
 	private static final long SAMPLING_PERIOD = 10;
 
 	/** The path. */
-	private static LinkedList<Integer> path; // For demo coordinates
+	private LinkedList<Double> path; // For demo coordinates
 
 	/** The odometer. */
 	private Odometer odometer;
@@ -96,6 +96,8 @@ public class Navigation {
 	public boolean corrected = false;
 
 	private boolean avoided;
+
+	public boolean ziptraversing;
 
 	/** The is navigating. */
 	private static boolean isNavigating = false;
@@ -122,7 +124,7 @@ public class Navigation {
 	 * @param coordsList
 	 *            the new path
 	 */
-	public void setPath(LinkedList<Integer> coordsList) {
+	public void setPath(LinkedList<Double> coordsList) {
 		this.path = coordsList;
 	}
 
@@ -138,22 +140,24 @@ public class Navigation {
 		while (!path.isEmpty()) {
 			coordX = path.removeFirst();
 			coordY = path.removeFirst();
+
 			avoided = false;
+
 			travelTo(coordX, coordY);
 
-			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY
-					&& FinalProject.stage != Stage.FLAGSEARCH) {
+			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY) {
+
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
-			} else if (coordX == FinalProject.zipgreenXc && coordY == FinalProject.zipgreenYc
-					&& FinalProject.stage != Stage.ZIPTRAVERSAL) {
+			} else if (coordX == FinalProject.zipgreenXc && coordY == FinalProject.zipgreenYc) {
 				FinalProject.stage = Stage.ZIPTRAVERSAL;
 				break;
-			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY
-					&& FinalProject.stage != Stage.FLAGSEARCH) {
+			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY) {
+
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
 			} else if ((coordX == 1 && coordY == 11) || (coordX == 1 && coordY == 11)) {
+
 				FinalProject.stage = Stage.FINISHED;
 				break;
 			}
@@ -189,6 +193,7 @@ public class Navigation {
 		if (Math.abs(distanceX) <= 0.3 && Math.abs(distanceY) <= 0.3) {
 			FinalProject.leftMotor.stop(true);
 			FinalProject.rightMotor.stop(false);
+
 		}
 
 		else { // has not reached destination
@@ -320,11 +325,14 @@ public class Navigation {
 			// update distance from
 			// wall
 			if (oc.corrected) {
-				FinalProject.leftMotor.forward();
-				FinalProject.rightMotor.forward();
+				distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2));
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
+				// forward
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+						(distanceToTravel * RIGHT_OFFSET) * (Navigation.RIGHT_OFFSET)), true);
 				oc.corrected = false;
 			}
-			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 2) {
+			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 0.9) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
@@ -459,7 +467,8 @@ public class Navigation {
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
-		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), false);
+		FinalProject.rightMotor
+				.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta * RIGHT_OFFSET), false);
 	}
 
 	/**
@@ -494,9 +503,10 @@ public class Navigation {
 	 * zip traversal algorithm slows down near the end for a safer landing.
 	 */
 	public void zipTraversal() {
+		ziptraversing = true;
 		FinalProject.leftMotor.setSpeed(300); // set speeds
 		FinalProject.rightMotor.setSpeed(300);
-		FinalProject.zipMotor.setSpeed(MOTOR_SPEED);
+		FinalProject.zipMotor.setSpeed(225);
 		FinalProject.zipMotor.forward();// travels about 3/4 the zipline
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), true);
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), false);
@@ -504,10 +514,13 @@ public class Navigation {
 			continue;
 		FinalProject.leftMotor.setSpeed(150); // slow down once getting to the downward slope
 		FinalProject.rightMotor.setSpeed(150);
-		FinalProject.zipMotor.setSpeed(MOTOR_SPEED / 2);
+		FinalProject.zipMotor.setSpeed(225 / 2);
 		FinalProject.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
-		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), true);
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 75), false);
+		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 64), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 64), false);
+		while (isNavigating)
+			continue;
+		ziptraversing = false;
 	}
 
 	/**

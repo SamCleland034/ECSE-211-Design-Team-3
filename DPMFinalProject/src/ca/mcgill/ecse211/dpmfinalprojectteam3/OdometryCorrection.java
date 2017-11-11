@@ -58,23 +58,24 @@ public class OdometryCorrection extends Thread {
 		long startTime;
 		long endTime;
 		double[] lightValue;
-		int counter = 2;
+		int counter = 1;
 		while (true) {
 			if (on) {
 				startTime = System.currentTimeMillis();
 				lightValue = jointPoller.getValues();
-				if (lightValue[0] < 0.3 && lightValue[1] < 0.3) {
+				if (lightValue[0] < 0.23 && lightValue[1] < 0.23) {
 					if (counter == 0) {
 						Sound.beepSequence();
 						checkOrientation();
 						corrected = true;
-						counter = 2;
+						counter = 1;
+						sleepFor(1);
 					} else {
 						counter--;
 						sleepFor(2);
 					}
 				}
-				if (lightValue[0] < 0.3) {
+				if (lightValue[0] < 0.23) {
 					if (counter == 0) {
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
@@ -82,14 +83,15 @@ public class OdometryCorrection extends Thread {
 						Sound.beep();
 						checkRightPoller();
 						corrected = true;
-						counter = 2;
+						counter = 1;
+						sleepFor(1);
 					} else {
 						counter--;
 
 						sleepFor(2);
 					}
 				}
-				if (lightValue[1] < 0.3) {
+				if (lightValue[1] < 0.23) {
 					if (counter == 0) {
 						FinalProject.rightMotor.stop(true);
 						FinalProject.leftMotor.stop(false);
@@ -97,7 +99,8 @@ public class OdometryCorrection extends Thread {
 						Sound.beep();
 						checkLeftPoller();
 						corrected = true;
-						counter = 2;
+						counter = 1;
+						sleepFor(1);
 					} else {
 						counter--;
 						sleepFor(2);
@@ -140,12 +143,12 @@ public class OdometryCorrection extends Thread {
 			odometer.setY(correctedY * TILE_SPACING + SENSOR_OFFSET);
 		} else if (theta >= 5 * Math.PI / 4 && theta <= 7 * Math.PI / 4) {
 			odometer.setTheta(3 * Math.PI / 2);
-			correctedY = (int) (odometer.getY() / TILE_SPACING);
-			odometer.setY(correctedY * TILE_SPACING + SENSOR_OFFSET);
+			correctedX = (int) ((odometer.getX() + TILE_SPACING) / TILE_SPACING);
+			odometer.setX(correctedX * TILE_SPACING - SENSOR_OFFSET);
 		} else if (theta >= 3 * Math.PI / 4 && theta <= 5 * Math.PI / 4) {
 			odometer.setTheta(Math.PI);
-			correctedX = (int) (odometer.getX() / TILE_SPACING);
-			odometer.setX(correctedX * TILE_SPACING + SENSOR_OFFSET);
+			correctedY = (int) ((odometer.getY() + TILE_SPACING) / TILE_SPACING);
+			odometer.setY(correctedY * TILE_SPACING - SENSOR_OFFSET);
 		} else {
 			odometer.setTheta(Math.PI / 2);
 			correctedX = (int) (odometer.getX() / TILE_SPACING);
@@ -158,16 +161,18 @@ public class OdometryCorrection extends Thread {
 		// FinalProject.rightMotor.setSpeed(50);
 		// FinalProject.rightMotor.forward();
 		// long startTime = System.currentTimeMillis();
-		FinalProject.rightMotor.setSpeed(25);
-		FinalProject.leftMotor.setSpeed(25);
-		while (jointPoller.getLeftValue() > 0.3) {
+		FinalProject.rightMotor.setSpeed(45);
+		FinalProject.leftMotor.setSpeed(45);
+		FinalProject.leftMotor.backward();
+		FinalProject.rightMotor.backward();
+		while (jointPoller.getLeftValue() > 0.23) {
 			continue;
 		}
 		FinalProject.leftMotor.stop(true);
 		FinalProject.rightMotor.stop(false);
 		FinalProject.rightMotor.setSpeed(50);
 		FinalProject.rightMotor.forward();
-		while (jointPoller.getRightValue() > 0.3) {
+		while (jointPoller.getRightValue() > 0.23) {
 			continue;
 			/*
 			 * if (timedOut(startTime)) break; continue;
@@ -186,11 +191,11 @@ public class OdometryCorrection extends Thread {
 	}
 
 	private void checkLeftPoller() {
-		FinalProject.rightMotor.setSpeed(25);
-		FinalProject.leftMotor.setSpeed(25);
+		FinalProject.rightMotor.setSpeed(45);
+		FinalProject.leftMotor.setSpeed(45);
 		FinalProject.rightMotor.backward();
 		FinalProject.leftMotor.backward();
-		while (jointPoller.getRightValue() > 0.3)
+		while (jointPoller.getRightValue() > 0.23)
 			continue;
 		FinalProject.leftMotor.stop(true);
 		FinalProject.rightMotor.stop(false);
@@ -199,7 +204,7 @@ public class OdometryCorrection extends Thread {
 		// FinalProject.leftMotor.setSpeed(50);
 		// FinalProject.leftMotor.forward();
 		// long startTime = System.currentTimeMillis();
-		while (jointPoller.getLeftValue() > 0.3) {
+		while (jointPoller.getLeftValue() > 0.23) {
 			/*
 			 * if (timedOut(startTime)) break;
 			 */

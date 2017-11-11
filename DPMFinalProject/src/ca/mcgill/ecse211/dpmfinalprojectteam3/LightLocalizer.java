@@ -223,7 +223,6 @@ public class LightLocalizer {
 		 */
 
 		// drive 25 cm backwards and turn back to 0 degrees
-		navigation.driveWithoutAvoid(-25);
 
 		// navigation.turnTo(0);
 

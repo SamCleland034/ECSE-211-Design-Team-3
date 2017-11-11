@@ -35,7 +35,7 @@ import ca.mcgill.ecse211.WiFiClient.WifiConnection;
  */
 public class WiFi {
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.21";
+	private static final String SERVER_IP = "192.168.43.123";
 	private static final int TEAM_NUMBER = 3;
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
@@ -69,13 +69,15 @@ public class WiFi {
 			// System.out.println("Map:\n" + data);
 			FinalProject.SHLLX = ((Long) data.get("SH_LL_x")).intValue();
 			FinalProject.SHLLY = ((Long) data.get("SH_LL_y")).intValue();
-			FinalProject.LLSRGX = ((Long) data.get("Red_LL_x")).intValue();
-			FinalProject.LLSRGY = ((Long) data.get("Red_LL_y")).intValue();
-			FinalProject.LLSRGX = ((Long) data.get("Green_LL_x")).intValue();
-			FinalProject.LLSRGY = ((Long) data.get("Green_LL_y")).intValue();
-			FinalProject.URSRGX = ((Long) data.get("Green_UR_x")).intValue();
-			FinalProject.URSRGY = ((Long) data.get("Green_UR_y")).intValue();
-			FinalProject.URSRRX = ((Long) data.get("Red_UR_x")).intValue();
+			FinalProject.LLSRRX = ((Long) data.get("SR_LL_x")).intValue();
+			FinalProject.LLSRRY = ((Long) data.get("SR_LL_y")).intValue();
+			FinalProject.LLSRGX = ((Long) data.get("SG_LL_x")).intValue();
+			FinalProject.LLSRGY = ((Long) data.get("SG_LL_y")).intValue();
+			FinalProject.URSRGX = ((Long) data.get("SG_UR_x")).intValue();
+			FinalProject.URSRGY = ((Long) data.get("SG_UR_y")).intValue();
+			FinalProject.URSRRX = ((Long) data.get("SR_UR_x")).intValue();
+			System.out.println(FinalProject.URSRGX);
+			System.out.println(FinalProject.URSRGY);
 			FinalProject.URSRRY = ((Long) data.get("Red_UR_y")).intValue();
 			FinalProject.zipgreenX = ((Long) data.get("ZC_G_x")).intValue();
 			FinalProject.zipgreenY = ((Long) data.get("ZC_G_y")).intValue();
