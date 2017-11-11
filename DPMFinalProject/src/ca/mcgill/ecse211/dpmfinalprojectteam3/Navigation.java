@@ -302,13 +302,14 @@ public class Navigation {
 				corrected = false;
 				//return;
 			}
-			if (Math.abs(endX - odometer.getX()) <= 2 && Math.abs(endY - odometer.getY()) <= 2) {
+			if (Math.abs(endX - odometer.getX()) <= 20 && Math.abs(endY - odometer.getY()) <= 20) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(true);
 				Sound.buzz();
 				
 				return; // break out of while loop if has reached destination
 			}
+			System.out.println(123456789);
 
 		}
 		// if too close to obstacle

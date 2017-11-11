@@ -90,7 +90,6 @@ public class Test {
 		oc.start();
 		gps.startNav();
 		Sound.beepSequenceUp();
-		Button.waitForAnyPress();
 		oc.off();
 		
 		coordsList.clear();
@@ -101,22 +100,20 @@ public class Test {
 		gps.startNav();
 		Sound.beepSequenceUp();
 		oc.off();
-		Button.waitForAnyPress();
 		
 		coordsList.clear();
 		coordsList.addLast(4);
 		coordsList.addLast(0);
 		gps.setPath(coordsList);
-		//oc.on();
+		oc.on();
 		gps.startNav();
 		Sound.beepSequence();
-		//oc.off();
-		Button.waitForAnyPress();
+		oc.off();
 		coordsList.clear();
 		coordsList.addLast(0);
 		coordsList.addLast(0);
 		gps.setPath(coordsList);
-		//oc.on();
+		oc.on();
 		//Sound.beepSequence();
 		gps.startNav();
 		Sound.beepSequence();
