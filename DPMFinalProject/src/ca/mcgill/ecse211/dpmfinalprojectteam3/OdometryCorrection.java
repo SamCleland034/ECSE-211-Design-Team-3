@@ -89,6 +89,7 @@ public class OdometryCorrection extends Thread {
 							}
 							else {
 								counter2--;
+								checkOrientation();
 								sleepFor(2);
 							}
 
@@ -118,6 +119,7 @@ public class OdometryCorrection extends Thread {
 									sleepFor(1);
 								}
 								else counter2--;
+								checkOrientation();
 								sleepFor(2);
 								//							}
 								//							else checkOrientation();
@@ -145,6 +147,7 @@ public class OdometryCorrection extends Thread {
 									sleepFor(1);
 								}
 								else counter2--;
+								checkOrientation();
 								sleepFor(2);
 								//							}
 								//							else checkOrientation();
