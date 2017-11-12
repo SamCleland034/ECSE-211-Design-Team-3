@@ -7,8 +7,8 @@ import lejos.robotics.SampleProvider;
 /**
  * Class used for sampling data for the light sensors, particularly the color
  * sensor that will be used for color detection. The other two sensors for line
- * detection will use the JointLightPoller class to synchronize their data
- * better.
+ * detection will use the JointLightPoller class to synchronize their data with
+ * each other. Will be terminated once the robot has found the flag
  */
 public class LightPoller extends Thread {
 

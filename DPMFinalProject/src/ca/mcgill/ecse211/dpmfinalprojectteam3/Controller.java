@@ -7,11 +7,11 @@ import lejos.hardware.Sound;
  * @author Sam
  *
  *         Class that implements the state machine logic we designed for the
- *         project, shown in the software document appendix 4.3. Determines
- *         which method to call based on the current state of the robot. Only
- *         determines state transitions from navigation flag search and
- *         ziptraversal states, the avoidance state is only accessed while in
- *         the navigation state since we need to be navigating in order to
+ *         project, shown in the software document, final software design (5.0).
+ *         Determines which method to call based on the current state of the
+ *         robot. Only determines state transitions from navigation flag search
+ *         and ziptraversal states, the avoidance state is only accessed while
+ *         in the navigation state since we need to be navigating in order to
  *         avoid. This class doesn't actually change the state from navigation
  *         to flag search or ziptraversal, it only changes from flag search or
  *         ziptraversal back to navigation since we know explicitly when one of
@@ -282,8 +282,8 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
-		loc.startLightLOC4();
-		waitForLightLOC(loc);
+		ziplocalization(loc);
+
 		jointlightpoller.off();
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipgreenXc);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipgreenYc);
@@ -298,16 +298,8 @@ public class Controller {
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipredX);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipredY);
 		FinalProject.odometer.setTheta(initalTheta);
+		checkOrientation(initalTheta, gps);
 
-		if (initalTheta >= Math.PI / 4 && initalTheta <= 3 * Math.PI / 4)
-			// FinalProject.odometer.setTheta(Math.PI / 2);
-			gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
-		else if ((initalTheta) > 7 * Math.PI / 4 || ((initalTheta >= 0) && (initalTheta <= Math.PI / 4)))
-			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY + 1);
-		else if (initalTheta >= 5 * Math.PI / 4 && initalTheta <= 7 * Math.PI / 4)
-			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY - 1);
-		else if (initalTheta >= 3 * Math.PI / 4 && initalTheta <= 5 * Math.PI / 4)
-			gps.travelToWithoutAvoid(FinalProject.zipredX - 1, FinalProject.zipredY);
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
@@ -317,18 +309,35 @@ public class Controller {
 			continue;
 		jointlightpoller.on();
 		sleepFor(1);
-		loc.startLightLOC4();
-		waitForLightLOC(loc);
 		int currentX = (int) ((FinalProject.odometer.getX() + FinalProject.TILE_SPACING / 3)
 				/ FinalProject.TILE_SPACING);
 		int currentY = (int) ((FinalProject.odometer.getY() + FinalProject.TILE_SPACING / 3)
 				/ FinalProject.TILE_SPACING);
+
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
 		FinalProject.odometer.setX(currentX * FinalProject.TILE_SPACING);
 		FinalProject.odometer.setY(currentY * FinalProject.TILE_SPACING);
 		FinalProject.odometer.setTheta(0);
 		FinalProject.stage = Stage.NAVIGATION;
+	}
+
+	private static void checkOrientation(Double initalTheta, Navigation gps) {
+		if (initalTheta >= Math.PI / 4 && initalTheta <= 3 * Math.PI / 4)
+			// FinalProject.odometer.setTheta(Math.PI / 2);
+			gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
+		else if ((initalTheta) >= 7 * Math.PI / 4 || ((initalTheta >= 0) && (initalTheta <= Math.PI / 4)))
+			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY + 1);
+		else if (initalTheta >= 5 * Math.PI / 4 && initalTheta <= 7 * Math.PI / 4)
+			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY - 1);
+		else if (initalTheta >= 3 * Math.PI / 4 && initalTheta <= 5 * Math.PI / 4)
+			gps.travelToWithoutAvoid(FinalProject.zipredX - 1, FinalProject.zipredY);
+
+	}
+
+	private static void ziplocalization(LightLocalizer loc) {
+		loc.startLightLOC4();
+		waitForLightLOC(loc);
 	}
 
 	/**
