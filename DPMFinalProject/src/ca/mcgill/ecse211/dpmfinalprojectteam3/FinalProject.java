@@ -4,6 +4,7 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import java.util.LinkedList;
 
+import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -294,13 +295,25 @@ public class FinalProject extends Thread {
 		 * gps.setOdometryCorrection(oc), don't change anything below. Don't get rid of
 		 * this button.waitForAnyPress() below if you are testing
 		 */
-		/*
-		 * Button.waitForAnyPress(); odometer.start(); odometryDisplay.start();
-		 * jointpoller.on(); odometer.setX(1 * TILE_SPACING);
-		 * odometer.setY(TILE_SPACING); oc.on(); oc.start(); jointpoller.start();
-		 * gps.travelTo(1, 3); oc.on(); gps.travelTo(3, 3); oc.on(); gps.travelTo(3, 1);
-		 * oc.on(); gps.travelTo(1, 1); Button.waitForAnyPress();
-		 */
+
+		Button.waitForAnyPress();
+		odometer.start();
+		odometryDisplay.start();
+		jointpoller.on();
+		odometer.setX(1 * TILE_SPACING);
+		odometer.setY(TILE_SPACING);
+		oc.on();
+		oc.start();
+		jointpoller.start();
+		gps.travelTo(1, 3);
+		oc.on();
+		gps.travelTo(3, 3);
+		oc.on();
+		gps.travelTo(3, 1);
+		oc.on();
+		gps.travelTo(1, 1);
+		Button.waitForAnyPress();
+
 		stage = Stage.WIFI;
 		Sound.beepSequence();
 		WiFi wifi = new WiFi();

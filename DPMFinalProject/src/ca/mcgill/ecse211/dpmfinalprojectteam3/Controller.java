@@ -290,23 +290,28 @@ public class Controller {
 		gps.travelToWithoutAvoid(FinalProject.zipgreenX, FinalProject.zipgreenY);
 
 		sleepFor(1);
-		gps.zipTraversal();
+		double initalTheta = gps.zipTraversal();
 		while (Navigation.isNavigating())
 			continue;
 		while (gps.ziptraversing)
 			continue;
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipredX);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipredY);
-		double theta = FinalProject.odometer.getTheta();
-		if (theta >= Math.PI / 4 && theta <= 3 * Math.PI / 4) {
-			FinalProject.odometer.setTheta(Math.PI / 2);
+		FinalProject.odometer.setTheta(initalTheta);
+
+		if (initalTheta >= Math.PI / 4 && initalTheta <= 3 * Math.PI / 4)
+			// FinalProject.odometer.setTheta(Math.PI / 2);
 			gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
-		} else
+		else if ((initalTheta) > 7 * Math.PI / 4 || ((initalTheta >= 0) && (initalTheta <= Math.PI / 4)))
 			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY + 1);
+		else if (initalTheta >= 5 * Math.PI / 4 && initalTheta <= 7 * Math.PI / 4)
+			gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY - 1);
+		else if (initalTheta >= 3 * Math.PI / 4 && initalTheta <= 5 * Math.PI / 4)
+			gps.travelToWithoutAvoid(FinalProject.zipredX - 1, FinalProject.zipredY);
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
-		gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
+		// gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
 		gps.turnTo(0);
 		while (Navigation.isNavigating())
 			continue;
@@ -314,8 +319,14 @@ public class Controller {
 		sleepFor(1);
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
-		FinalProject.odometer.setX(FinalProject.TILE_SPACING * (FinalProject.zipredX + 1));
-		FinalProject.odometer.setY(FinalProject.TILE_SPACING * (FinalProject.zipredY + 1));
+		int currentX = (int) ((FinalProject.odometer.getX() + FinalProject.TILE_SPACING / 3)
+				/ FinalProject.TILE_SPACING);
+		int currentY = (int) ((FinalProject.odometer.getY() + FinalProject.TILE_SPACING / 3)
+				/ FinalProject.TILE_SPACING);
+		loc.startLightLOC4();
+		waitForLightLOC(loc);
+		FinalProject.odometer.setX(currentX * FinalProject.TILE_SPACING);
+		FinalProject.odometer.setY(currentY * FinalProject.TILE_SPACING);
 		FinalProject.odometer.setTheta(0);
 		FinalProject.stage = Stage.NAVIGATION;
 	}

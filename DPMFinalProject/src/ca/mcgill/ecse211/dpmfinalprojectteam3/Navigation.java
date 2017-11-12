@@ -501,9 +501,15 @@ public class Navigation {
 
 	/**
 	 * zip traversal algorithm slows down near the end for a safer landing.
+	 * 
+	 * @param initaltheta
+	 *            value of the robot's heading before traversing, set the odometer
+	 *            equal to this value once the zip traversal finishes (assumption
+	 *            that it doesnt change much).
 	 */
-	public void zipTraversal() {
+	public double zipTraversal() {
 		ziptraversing = true;
+		double initialTheta = odometer.getTheta();
 		FinalProject.leftMotor.setSpeed(300); // set speeds
 		FinalProject.rightMotor.setSpeed(300);
 		FinalProject.zipMotor.setSpeed(225);
@@ -521,6 +527,7 @@ public class Navigation {
 		while (isNavigating)
 			continue;
 		ziptraversing = false;
+		return initialTheta;
 	}
 
 	/**

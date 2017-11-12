@@ -178,7 +178,7 @@ public class UltrasonicLocalizer {
 
 			filter_close(dist); // Filter out distances that are too close that's not meant to be
 
-			while (this.dist > TOP_THRESHOLD) { // Doesn't see the wall
+			while (this.dist >= TOP_THRESHOLD) { // Doesn't see the wall
 
 				this.dist = poller.getReading(); // update distance from wall
 
@@ -211,7 +211,7 @@ public class UltrasonicLocalizer {
 			filter_close(dist); // Filter out distances that are too close for no reasons
 
 			// Rotate until it sees a wall
-			while (this.dist > TOP_THRESHOLD) { // Doesn't see the wall
+			while (this.dist >= TOP_THRESHOLD) { // Doesn't see the wall
 
 				this.dist = poller.getReading(); // update distance from wall
 
@@ -254,7 +254,7 @@ public class UltrasonicLocalizer {
 		}
 
 		if (localizationType == LocalizationType.FALLINGEDGE) {
-			UPDATED_ANGLE = UPDATED_ANGLE + 16; // This value is found experimentally
+			UPDATED_ANGLE = UPDATED_ANGLE + 17; // This value is found experimentally
 			navigation.turnWithoutInterruption(UPDATED_ANGLE);
 		}
 

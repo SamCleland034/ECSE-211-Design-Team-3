@@ -2,11 +2,12 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 // TODO: Auto-generated Javadoc
 /**
- * Avoidance controls if the robot should be in the avoiding state or not. It
- * takes in data from an ultrasonic poller instance and if the data is less than
- * a certain threshold, then we interupt whatever the navigation is doing and
- * avoid. When the robot thinks its save again (after seeing nothing for a
- * while), it will then travelTo wherever it was previously travelling to.
+ * Avoidance controls if the robot should be in the avoiding state or not while
+ * navigating only. It takes in data from an ultrasonic poller instance and if
+ * the data is less than a certain threshold, then we interupt whatever the
+ * navigation is doing and avoid, using a bang bang wall follower. When the
+ * robot thinks its safe again (after seeing nothing for a while), it will then
+ * travelTo wherever it was previously travelling to.
  */
 public class Avoidance extends Thread {
 
@@ -91,8 +92,7 @@ public class Avoidance extends Thread {
 			} else if (avoiding && inDanger) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
-				FinalProject.leftMotor.rotate(45, true);
-				FinalProject.rightMotor.rotate(45, false);
+				gps.turn(-45);
 				sensorMotor.off();
 				sleepFor(0.5);
 				while (FinalProject.usMotor.isMoving())
