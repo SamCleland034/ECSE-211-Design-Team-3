@@ -50,6 +50,7 @@ public class Navigation {
 	private static double CENTER_OFFSET = 1.96;
 	public static double RIGHT_OFFSET = 1.0093;
 	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
+	private static final float ROTATE_SPEED_RIGHT = (float) (ROTATE_SPEED * RIGHT_OFFSET);
 
 	/** The search region path. */
 	private LinkedList<Integer> searchRegionPath;
@@ -463,7 +464,7 @@ public class Navigation {
 
 		// set rotate speed for both motors
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
-		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
+		FinalProject.rightMotor.setSpeed(ROTATE_SPEED_RIGHT);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
@@ -492,7 +493,7 @@ public class Navigation {
 
 		// set rotate speed for both motors
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
-		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
+		FinalProject.rightMotor.setSpeed(ROTATE_SPEED_RIGHT);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, turnTheta), true);
@@ -552,7 +553,7 @@ public class Navigation {
 	void turn(double theta) {
 		// set rotate speed for both motors
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
-		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
+		FinalProject.rightMotor.setSpeed(ROTATE_SPEED_RIGHT);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
@@ -567,7 +568,7 @@ public class Navigation {
 	 */
 	void turnWithoutInterruption(double theta) {
 		FinalProject.leftMotor.setSpeed(ROTATE_SPEED);
-		FinalProject.rightMotor.setSpeed(ROTATE_SPEED);
+		FinalProject.rightMotor.setSpeed(ROTATE_SPEED_RIGHT);
 
 		// Turn
 		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
