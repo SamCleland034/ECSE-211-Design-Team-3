@@ -40,6 +40,8 @@ public class OdometryCorrection extends Thread {
 	/** The gps. */
 	private Navigation gps;
 
+	public int counter;
+
 	// private EV3ColorSensor colorSensor;
 
 	/** The Constant SENSOR_OFFSET. */
@@ -81,7 +83,7 @@ public class OdometryCorrection extends Thread {
 		long startTime;
 		long endTime;
 		double[] lightValue;
-		int counter = 1;
+		counter = 0;
 		while (true) {
 			if (on) {
 				startTime = System.currentTimeMillis();
@@ -91,7 +93,7 @@ public class OdometryCorrection extends Thread {
 						Sound.beepSequence();
 						checkOrientation();
 						corrected = true;
-						counter = 1;
+						counter = 2;
 						sleepFor(1);
 					} else {
 						counter--;
@@ -106,7 +108,7 @@ public class OdometryCorrection extends Thread {
 						Sound.beep();
 						checkRightPoller();
 						corrected = true;
-						counter = 1;
+						counter = 2;
 						sleepFor(1);
 					} else {
 						counter--;
@@ -121,8 +123,9 @@ public class OdometryCorrection extends Thread {
 						speed = FinalProject.rightMotor.getSpeed();
 						Sound.beep();
 						checkLeftPoller();
+						counter = 2;
 						corrected = true;
-						counter = 1;
+
 						sleepFor(1);
 					} else {
 						counter--;

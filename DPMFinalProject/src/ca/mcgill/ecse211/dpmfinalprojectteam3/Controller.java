@@ -96,8 +96,10 @@ public class Controller {
 	 */
 	public void startControlFlow() {
 		FinalProject.stage = Stage.STARTINGLOCALIZATION;
+		// localize in corner
 		startingLocalization(uspoller, jointpoller, gps, usLoc, lightLoc);
 		waitForLightLOC(lightLoc);
+		// set coordinates to these based on what color and corner starting from
 		if (FinalProject.greenTeam == 3) {
 			if (FinalProject.greenCorner == 1) {
 				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
@@ -107,7 +109,7 @@ public class Controller {
 				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(3 * Math.PI / 2);
-			} else if (FinalProject.greenCorner == 2) {
+			} else if (FinalProject.greenCorner == 3) {
 				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(Math.PI);
@@ -125,7 +127,7 @@ public class Controller {
 				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(3 * Math.PI / 2);
-			} else if (FinalProject.redCorner == 2) {
+			} else if (FinalProject.redCorner == 3) {
 				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(Math.PI);
@@ -206,10 +208,14 @@ public class Controller {
 		sleepFor(1);
 		jointpoller.off();
 		usLoc.doLocalization();
-		sleepFor(1);
+		while (usLoc.localizing)
+			continue;
 		uspoller.off();
 		jointpoller.on();
+
 		jointpoller.start();
+		sleepFor(1);
+		lightLoc.sweep();
 		lightLoc.startLightLOC4();
 		waitForLightLOC(lightLoc);
 
@@ -282,7 +288,13 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
-		ziplocalization(loc);
+		loc.correctPosition();
+		loc.startLightLOC4();
+		waitForLightLOC(loc);
+		gps.turn(7);
+		while (Navigation.isNavigating())
+			continue;
+		FinalProject.odometer.setTheta(0);
 
 		jointlightpoller.off();
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipgreenXc);
@@ -298,26 +310,24 @@ public class Controller {
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipredX);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipredY);
 		FinalProject.odometer.setTheta(initalTheta);
-		checkOrientation(initalTheta, gps);
+		gps.travelToWithoutAvoid(FinalProject.zipredXc, FinalProject.zipredYc);
+		// checkOrientation(initalTheta, gps);
 
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
 		// gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
 		gps.turnTo(0);
+		jointlightpoller.on();
+		loc.sweep();
 		while (Navigation.isNavigating())
 			continue;
-		jointlightpoller.on();
-		sleepFor(1);
-		int currentX = (int) ((FinalProject.odometer.getX() + FinalProject.TILE_SPACING / 3)
-				/ FinalProject.TILE_SPACING);
-		int currentY = (int) ((FinalProject.odometer.getY() + FinalProject.TILE_SPACING / 3)
-				/ FinalProject.TILE_SPACING);
 
+		sleepFor(1);
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
-		FinalProject.odometer.setX(currentX * FinalProject.TILE_SPACING);
-		FinalProject.odometer.setY(currentY * FinalProject.TILE_SPACING);
+		FinalProject.odometer.setX(FinalProject.zipredXc * FinalProject.TILE_SPACING);
+		FinalProject.odometer.setY(FinalProject.zipredYc * FinalProject.TILE_SPACING);
 		FinalProject.odometer.setTheta(0);
 		FinalProject.stage = Stage.NAVIGATION;
 	}
@@ -333,11 +343,6 @@ public class Controller {
 		else if (initalTheta >= 3 * Math.PI / 4 && initalTheta <= 5 * Math.PI / 4)
 			gps.travelToWithoutAvoid(FinalProject.zipredX - 1, FinalProject.zipredY);
 
-	}
-
-	private static void ziplocalization(LightLocalizer loc) {
-		loc.startLightLOC4();
-		waitForLightLOC(loc);
 	}
 
 	/**
@@ -365,6 +370,7 @@ public class Controller {
 	 */
 	public static void navigating(Navigation gps, SensorRotation motor, LightPoller leftPoller, LightPoller rightPoller,
 			JointLightPoller jointpoller, OdometryCorrection oc, UltrasonicPoller uspoller, LightPoller colorpoller) {
+		// turn on threads that need to be on for navigation
 		colorpoller.off();
 		motor.on();
 		uspoller.on();

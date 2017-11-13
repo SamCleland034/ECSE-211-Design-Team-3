@@ -47,8 +47,8 @@ public class Navigation {
 	private static final double SQUARE_LENGTH = 30.48;
 
 	/** The center offset. */
-	private static double CENTER_OFFSET = 1.96;
-	public static double RIGHT_OFFSET = 1.0093;
+	private static double CENTER_OFFSET = 1.43;
+	public static double RIGHT_OFFSET = 1.0089;
 	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
 	private static final float ROTATE_SPEED_RIGHT = (float) (ROTATE_SPEED * RIGHT_OFFSET);
 
@@ -316,8 +316,10 @@ public class Navigation {
 		// fetch
 		// usSensor
 		// data
-		if (!avoided)
+		if (!avoided) {
 			oc.on();
+			oc.counter = 0;
+		}
 		master.on();
 		long startTime;
 		long endTime;
@@ -326,12 +328,13 @@ public class Navigation {
 			// update distance from
 			// wall
 			if (oc.corrected) {
+				oc.corrected = false;
 				distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2));
 				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
 				// forward
 				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
 						(distanceToTravel * RIGHT_OFFSET) * (Navigation.RIGHT_OFFSET)), true);
-				oc.corrected = false;
+
 			}
 			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 0.9) {
 				FinalProject.leftMotor.stop(true);
@@ -523,8 +526,8 @@ public class Navigation {
 		FinalProject.rightMotor.setSpeed(150);
 		FinalProject.zipMotor.setSpeed(225 / 2);
 		FinalProject.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
-		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 64), true);
-		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 64), false);
+		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 61), true);
+		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 61), false);
 		while (isNavigating)
 			continue;
 		ziptraversing = false;

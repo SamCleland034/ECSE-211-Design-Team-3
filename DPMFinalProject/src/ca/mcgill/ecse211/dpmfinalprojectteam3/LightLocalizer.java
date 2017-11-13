@@ -1238,27 +1238,17 @@ public class LightLocalizer {
 	 */
 	public boolean correctPosition() {
 		boolean corrected = false;
-		int rotations = Navigation.convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, 15);
+		int rotations = Navigation.convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, 25);
 		FinalProject.leftMotor.setSpeed(60);
 		FinalProject.rightMotor.setSpeed(60);
-		int colorLeft = 0;
-		int lastColorLeft = 6;
-		int lastColorRight = 6;
-		int colorRight = 0;
+		double currentTheta = Math.toDegrees(odometer.getTheta());
+		double[] lightValues;
 		FinalProject.leftMotor.rotate(-rotations, true);
 		FinalProject.rightMotor.rotate(rotations, true);
-		double currentTheta = Math.toDegrees(odometer.getTheta());
-		float[] leftsample = new float[1];
-		float[] rightsample = new float[1];
 		while (Navigation.isNavigating()) {
+			lightValues = jointPoller.getValues();
 
-			FinalProject.leftProvider.fetchSample(leftsample, 0);
-			colorLeft = (int) leftsample[0];
-			FinalProject.rightProvider.fetchSample(rightsample, 0);
-			colorRight = (int) rightsample[0];
-
-			if ((colorLeft - lastColorLeft) / lastColorLeft >= 1
-					|| (colorRight - lastColorRight) / lastColorRight >= 1) {
+			if (lightValues[0] < 0.23 || lightValues[1] < 0.23) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
@@ -1273,39 +1263,66 @@ public class LightLocalizer {
 				corrected = true;
 				return corrected;
 			}
-			lastColorLeft = colorLeft;
-			lastColorRight = colorRight;
 
 		}
 		FinalProject.leftMotor.rotate(2 * rotations, true);
 		FinalProject.rightMotor.rotate(-2 * rotations, true);
 		while (Navigation.isNavigating()) {
-			FinalProject.leftProvider.fetchSample(leftsample, 0);
-			colorLeft = (int) leftsample[0];
-			FinalProject.rightProvider.fetchSample(rightsample, 0);
-			colorRight = (int) rightsample[0];
+			lightValues = jointPoller.getValues();
 
-			if ((colorLeft - lastColorLeft) / lastColorLeft >= 1
-					|| (colorRight - lastColorRight) / lastColorRight >= 1) {
+			if (lightValues[0] < 0.23 || lightValues[1] < 0.23) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
 				double changeInTheta = Math.toDegrees(odometer.getTheta()) - currentTheta;
-				navigation.turnWithoutInterruption(-90 - changeInTheta);
+				navigation.turnTo(-90 + (360 - changeInTheta));
 				while (Navigation.isNavigating())
 					continue;
+
 				odometer.setTheta(-Math.PI / 2);
-				navigation.driveWithoutAvoid(7);
+				navigation.driveWithoutAvoid(6);
 				navigation.turnTo(0);
 				corrected = true;
 				return corrected;
 			}
-			lastColorLeft = colorLeft;
-			lastColorRight = colorRight;
+
 		}
 		FinalProject.leftMotor.rotate(-rotations, true);
 		FinalProject.rightMotor.rotate(rotations, false);
 		return corrected;
+	}
+
+	public void sweep() {
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
+		while (FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving()) {
+			double[] lightValue = jointPoller.getValues();
+			if (lightValue[0] < 0.25) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
+				reposition();
+				break;
+
+			}
+			if (lightValue[1] < 0.25) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
+				reposition();
+				break;
+			}
+		}
+	}
+
+	private void reposition() {
+		navigation.turnWithoutInterruption(-90);
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), false);
+		navigation.turnWithoutInterruption(90);
+		FinalProject.leftMotor.rotate(-Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
+		FinalProject.rightMotor.rotate(-Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), false);
+		while (Navigation.isNavigating())
+			continue;
+
 	}
 
 }

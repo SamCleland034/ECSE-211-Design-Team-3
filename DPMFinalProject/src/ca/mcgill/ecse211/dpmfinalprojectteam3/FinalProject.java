@@ -4,7 +4,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import java.util.LinkedList;
 
-import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -218,7 +217,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.25; // Width of car
+	public static final double TRACK = 11.37; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 12;
@@ -296,24 +295,14 @@ public class FinalProject extends Thread {
 		 * this button.waitForAnyPress() below if you are testing
 		 */
 
-		Button.waitForAnyPress();
-		odometer.start();
-		odometryDisplay.start();
-		jointpoller.on();
-		odometer.setX(1 * TILE_SPACING);
-		odometer.setY(TILE_SPACING);
-		oc.on();
-		oc.start();
-		jointpoller.start();
-		gps.travelTo(1, 3);
-		oc.on();
-		gps.travelTo(3, 3);
-		oc.on();
-		gps.travelTo(3, 1);
-		oc.on();
-		gps.travelTo(1, 1);
-		Button.waitForAnyPress();
-
+		/*
+		 * Button.waitForAnyPress(); odometer.start(); odometryDisplay.start();
+		 * jointpoller.on(); odometer.setX(1 * TILE_SPACING);
+		 * odometer.setY(TILE_SPACING); oc.on(); oc.start(); jointpoller.start();
+		 * gps.travelTo(1, 3); oc.on(); gps.travelTo(3, 3); oc.on(); gps.travelTo(3, 1);
+		 * oc.on(); gps.travelTo(1, 1); Button.waitForAnyPress();
+		 */
+		// get values from server
 		stage = Stage.WIFI;
 		Sound.beepSequence();
 		WiFi wifi = new WiFi();
@@ -350,18 +339,53 @@ public class FinalProject extends Thread {
 				startingY = 7;
 			}
 		}
-
-		LinkedList<Double> coordsList = new LinkedList<Double>();
-		coordsList.addLast((double) zipgreenXc);
-		coordsList.addLast((double) startingY);
-		coordsList.addLast((double) zipgreenXc);
-		coordsList.addLast((double) zipgreenYc);
-		coordsList.addLast((double) zipredX + 1);
-		coordsList.addLast((double) LLSRRY + 0.5);
-		coordsList.addLast(LLSRRX + 0.5);
-		coordsList.addLast(LLSRRY + 0.5);
-		gps.setPath(coordsList);
-
+		// determines path based on the layout that is choosen, will have to traverse x
+		// or y first depending on the layout of the zipline
+		if (Math.abs(zipgreenX - zipredX) > Math.abs(zipgreenY - zipredY)) {
+			LinkedList<Double> coordsList = new LinkedList<Double>();
+			coordsList.addLast((double) zipgreenXc);
+			coordsList.addLast((double) startingY);
+			coordsList.addLast((double) zipgreenXc);
+			coordsList.addLast((double) zipgreenYc);
+			coordsList.addLast((double) zipredXc);
+			coordsList.addLast((double) LLSRRY + 0.5);
+			coordsList.addLast(LLSRRX + 0.5);
+			coordsList.addLast(LLSRRY + 0.5);
+			gps.setPath(coordsList);
+		} else {
+			LinkedList<Double> coordsList = new LinkedList<Double>();
+			coordsList.addLast((double) startingX);
+			coordsList.addLast((double) zipgreenYc);
+			coordsList.addLast((double) zipgreenXc);
+			coordsList.addLast((double) zipgreenYc);
+			coordsList.addLast((double) LLSRRX + 0.5);
+			coordsList.addLast((double) zipredYc);
+			coordsList.addLast(LLSRRX + 0.5);
+			coordsList.addLast(LLSRRY + 0.5);
+			gps.setPath(coordsList);
+		}
+		/*
+		 * if (zipgreenY - zipredY == 0) { LinkedList<Double> coordsList = new
+		 * LinkedList<Double>(); coordsList.addLast((double) zipgreenXc);
+		 * coordsList.addLast((double) startingY); coordsList.addLast((double)
+		 * zipgreenXc); coordsList.addLast((double) zipgreenYc);
+		 * coordsList.addLast((double) LLSRRX + 0.5); coordsList.addLast((double)
+		 * zipredY + 1); coordsList.addLast(LLSRRX + 0.5); coordsList.addLast(LLSRRY +
+		 * 0.5); gps.setPath(coordsList); } else if ((zipgreenY - zipredY) > 0) {
+		 * LinkedList<Double> coordsList = new LinkedList<Double>();
+		 * coordsList.addLast((double) zipgreenXc); coordsList.addLast((double)
+		 * startingY); coordsList.addLast((double) zipgreenXc);
+		 * coordsList.addLast((double) zipgreenYc); coordsList.addLast((double) zipredX
+		 * + 1); coordsList.addLast((double) LLSRRY + 0.5); coordsList.addLast(LLSRRX +
+		 * 0.5); coordsList.addLast(LLSRRY + 0.5); gps.setPath(coordsList); } else if
+		 * ((zipgreenY - zipredY) < 0) { LinkedList<Double> coordsList = new
+		 * LinkedList<Double>(); coordsList.addLast((double) zipgreenXc);
+		 * coordsList.addLast((double) startingY); coordsList.addLast((double)
+		 * zipgreenXc); coordsList.addLast((double) zipgreenYc);
+		 * coordsList.addLast((double) LLSRRX + 0.5); coordsList.addLast((double)
+		 * zipredY - 1); coordsList.addLast(LLSRRX + 0.5); coordsList.addLast(LLSRRY +
+		 * 0.5); gps.setPath(coordsList); }
+		 */
 		/*
 		 * if (greenTeam == 3) { LinkedList<Double> coordsList = new
 		 * LinkedList<Double>(); LinkedList<Double> searchList = new
@@ -414,7 +438,7 @@ public class FinalProject extends Thread {
 		 * gps.setSearchRegionPath(searchList); // gps.setSearchRegionPath(URSRGX,
 		 * URSRGX, URSRGX, LLSRGY, LLSRGX, LLSRGY, // LLSRGX, URSRGY); }
 		 */
-
+		// stage matchine logic
 		ctfcontroller.startControlFlow();
 	}
 

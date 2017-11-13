@@ -40,7 +40,9 @@ public class UltrasonicLocalizer {
 
 	/** The Constant FILTER_OUT. To filter out bad data */
 	// Used to filter values
-	private static final int FILTER_OUT = 20;
+	private static final int FILTER_OUT = 30;
+
+	private static final int FILTER_CONTROL = 130;
 
 	/** The odometer. */
 	private Odometer odometer;
@@ -55,6 +57,8 @@ public class UltrasonicLocalizer {
 	private int filterControl;
 
 	public boolean localizing;
+
+	private int filter = 0;
 
 	/**
 	 * Instantiates a new ultrasonic localizer.
@@ -105,62 +109,38 @@ public class UltrasonicLocalizer {
 
 		double FIRST_ANGLE = 0, SECOND_ANGLE = 0; // To store two angles when it changes from seeing the wall to facing
 		// away or vice versa
-		FinalProject.leftMotor.setSpeed(200);
-		FinalProject.rightMotor.setSpeed(200);
+		this.localizing = true;
+		FinalProject.leftMotor.setSpeed(150);
+		FinalProject.rightMotor.setSpeed(150);
 		if (localizationType == LocalizationType.RISINGEDGE) { // Starts by facing the wall
-			navigation.turn(360); // Turns
+			FinalProject.leftMotor.forward(); // Starts turning
+			FinalProject.rightMotor.backward();// Turns
+			this.dist = 0;
 			// Get data from ultrasonic sensor
-			double dist = poller.getReading();
-			filter_far(dist); // Filter the distances that is too far that's not meant to be
-			while (this.dist < BOTTOM_THRESHOLD) { // It's seeing the wall during the turn
-
-				this.dist = poller.getReading(); // update distance from wall
-
-				if (this.dist > BOTTOM_THRESHOLD) {
-					FIRST_ANGLE = odometer.getTheta(); // Stop the motos when it doesn't see the wall anymore
-					Sound.buzz();
+			while (true) {
+				this.dist = processUSData();
+				if (this.dist > TOP_THRESHOLD) {
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
+					navigation.turnWithoutInterruption(40);
+					while (Navigation.isNavigating())
+						continue;
+					this.localizing = false;
+					FinalProject.odometer.setTheta(0);
+					return;
 				}
-			}
-
+			} // Filter the distances that is too far that's not meant to be
+			/*
+			 * while (this.dist < BOTTOM_THRESHOLD) { // It's seeing the wall during the
+			 * turn
+			 * 
+			 * this.dist = poller.getReading(); // update distance from wall
+			 * 
+			 * if (this.dist > BOTTOM_THRESHOLD) { FIRST_ANGLE = odometer.getTheta(); //
+			 * Stop the motos when it doesn't see the wall anymore Sound.buzz();
+			 * FinalProject.leftMotor.stop(true); FinalProject.rightMotor.stop(false); } }
+			 */
 			// Save the angle read by the odometer
-
-			navigation.turn(-360); // Rotate back to facing the wall and rotate until it sees no wall
-			Sound.buzz();
-
-			// Pause to not mix results
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// there is nothing to be done here because it is not expected
-				// that
-				// the odometer will be interrupted by another thread
-			}
-
-			this.dist = poller.getReading();
-			; // update distance from wall
-
-			filter_far(dist); // Filter distances too big that's not meant to be
-
-			// Rotate until it sees no wall
-			while (this.dist < BOTTOM_THRESHOLD) { // sees the wall //Using the distance in between because it can't be
-													// sure //whether it is going to be a raising or falling edge
-
-				this.dist = poller.getReading(); // update distance from wall
-
-				if (this.dist > BOTTOM_THRESHOLD) { // There's no more wall
-													// Using the distance in between because it can't be sure
-													// whether it is going to be a raising or falling edge
-					Sound.buzz();
-					Sound.playTone(1000, 100);
-					FinalProject.leftMotor.stop(true);
-					FinalProject.rightMotor.stop(false);
-				}
-			}
-
-			SECOND_ANGLE = odometer.getTheta(); // Save the angle read by the odometer
-			updateAngle(FIRST_ANGLE, SECOND_ANGLE); // turn to face (0 axis)
 
 		}
 
@@ -185,7 +165,8 @@ public class UltrasonicLocalizer {
 				if (this.dist < TOP_THRESHOLD) {
 					FIRST_ANGLE = odometer.getTheta();
 					FinalProject.leftMotor.stop(true);
-					FinalProject.rightMotor.stop(false);// When it sees the wall, stop
+					FinalProject.rightMotor.stop(false);
+					// When it sees the wall, stop
 					Sound.buzz();
 
 				}
@@ -230,6 +211,20 @@ public class UltrasonicLocalizer {
 
 		}
 		this.localizing = false;
+	}
+
+	private double processUSData() {
+		double data = poller.getReading();
+		if (filter < FILTER_CONTROL && data > 51) {
+			filter++;
+			return this.dist;
+		} else if (filter >= FILTER_CONTROL && data > 51) {
+			return data;
+		} else {
+			filter = 0;
+			return data;
+		}
+
 	}
 
 	/**
