@@ -1,4 +1,3 @@
-
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
@@ -28,7 +27,7 @@ public class UltrasonicLocalizer {
 	 */
 	private double UPDATED_ANGLE;
 
-	/** The Constant TOP_THRESHOLD. Noise margin top for reading distance values */
+	/** The Constant 120. Noise margin top for reading distance values */
 	// The noise margin is set to be 35 to 55 which is determined experimentally
 	private static final int TOP_THRESHOLD = 51; // "d+k"
 
@@ -119,10 +118,10 @@ public class UltrasonicLocalizer {
 			// Get data from ultrasonic sensor
 			while (true) {
 				this.dist = processUSData();
-				if (this.dist > TOP_THRESHOLD) {
+				if (this.dist > 120) {
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
-					navigation.turnWithoutInterruption(40);
+					navigation.turnWithoutInterruption(46);
 					while (Navigation.isNavigating())
 						continue;
 					this.localizing = false;
@@ -158,11 +157,11 @@ public class UltrasonicLocalizer {
 
 			filter_close(dist); // Filter out distances that are too close that's not meant to be
 
-			while (this.dist >= TOP_THRESHOLD) { // Doesn't see the wall
+			while (this.dist >= 120) { // Doesn't see the wall
 
 				this.dist = poller.getReading(); // update distance from wall
 
-				if (this.dist < TOP_THRESHOLD) {
+				if (this.dist < 120) {
 					FIRST_ANGLE = odometer.getTheta();
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
@@ -192,16 +191,16 @@ public class UltrasonicLocalizer {
 			filter_close(dist); // Filter out distances that are too close for no reasons
 
 			// Rotate until it sees a wall
-			while (this.dist >= TOP_THRESHOLD) { // Doesn't see the wall
+			while (this.dist >= 120) { // Doesn't see the wall
 
 				this.dist = poller.getReading(); // update distance from wall
 
-				if (this.dist < TOP_THRESHOLD) {
+				if (this.dist < 120) {
 					SECOND_ANGLE = odometer.getTheta();
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false); // Sees the wall
 					Sound.buzz();
-					Sound.playTone(1000, 100);
+					Sound.playTone(1200, 100);
 
 				}
 			}

@@ -217,7 +217,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.37; // Width of car
+	public static final double TRACK = 11.39; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 12;
@@ -280,7 +280,7 @@ public class FinalProject extends Thread {
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller, jointpoller);
 		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
 		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
-		LocalizationType lt = LocalizationType.FALLINGEDGE;
+		LocalizationType lt = LocalizationType.RISINGEDGE;
 		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
 		Controller ctfcontroller = new Controller(master, jointpoller, lightLoc, rightpoller, oc, sensorMotor, usLoc,
 				uspoller, gps);

@@ -26,7 +26,7 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	public static final int MOTOR_SPEED = 150;
+	public static final int MOTOR_SPEED = 200;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 150;
@@ -48,7 +48,7 @@ public class Navigation {
 
 	/** The center offset. */
 	private static double CENTER_OFFSET = 1.43;
-	public static double RIGHT_OFFSET = 1.0089;
+	public static double RIGHT_OFFSET = 1.0086;
 	public static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * RIGHT_OFFSET);
 	private static final float ROTATE_SPEED_RIGHT = (float) (ROTATE_SPEED * RIGHT_OFFSET);
 
@@ -324,19 +324,24 @@ public class Navigation {
 		long startTime;
 		long endTime;
 		while (!master.inDanger) {// far enough from block
-			startTime = System.currentTimeMillis();
+
 			// update distance from
 			// wall
 			if (oc.corrected) {
 				oc.corrected = false;
 				distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2));
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distanceToTravel), true); // move
+				// FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
+				// distanceToTravel), true); // move
 				// forward
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS,
-						(distanceToTravel * RIGHT_OFFSET) * (Navigation.RIGHT_OFFSET)), true);
+				// FinalProject.rightMotor.rotate(
+				// convertDistance(FinalProject.WHEEL_RADIUS, (distanceToTravel) *
+				// (Navigation.RIGHT_OFFSET)),
+				// true);
+				FinalProject.leftMotor.forward();
+				FinalProject.rightMotor.forward();
 
 			}
-			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 0.9) {
+			if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2)) < 1.01) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
 				Sound.buzz();
@@ -344,13 +349,6 @@ public class Navigation {
 				return; // break out of while loop if has reached destination
 			}
 
-			endTime = System.currentTimeMillis();
-			if (endTime - startTime < SAMPLING_PERIOD) {
-				try {
-					Thread.sleep(SAMPLING_PERIOD - (endTime - startTime));
-				} catch (InterruptedException e) {
-				}
-			}
 		}
 		// if too close to obstacle
 		oc.off();

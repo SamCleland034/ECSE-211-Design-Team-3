@@ -35,7 +35,7 @@ import ca.mcgill.ecse211.WiFiClient.WifiConnection;
  */
 public class WiFi {
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.9";
+	private static final String SERVER_IP = "192.168.2.3";
 	private static final int TEAM_NUMBER = 3;
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
@@ -76,8 +76,6 @@ public class WiFi {
 			FinalProject.URSRGX = ((Long) data.get("SG_UR_x")).intValue();
 			FinalProject.URSRGY = ((Long) data.get("SG_UR_y")).intValue();
 			FinalProject.URSRRX = ((Long) data.get("SR_UR_x")).intValue();
-			System.out.println(FinalProject.URSRGX);
-			System.out.println(FinalProject.URSRGY);
 			FinalProject.URSRRY = ((Long) data.get("Red_UR_y")).intValue();
 			FinalProject.zipgreenX = ((Long) data.get("ZC_G_x")).intValue();
 			FinalProject.zipgreenY = ((Long) data.get("ZC_G_y")).intValue();
@@ -96,7 +94,7 @@ public class WiFi {
 			FinalProject.redCorner = ((Long) data.get("RedCorner")).intValue();
 			FinalProject.redTeam = ((Long) data.get("RedTeam")).intValue();
 			FinalProject.greenTeam = ((Long) data.get("GreenTeam")).intValue();
-			FinalProject.greenCorner = ((Long) data.get("OG")).intValue();
+			FinalProject.greenCorner = ((Long) data.get("GreenCorner")).intValue();
 			FinalProject.redColor = ((Long) data.get("OR")).intValue();
 			/*
 			 * // Example 2 : Print out specific values int redTeam = ((Long)

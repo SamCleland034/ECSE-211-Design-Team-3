@@ -30,7 +30,7 @@ public class OdometryCorrection extends Thread {
 	private JointLightPoller jointPoller;
 
 	/** The samplingperiod. */
-	private static int SAMPLINGPERIOD = 10;
+	private static int SAMPLINGPERIOD = 12;
 	/** The distance between lines. */
 	private static double TILE_SPACING = 30.48;
 

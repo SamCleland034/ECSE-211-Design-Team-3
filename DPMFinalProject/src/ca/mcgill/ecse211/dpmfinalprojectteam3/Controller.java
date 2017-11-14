@@ -215,7 +215,7 @@ public class Controller {
 
 		jointpoller.start();
 		sleepFor(1);
-		lightLoc.sweep();
+		// lightLoc.correctPosition();
 		lightLoc.startLightLOC4();
 		waitForLightLOC(lightLoc);
 
@@ -288,10 +288,10 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(2);
-		loc.correctPosition();
+		// loc.correctPosition();
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
-		gps.turn(7);
+		gps.turn(4);
 		while (Navigation.isNavigating())
 			continue;
 		FinalProject.odometer.setTheta(0);
