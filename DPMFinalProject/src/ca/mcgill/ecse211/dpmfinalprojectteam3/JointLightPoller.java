@@ -28,10 +28,10 @@ public class JointLightPoller extends Thread {
 	private double rightLightVal = 0;
 
 	/** The left last light val. */
-	private double leftLastLightVal = 0;
+	// private double leftLastLightVal = 0;
 
 	/** The right last light val. */
-	private double rightLastLightVal = 0;
+	// private double rightLastLightVal = 0;
 
 	/** The on. */
 	public boolean on;
@@ -80,7 +80,7 @@ public class JointLightPoller extends Thread {
 				}
 
 				try {
-					Thread.sleep(20);
+					Thread.sleep(18);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {

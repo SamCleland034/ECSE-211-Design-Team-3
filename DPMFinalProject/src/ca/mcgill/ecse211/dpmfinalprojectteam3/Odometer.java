@@ -18,10 +18,10 @@ public class Odometer extends Thread {
 	private double y;
 
 	/** The last tacho left. Last tachometer reading of the left wheel */
-	private int lastTachoLeft;// Tacho L at last sample
+	// Tacho L at last sample
 
 	/** The last tacho right. Last tachometer reading of the right wheel */
-	private int lastTachoRight;// Tacho R at last sample
+	// Tacho R at last sample
 
 	/** The now tacho left. Current tachometer reading of the left wheel */
 	private int nowTachoLeft;// Current tacho L

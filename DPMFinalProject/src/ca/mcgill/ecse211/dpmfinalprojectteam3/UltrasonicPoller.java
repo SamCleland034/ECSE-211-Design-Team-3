@@ -27,7 +27,7 @@ public class UltrasonicPoller extends Thread {
 	private int reading;
 
 	/** The Constant SAMPLINGPERIOD. */
-	private static final int SAMPLINGPERIOD = 45;
+	private static final int SAMPLINGPERIOD = 22;
 
 	/** The on. */
 	private boolean on;

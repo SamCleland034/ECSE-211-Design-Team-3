@@ -10,7 +10,7 @@ import lejos.hardware.lcd.TextLCD;
  * The Class OdometryDisplay, used to display the odometer to the screen of the
  * EV3 brick. Also display other things such as the ultrasonic sensor readings
  * 
- * @version 1.0
+ * 
  */
 public class OdometryDisplay extends Thread {
 
@@ -54,10 +54,10 @@ public class OdometryDisplay extends Thread {
 			displayStart = System.currentTimeMillis();
 
 			// clear the lines for displaying odometry information
-			t.drawString("X:              ", 0, 0);
-			t.drawString("Y:              ", 0, 1);
-			t.drawString("T:              ", 0, 2);
-			t.drawString("Distance:       ", 0, 3);
+			t.drawString("X:              ", 0, 1);
+			t.drawString("Y:              ", 0, 2);
+			t.drawString("T:              ", 0, 3);
+			t.drawString("Distance:       ", 0, 4);
 
 			// get the odometry information
 			odometer.getPosition(position, new boolean[] { true, true, true });
