@@ -7,8 +7,8 @@ import lejos.robotics.SampleProvider;
 /**
  * Class used for sampling data for the light sensors, particularly the color
  * sensor that will be used for color detection. The other two sensors for line
- * detection will use the JointLightPoller class to synchronize their data
- * better.
+ * detection will use the JointLightPoller class to synchronize their data with
+ * each other. Will be terminated once the robot has found the flag
  */
 public class LightPoller extends Thread {
 
@@ -23,6 +23,7 @@ public class LightPoller extends Thread {
 
 	/** The light val. */
 	private double lightVal = 0;
+	private double[] colorValues = new double[3];
 
 	/** The last light val. */
 	private double lastLightVal = 0;
@@ -51,13 +52,15 @@ public class LightPoller extends Thread {
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-		sample = new float[1];
+		sample = new float[3];
 		while (true) {
 			if (on) {
 				synchronized (this) {
-					lastLightVal = lightVal;
+
 					provider.fetchSample(sample, 0); // acquire data
-					lightVal = (double) (sample[0]); // extract from buffer, cast to int
+					colorValues[0] = sample[0];// extract from buffer, cast to int
+					colorValues[1] = sample[1];
+					colorValues[2] = sample[2];
 				}
 				try {
 					Thread.sleep(50);
@@ -90,10 +93,10 @@ public class LightPoller extends Thread {
 	 *
 	 * @return the light val
 	 */
-	public double getLightVal() {
-		double result;
+	public double[] getLightVal() {
+		double[] result;
 		synchronized (this) {
-			result = lightVal;
+			result = colorValues;
 		}
 
 		return result;
@@ -124,5 +127,17 @@ public class LightPoller extends Thread {
 	 */
 	public void off() {
 		on = false;
+	}
+
+	public boolean checkColors() {
+		synchronized (this) {
+			return (colorValues[0] < FinalProject.RGBColors[0] + FinalProject.EPSILON
+					&& colorValues[0] > FinalProject.RGBColors[0] - FinalProject.EPSILON)
+					&& (colorValues[1] < FinalProject.RGBColors[1] + FinalProject.EPSILON
+							&& colorValues[1] > FinalProject.RGBColors[1] - FinalProject.EPSILON)
+					&& (colorValues[2] < FinalProject.RGBColors[2] + FinalProject.EPSILON
+							&& colorValues[2] > FinalProject.RGBColors[2] - FinalProject.EPSILON);
+
+		}
 	}
 }

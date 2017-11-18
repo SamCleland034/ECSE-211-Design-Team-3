@@ -2,11 +2,12 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 // TODO: Auto-generated Javadoc
 /**
- * Avoidance controls if the robot should be in the avoiding state or not. It
- * takes in data from an ultrasonic poller instance and if the data is less than
- * a certain threshold, then we interupt whatever the navigation is doing and
- * avoid. When the robot thinks its save again (after seeing nothing for a
- * while), it will then travelTo wherever it was previously travelling to.
+ * Avoidance controls if the robot should be in the avoiding state or not while
+ * navigating only. It takes in data from an ultrasonic poller instance and if
+ * the data is less than a certain threshold, then we interupt whatever the
+ * navigation is doing and avoid, using a bang bang wall follower. When the
+ * robot thinks its safe again (after seeing nothing for a while), it will then
+ * travelTo wherever it was previously travelling to.
  */
 public class Avoidance extends Thread {
 
@@ -20,7 +21,10 @@ public class Avoidance extends Thread {
 	private UltrasonicPoller poller;
 
 	/** The Constant FILTERCONTROL. */
-	private static final int FILTERCONTROL = 100;
+	private static final int FILTERCONTROL = 92;
+
+	private static final float MOTOR_SPEED = 250;
+	private static final float MOTOR_SPEED_RIGHT = (float) (MOTOR_SPEED * Navigation.RIGHT_OFFSET);
 
 	/** The avoiding. */
 	public boolean avoiding;
@@ -77,8 +81,6 @@ public class Avoidance extends Thread {
 				startTime = System.currentTimeMillis();
 				distance = poller.getReading();
 				if (distance < FinalProject.THRESHOLD) {
-					FinalProject.leftMotor.stop(true);
-					FinalProject.rightMotor.stop(false);
 					inDanger = true;
 				}
 				endTime = System.currentTimeMillis();
@@ -88,31 +90,38 @@ public class Avoidance extends Thread {
 					} catch (InterruptedException e) {
 					}
 				}
-			} else if (avoiding && inDanger) {
+			} else if (avoiding && inDanger && gps.donecorrecting) {
+				// do bang-bang controller algorithm
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
-				FinalProject.leftMotor.rotate(45, true);
-				FinalProject.rightMotor.rotate(45, false);
+				// reposition to set the robot at a 90 degree angle
+				gps.turnWithoutInterruption(60);
 				sensorMotor.off();
 				sleepFor(0.5);
 				while (FinalProject.usMotor.isMoving())
 					continue;
 				sleepFor(1);
-				FinalProject.usMotor.rotateTo(sensorMotor.reference + 45);
+				// shift the usmotor to the left
+				FinalProject.usMotor.rotateTo(sensorMotor.reference + 52, true);
 				while (FinalProject.usMotor.isMoving())
 					continue;
 				int filter = 0;
 				int measure = poller.getReading();
 				FinalProject.leftMotor.setSpeed(200);
 				FinalProject.rightMotor.setSpeed(200);
+				// start bang-bang controller
 				do {
 
 					startTime = System.currentTimeMillis();
 					distance = poller.getReading();
-					if (distance > FinalProject.THRESHOLD + 10 && filter < FILTERCONTROL) {
+					if (distance > FinalProject.THRESHOLD + 18 && filter == 0) {
+						filter++;
+						measure = distance;
+					} else if (distance > FinalProject.THRESHOLD + 18 && filter < FILTERCONTROL) {
 						filter++;
 						// System.out.println("Filter =" + filter);
-					} else if (distance > FinalProject.THRESHOLD + 10 && filter >= FILTERCONTROL) {
+					} else if (distance > FinalProject.THRESHOLD + 18 && filter >= FILTERCONTROL) {
+						// break out of bang-bang controller and continue travelling
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
 						// System.out.println("Avoided Object");
@@ -128,19 +137,19 @@ public class Avoidance extends Thread {
 						filter = 0;
 						measure = distance;
 					}
-					if (measure > FinalProject.THRESHOLD && measure < FinalProject.THRESHOLD + 10) {
-						FinalProject.leftMotor.setSpeed(250);
-						FinalProject.rightMotor.setSpeed(250);
+					if (measure > FinalProject.THRESHOLD && measure < FinalProject.THRESHOLD + 5) {
+						FinalProject.leftMotor.setSpeed(MOTOR_SPEED);
+						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
 					} else if (measure < FinalProject.THRESHOLD) {
-						FinalProject.leftMotor.setSpeed(250);
-						FinalProject.rightMotor.setSpeed(125);
+						FinalProject.leftMotor.setSpeed(MOTOR_SPEED);
+						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
 					} else {
-						FinalProject.leftMotor.setSpeed(125);
-						FinalProject.rightMotor.setSpeed(250);
+						FinalProject.leftMotor.setSpeed(MOTOR_SPEED * 2 / 3);
+						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 						FinalProject.rightMotor.forward();
 						FinalProject.leftMotor.forward();
 					}

@@ -18,10 +18,10 @@ public class Odometer extends Thread {
 	private double y;
 
 	/** The last tacho left. Last tachometer reading of the left wheel */
-	private int lastTachoLeft;// Tacho L at last sample
+	// Tacho L at last sample
 
 	/** The last tacho right. Last tachometer reading of the right wheel */
-	private int lastTachoRight;// Tacho R at last sample
+	// Tacho R at last sample
 
 	/** The now tacho left. Current tachometer reading of the left wheel */
 	private int nowTachoLeft;// Current tacho L
@@ -88,7 +88,7 @@ public class Odometer extends Thread {
 			double distanceLeft, distanceRight, deltaDistance, deltaT, dX, dY;
 
 			nowTachoLeft = leftMotor.getTachoCount(); // get tacho counts
-			nowTachoRight = rightMotor.getTachoCount()/Navigation.RIGHT_OFFSET;
+			nowTachoRight = rightMotor.getTachoCount() / Navigation.RIGHT_OFFSET;
 
 			// compute wheel displacement
 			distanceLeft = Math.PI * FinalProject.WHEEL_RADIUS * (nowTachoLeft - getLeftMotorTachoCount()) / 180;
@@ -112,18 +112,18 @@ public class Odometer extends Thread {
 				 */
 
 				// setX(getX() + dX);
-				x = getX() + dX;// update estimates of X and Y position
+				x = x + dX;// update estimates of X and Y position
 				// setY(getY() + dY);
-				y = getY() + dY;
-				theta = getTheta() + deltaT;
+				y = y + dY;
+				theta = theta + deltaT;
 				// setTheta((getTheta() + deltaT));
 
-				if (getTheta() < 0) { // Keep theta (in radians) between 0 and 2pi
+				if (theta < 0) { // Keep theta (in radians) between 0 and 2pi
 					// setTheta(getTheta() + 2 * Math.PI);
-					theta = getTheta() + 2 * Math.PI;
-				} else if (getTheta() > 2 * Math.PI) {
+					theta = theta + 2 * Math.PI;
+				} else if (theta > 2 * Math.PI) {
 					// setTheta(getTheta() - 2 * Math.PI);
-					theta = getTheta() - 2 * Math.PI;
+					theta = theta - 2 * Math.PI;
 				}
 
 			}
@@ -299,12 +299,12 @@ public class Odometer extends Thread {
 	/**
 	 * Sets the right motor tacho count.
 	 *
-	 * @param rightMotorTachoCount
+	 * @param nowTachoRight2
 	 *            the rightMotorTachoCount to set
 	 */
-	public void setRightMotorTachoCount(double rightMotorTachoCount) {
+	public void setRightMotorTachoCount(double nowTachoRight2) {
 		synchronized (lock) {
-			this.rightMotorTachoCount = rightMotorTachoCount;
+			this.rightMotorTachoCount = nowTachoRight2;
 		}
 	}
 }
