@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
+import lejos.hardware.Button;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
@@ -23,6 +24,10 @@ public class LightPoller extends Thread {
 
 	/** The light val. */
 	private double lightVal = 0;
+<<<<<<< Updated upstream
+=======
+	private static double[] colorValues = new double[3];
+>>>>>>> Stashed changes
 
 	/** The last light val. */
 	private double lastLightVal = 0;
@@ -125,4 +130,25 @@ public class LightPoller extends Thread {
 	public void off() {
 		on = false;
 	}
+<<<<<<< Updated upstream
+=======
+
+	public static boolean checkColors() {
+		colorValues[0] = colorValues[0] * 100;
+		colorValues[1] = colorValues[1] * 100;
+		colorValues[2] = colorValues[2] * 100;
+		System.out.println(colorValues[0]);
+		System.out.println(colorValues[1]);
+		System.out.println(colorValues[2]);
+
+			return (colorValues[0] < FinalProject.RGBColors[0] + FinalProject.EPSILON
+					&& colorValues[0] > FinalProject.RGBColors[0] - FinalProject.EPSILON)
+					&& (colorValues[1] < FinalProject.RGBColors[1] + FinalProject.EPSILON
+							&& colorValues[1] > FinalProject.RGBColors[1] - FinalProject.EPSILON)
+					&& (colorValues[2] < FinalProject.RGBColors[2] + FinalProject.EPSILON
+							&& colorValues[2] > FinalProject.RGBColors[2] - FinalProject.EPSILON);
+
+		
+	}
+>>>>>>> Stashed changes
 }

@@ -68,7 +68,11 @@ public class SensorRotation extends Thread {
 			if (on) {
 				startTime = System.currentTimeMillis();
 				if (!movedLeft && !halfturn) {
+<<<<<<< Updated upstream
 					motor.rotateTo(reference - 35);
+=======
+					motor.rotateTo(reference - 50);
+>>>>>>> Stashed changes
 					while (motor.isMoving())
 						continue;
 					movedLeft = true;
@@ -77,7 +81,11 @@ public class SensorRotation extends Thread {
 					corrected = false;
 
 				} else if (!movedLeft && halfturn) {
+<<<<<<< Updated upstream
 					motor.rotateTo(reference - 70);
+=======
+					motor.rotateTo(reference -50);
+>>>>>>> Stashed changes
 					while (motor.isMoving())
 						continue;
 					movedLeft = true;
@@ -86,7 +94,11 @@ public class SensorRotation extends Thread {
 					corrected = false;
 
 				} else if (!movedRight && halfturn) {
+<<<<<<< Updated upstream
 					motor.rotateTo(reference + 70);
+=======
+					motor.rotateTo(reference + 50);
+>>>>>>> Stashed changes
 					while (motor.isMoving())
 						continue;
 					movedLeft = false;

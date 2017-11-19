@@ -267,15 +267,25 @@ public class FinalProject extends Thread {
 		odometryDisplay.start();
 		odometer.start();
 		
+<<<<<<< Updated upstream
 		//Button.waitForAnyPress();
 //		Test.NavigationTest();
 //		Test.UltrasonicTest();
 		Test.CorrectionTest();
 		
+=======
+
+		Test.FlagTest();
+>>>>>>> Stashed changes
 		
 		Button.waitForAnyPress();
 		
 		
+<<<<<<< Updated upstream
+=======
+		
+		
+>>>>>>> Stashed changes
 		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
 		/* TEST */gps.setColorProvider(colorpoller);
 		Avoidance master = new Avoidance(gps);
@@ -284,6 +294,16 @@ public class FinalProject extends Thread {
 		JointLightPoller jointpoller = new JointLightPoller(leftProvider, rightProvider);
 		OdometryCorrection oc = new OdometryCorrection(odometer, leftpoller, rightpoller, jointpoller);
 		LightLocalizer lightLoc = new LightLocalizer(odometer, gps, leftpoller, rightpoller, jointpoller);
+<<<<<<< Updated upstream
+=======
+		SensorRotation sensorMotor = new SensorRotation(master, usMotor, gps);
+		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
+		LocalizationType lt = LocalizationType.RISINGEDGE;
+		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
+		
+		Controller ctfcontroller = new Controller(master, jointpoller, lightLoc, rightpoller, oc, sensorMotor, usLoc,
+				uspoller, gps);
+>>>>>>> Stashed changes
 		oc.setNavigation(gps);
 		gps.setOdometryCorrection(oc);
 		jointpoller.on();
@@ -355,6 +375,7 @@ public class FinalProject extends Thread {
 		master.start();
 		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
 
+<<<<<<< Updated upstream
 		usLoc.doLocalization();
 		while (usLoc.localizing)
 			continue;
@@ -366,6 +387,17 @@ public class FinalProject extends Thread {
 		jointpoller.on();
 		jointpoller.start();
 		lightLoc.startLightLOC4();
+=======
+	public static void getColors() {
+		if (FinalProject.greenTeam == 3) {
+			switch (FinalProject.greenColor) {
+			case 1:
+				FinalProject.RGBColors = new double[] { 3, 7, 10 };
+				break;
+			case 2:
+				FinalProject.RGBColors = new double[] { 10, 2, 1 };
+				break;
+>>>>>>> Stashed changes
 
 		Button.waitForAnyPress();
 		if (greenTeam == 3) {
