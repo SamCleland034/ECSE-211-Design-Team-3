@@ -3,25 +3,22 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import lejos.hardware.Sound;
 
 /**
+ * Class that implements the state machine logic we designed for the project,
+ * shown in the software document, final software design (5.0). Determines which
+ * method to call based on the current state of the robot. Only determines state
+ * transitions from navigation flag search and ziptraversal states, the
+ * avoidance state is only accessed while in the navigation state since we need
+ * to be navigating in order to avoid. This class doesn't actually change the
+ * state from navigation to flag search or ziptraversal, it only changes from
+ * flag search or ziptraversal back to navigation since we know explicitly when
+ * one of these algorithms ends. But for navigation, we have to dynamically
+ * figure out when to transition states based on the coordinates that the robot
+ * ends up in after travelling to a position, so we figure this out through the
+ * navigation method startNav().
+ * 
  * @since 11/7/17
  * @author Sam
  *
- *         Class that implements the state machine logic we designed for the
- *         project, shown in the software document, final software design (5.0).
- *         Determines which method to call based on the current state of the
- *         robot. Only determines state transitions from navigation flag search
- *         and ziptraversal states, the avoidance state is only accessed while
- *         in the navigation state since we need to be navigating in order to
- *         avoid. This class doesn't actually change the state from navigation
- *         to flag search or ziptraversal, it only changes from flag search or
- *         ziptraversal back to navigation since we know explicitly when one of
- *         these algorithms ends. But for navigation, we have to dynamically
- *         figure out when to transition states based on the coordinates that
- *         the robot ends up in after travelling to a position, so we figure
- *         this out through the navigation method startNav().
- * 
- * 
- * 
  */
 public class Controller {
 
@@ -61,8 +58,6 @@ public class Controller {
 	 *            the jointpoller
 	 * @param lightLoc
 	 *            the light loc
-	 * @param colorpoller
-	 *            the colorpoller
 	 * @param oc
 	 *            the oc
 	 * @param sensormotor
@@ -74,9 +69,8 @@ public class Controller {
 	 * @param gps
 	 *            the gps
 	 */
-	public Controller(Avoidance master, JointLightPoller jointpoller, LightLocalizer lightLoc, LightPoller colorpoller,
-			OdometryCorrection oc, SensorRotation sensormotor, UltrasonicLocalizer usLoc, UltrasonicPoller uspoller,
-			Navigation gps) {
+	public Controller(Avoidance master, JointLightPoller jointpoller, LightLocalizer lightLoc, OdometryCorrection oc,
+			SensorRotation sensormotor, UltrasonicLocalizer usLoc, UltrasonicPoller uspoller, Navigation gps) {
 		this.master = master;
 		this.jointpoller = jointpoller;
 		this.lightLoc = lightLoc;
@@ -148,19 +142,18 @@ public class Controller {
 		while (true) {
 
 			if (FinalProject.stage == Stage.NAVIGATION) {
-
-				navigating(gps, sensormotor, colorpoller, colorpoller, jointpoller, oc, uspoller, colorpoller);
+				// start navigating
+				navigating(gps, sensormotor, jointpoller, oc, uspoller, colorpoller);
 			} else if (FinalProject.stage == Stage.FLAGSEARCH) {
-				System.exit(0);
-
+				// start flagsearch
 				flagsearch(gps, master, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.ZIPTRAVERSAL) {
-
-				ziptraversal(gps, colorpoller, colorpoller, master, lightLoc, sensormotor, colorpoller, jointpoller);
+				// start ziptraversal
+				ziptraversal(gps, master, lightLoc, sensormotor, colorpoller, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {
-
+				// END
 				Sound.beepSequenceUp();
 				System.exit(0);
 			}
@@ -223,7 +216,6 @@ public class Controller {
 
 		jointpoller.start();
 		sleepFor(1);
-		// lightLoc.correctPosition();
 		// start light localization
 		lightLoc.startLightLOC4();
 		waitForLightLOC(lightLoc);
@@ -287,9 +279,8 @@ public class Controller {
 	 * @param jointlightpoller
 	 *            the jointlightpoller
 	 */
-	private static void ziptraversal(Navigation gps, LightPoller leftpoller, LightPoller rightpoller, Avoidance master,
-			LightLocalizer loc, SensorRotation sensorMotor, LightPoller colorpoller,
-			JointLightPoller jointlightpoller) {
+	private static void ziptraversal(Navigation gps, Avoidance master, LightLocalizer loc, SensorRotation sensorMotor,
+			LightPoller colorpoller, JointLightPoller jointlightpoller) {
 		// need lightpoller for light loc
 		jointlightpoller.on();
 		// don't need avoidance
@@ -362,22 +353,6 @@ public class Controller {
 		FinalProject.stage = Stage.NAVIGATION;
 	}
 
-	/*
-	 * private static void checkOrientation(Double initalTheta, Navigation gps) { if
-	 * (initalTheta >= Math.PI / 4 && initalTheta <= 3 * Math.PI / 4) //
-	 * FinalProject.odometer.setTheta(Math.PI / 2);
-	 * gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY);
-	 * else if ((initalTheta) >= 7 * Math.PI / 4 || ((initalTheta >= 0) &&
-	 * (initalTheta <= Math.PI / 4))) gps.travelToWithoutAvoid(FinalProject.zipredX,
-	 * FinalProject.zipredY + 1); else if (initalTheta >= 5 * Math.PI / 4 &&
-	 * initalTheta <= 7 * Math.PI / 4)
-	 * gps.travelToWithoutAvoid(FinalProject.zipredX, FinalProject.zipredY - 1);
-	 * else if (initalTheta >= 3 * Math.PI / 4 && initalTheta <= 5 * Math.PI / 4)
-	 * gps.travelToWithoutAvoid(FinalProject.zipredX - 1, FinalProject.zipredY);
-	 * 
-	 * }
-	 */
-
 	/**
 	 * This method will be called if the robot is in the navigation phase of the
 	 * project. Continuously cycles through the coordinates passed in through the
@@ -401,8 +376,8 @@ public class Controller {
 	 * @param colorpoller
 	 *            the colorpoller
 	 */
-	public static void navigating(Navigation gps, SensorRotation motor, LightPoller leftPoller, LightPoller rightPoller,
-			JointLightPoller jointpoller, OdometryCorrection oc, UltrasonicPoller uspoller, LightPoller colorpoller) {
+	public static void navigating(Navigation gps, SensorRotation motor, JointLightPoller jointpoller,
+			OdometryCorrection oc, UltrasonicPoller uspoller, LightPoller colorpoller) {
 		// turn on threads that need to be on for navigation
 		colorpoller.off();
 		motor.on();

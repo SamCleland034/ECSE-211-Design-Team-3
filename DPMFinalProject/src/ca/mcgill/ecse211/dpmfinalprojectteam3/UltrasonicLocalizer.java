@@ -31,12 +31,6 @@ public class UltrasonicLocalizer {
 	// The noise margin is set to be 35 to 55 which is determined experimentally
 	private static final int TOP_THRESHOLD = 51; // "d+k"
 
-	/**
-	 * The Constant BOTTOM_THRESHOLD. Noise margin bottom for reading distance
-	 * values
-	 */
-	private static final int BOTTOM_THRESHOLD = 35; // "d-k"
-
 	/** The Constant FILTER_OUT. To filter out bad data */
 	// Used to filter values
 	private static final int FILTER_OUT = 30;
@@ -86,21 +80,6 @@ public class UltrasonicLocalizer {
 		this.localizing = true;
 
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#run()
-	 */
-	/*
-	 * public void run() {
-	 * 
-	 * try { Thread.sleep(2000); } catch (InterruptedException e) { // there is
-	 * nothing to be done here because it is not expected that // the odometer will
-	 * be interrupted by another thread }
-	 * 
-	 * doLocalize(); // Start localizing }
-	 */
 
 	/**
 	 * Do localize, main ultrasonic localization method that will perform the
@@ -266,34 +245,6 @@ public class UltrasonicLocalizer {
 			UPDATED_ANGLE = UPDATED_ANGLE + 200; // This value is found experimentally
 			navigation.turnWithoutInterruption(UPDATED_ANGLE);
 		}
-	}
-
-	/**
-	 * Filter far, filter out far distances unless they get repeated enough to
-	 * suggest nothing is ther
-	 *
-	 * @param dist
-	 *            the dist, distance the ultrasonic sensor reads
-	 * @return the double, the distance returned based on filtering or no filtering
-	 */
-	// Filter the distances that is too far that's not meant to be
-	private double filter_far(double dist) {
-
-		if (dist >= 255 && filterControl < FILTER_OUT) {
-			// bad value, do not set the distance var, however do increment the
-			// filter value
-			filterControl++;
-		} else if (dist >= 255) {
-			// We have repeated large values, so there must actually be nothing
-			// there: leave the distance alone
-			this.dist = dist;
-		} else {
-			// distance went below 255: reset filter and leave
-			// distance alone.
-			filterControl = 0;
-			this.dist = dist;
-		}
-		return this.dist;
 	}
 
 	/**

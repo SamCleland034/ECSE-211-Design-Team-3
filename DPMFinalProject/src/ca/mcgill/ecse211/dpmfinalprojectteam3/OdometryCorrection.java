@@ -54,15 +54,10 @@ public class OdometryCorrection extends Thread {
 	 *
 	 * @param odometer
 	 *            the odometer
-	 * @param leftPoller
-	 *            the left poller
-	 * @param rightPoller
-	 *            the right poller
 	 * @param jointPoller
 	 *            the joint poller
 	 */
-	public OdometryCorrection(Odometer odometer, LightPoller leftPoller, LightPoller rightPoller,
-			JointLightPoller jointPoller) {
+	public OdometryCorrection(Odometer odometer, JointLightPoller jointPoller) {
 
 		this.odometer = odometer;
 		this.leftPoller = leftPoller;

@@ -52,18 +52,21 @@ public class LightPoller extends Thread {
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-		sample = new float[3];
+		sample = new float[provider.sampleSize()];
 		while (true) {
 			if (on) {
 				synchronized (this) {
 
 					provider.fetchSample(sample, 0); // acquire data
-					colorValues[0] = sample[0];// extract from buffer, cast to int
-					colorValues[1] = sample[1];
-					colorValues[2] = sample[2];
+					colorValues[0] = (double) 100 * sample[0];// extract from buffer, cast to int
+					colorValues[1] = (double) 100 * sample[1];
+					colorValues[2] = (double) 100 * sample[2];
+					System.out.print("R:" + colorValues[0]);
+					System.out.print("  G:" + colorValues[1]);
+					System.out.println("  B:" + colorValues[2]);
 				}
 				try {
-					Thread.sleep(50);
+					Thread.sleep(30);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {
@@ -129,15 +132,65 @@ public class LightPoller extends Thread {
 		on = false;
 	}
 
-	public boolean checkColors() {
+	public boolean checkWhite() {
+		boolean result = false;
 		synchronized (this) {
-			return (colorValues[0] < FinalProject.RGBColors[0] + FinalProject.EPSILON
-					&& colorValues[0] > FinalProject.RGBColors[0] - FinalProject.EPSILON)
-					&& (colorValues[1] < FinalProject.RGBColors[1] + FinalProject.EPSILON
-							&& colorValues[1] > FinalProject.RGBColors[1] - FinalProject.EPSILON)
-					&& (colorValues[2] < FinalProject.RGBColors[2] + FinalProject.EPSILON
-							&& colorValues[2] > FinalProject.RGBColors[2] - FinalProject.EPSILON);
-
+			result = colorValues[0] > 0.45 && colorValues[1] > 0.45 && colorValues[2] > 0.098;
 		}
+		return result;
+	}
+
+	public boolean checkRed() {
+		boolean result = false;
+		synchronized (this) {
+			result = (colorValues[0] > colorValues[1] && colorValues[0] > colorValues[2] && colorValues[0] < 9.5);
+		}
+		return result;
+	}
+
+	public boolean checkBlue() {
+		boolean result = false;
+		synchronized (this) {
+			result = (colorValues[0] < colorValues[2] && colorValues[1] >= colorValues[2])
+					|| (colorValues[0] < colorValues[2] && colorValues[1] <= colorValues[2]);
+		}
+		return result;
+	}
+
+	public boolean checkYellow() {
+		boolean result = false;
+		synchronized (this) {
+			result = colorValues[0] > colorValues[1] && colorValues[1] > colorValues[2];
+		}
+		return result;
+	}
+
+	public boolean checkColors(int correctColor) {
+		boolean result = false;
+		synchronized (this) {
+			/*
+			 * result = (colorValues[0] < FinalProject.RGBColors[0] + FinalProject.EPSILON
+			 * && colorValues[0] > FinalProject.RGBColors[0] - FinalProject.EPSILON) &&
+			 * (colorValues[1] < FinalProject.RGBColors[1] + FinalProject.EPSILON &&
+			 * colorValues[1] > FinalProject.RGBColors[1] - FinalProject.EPSILON) &&
+			 * (colorValues[2] < FinalProject.RGBColors[2] + FinalProject.EPSILON &&
+			 * colorValues[2] > FinalProject.RGBColors[2] - FinalProject.EPSILON);
+			 * 
+			 * if (colorValues[0] > 0.45 && colorValues[1] > 0.45 && colorValues[2] > 0.098)
+			 * result = 4; else if (colorValues[0] > colorValues[1] && colorValues[0] >
+			 * colorValues[2]) result = 1; else if (colorValues[0] < colorValues[2] &&
+			 * colorValues[1] < colorValues[2]) result = 2; else if (colorValues[0] >
+			 * colorValues[1] && colorValues[1] > colorValues[2]) result = 3;
+			 */
+			if (correctColor == 1)
+				result = checkRed();
+			else if (correctColor == 2)
+				result = checkBlue();
+			else if (correctColor == 3)
+				result = checkYellow();
+			else if (correctColor == 4)
+				result = checkWhite();
+		}
+		return result;
 	}
 }

@@ -137,22 +137,27 @@ public class Avoidance extends Thread {
 						filter = 0;
 						measure = distance;
 					}
+					// go straight if within bandcenter
 					if (measure > FinalProject.THRESHOLD && measure < FinalProject.THRESHOLD + 5) {
 						FinalProject.leftMotor.setSpeed(MOTOR_SPEED);
 						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
+						// turn away from wall
 					} else if (measure < FinalProject.THRESHOLD) {
 						FinalProject.leftMotor.setSpeed(MOTOR_SPEED);
-						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
+						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT / 2);
 						FinalProject.leftMotor.forward();
 						FinalProject.rightMotor.forward();
+						// turn slightly to the wall, don't really mind if it doesn't go to the wall
+						// fast since we are avoiding
 					} else {
 						FinalProject.leftMotor.setSpeed(MOTOR_SPEED * 2 / 3);
 						FinalProject.rightMotor.setSpeed(MOTOR_SPEED_RIGHT);
 						FinalProject.rightMotor.forward();
 						FinalProject.leftMotor.forward();
 					}
+					// to adjust to sampling rate
 					endTime = System.currentTimeMillis();
 					if (endTime - startTime < SAMPLINGPERIOD) {
 						try {

@@ -64,9 +64,6 @@ public class WiFi {
 			 * letting you know.
 			 */
 			Map data = conn.getData();
-
-			// Example 1: Print out all received data
-			// System.out.println("Map:\n" + data);
 			FinalProject.SHLLX = ((Long) data.get("SH_LL_x")).intValue();
 			FinalProject.SHLLY = ((Long) data.get("SH_LL_y")).intValue();
 			FinalProject.LLSRRX = ((Long) data.get("SR_LL_x")).intValue();
@@ -97,23 +94,18 @@ public class WiFi {
 			FinalProject.greenCorner = ((Long) data.get("GreenCorner")).intValue();
 			FinalProject.greenColor = ((Long) data.get("OG")).intValue();
 			FinalProject.redColor = ((Long) data.get("OR")).intValue();
-			/*
-			 * // Example 2 : Print out specific values int redTeam = ((Long)
-			 * data.get("RedTeam")).intValue(); System.out.println("Red Team: " + redTeam);
-			 * 
-			 * int og = ((Long) data.get("OG")).intValue();
-			 * System.out.println("Green opponent flag: " + og);
-			 * 
-			 * // Example 3: Compare value int sh_ll_x = ((Long)
-			 * data.get("SH_LL_x")).intValue(); if (sh_ll_x < 5) {
-			 * System.out.println("Shallow water LL zone X < 5"); } else {
-			 * System.out.println("Shallow water LL zone X >= 5"); }
-			 */
+			FinalProject.REDXONE = ((Long) data.get("RED_LL_x")).intValue();
+			FinalProject.REDYONE = ((Long) data.get("RED_LL_y")).intValue();
+			FinalProject.REDXTWO = ((Long) data.get("RED_UR_x")).intValue();
+			FinalProject.REDYTWO = ((Long) data.get("RED_UR_y")).intValue();
+			FinalProject.GREENXONE = ((Long) data.get("GREEN_LL_x")).intValue();
+			FinalProject.GREENYONE = ((Long) data.get("GREEN_LL_y")).intValue();
+			FinalProject.GREENXTWO = ((Long) data.get("GREEN_UR_x")).intValue();
+			FinalProject.GREENYTWO = ((Long) data.get("GREEN_UR_y")).intValue();
 
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
-		// Wait until user decides to end program
 
 	}
 }

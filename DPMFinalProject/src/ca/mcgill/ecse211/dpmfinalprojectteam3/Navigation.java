@@ -68,7 +68,7 @@ public class Navigation {
 	private static final double YMin = -1 * SQUARE_LENGTH;
 
 	/** The Constant THRESHOLD. */
-	private static final int THRESHOLD = 40;
+	private static final int THRESHOLD = 50;
 
 	private static final long SAMPLING_PERIOD = 10;
 
@@ -544,18 +544,6 @@ public class Navigation {
 	}
 
 	/**
-	 * Same method as turn, without speed change.
-	 *
-	 * @author Sam Cleland
-	 * @param theta
-	 *            the theta
-	 */
-	public void turnWithSameSpeed(double theta) {
-		FinalProject.leftMotor.rotate(convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
-		FinalProject.rightMotor.rotate(-convertAngle(FinalProject.WHEEL_RADIUS, FinalProject.TRACK, theta), true);
-	}
-
-	/**
 	 * Turn.
 	 *
 	 * @param theta
@@ -603,47 +591,35 @@ public class Navigation {
 	 *         flag
 	 * @since 10/29/17
 	 */
-	public void flagSearch(double[] correctColors) {
+	public void flagSearch(float[] correctColors) {
 		int distance = 0;
+		int counter = 0;
 		while (!hasFlag) {
 			turnTo(Math.toDegrees(Math.atan2(searchRegionPath.get(2) * FinalProject.TILE_SPACING - odometer.getX(),
-					searchRegionPath.get(3) % 8 * FinalProject.TILE_SPACING - odometer.getY())));
+					searchRegionPath.get(3) * FinalProject.TILE_SPACING - odometer.getY())));
 			while (isNavigating())
 				continue;
 			turnToWithInterrupt(
 					Math.toDegrees(Math.atan2(searchRegionPath.get(6) * FinalProject.TILE_SPACING - odometer.getX(),
 							searchRegionPath.getLast() * FinalProject.TILE_SPACING - odometer.getY())));
-			while (poller.getReading() > THRESHOLD) {
+			while (poller.getReading() > THRESHOLD && isNavigating()) {
 				continue;
 			}
 			FinalProject.leftMotor.stop(true);
 			FinalProject.rightMotor.stop(false);
 			distance = poller.getReading();
-			FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distance - 5), true);
-			FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distance - 5), false);
-			while (isNavigating())
-				continue;
-			FinalProject.usMotor.setSpeed(50);
-			colorpoller.checkColors();
-			if (colorpoller.checkColors()) {
-				for (int j = 0; j < 3; j++) {
-					Sound.beep();
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-					}
-				}
-				hasFlag = true;
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), true);
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
+			if (distance > THRESHOLD)
+				;
+
+			else {
+
+				turnWithoutInterruption(2);
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distance - 7), true);
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, distance - 7), false);
 				while (isNavigating())
 					continue;
-				travelToAfterFlag();
-				return;
-			}
-			FinalProject.usMotor.rotateTo(sensorMotor.reference - 45);
-			while (FinalProject.usMotor.isMoving()) {
-				if (colorpoller.checkColors()) {
+				FinalProject.usMotor.setSpeed(40);
+				if (colorpoller.checkColors(FinalProject.correctColor)) {
 					for (int j = 0; j < 3; j++) {
 						Sound.beep();
 						try {
@@ -658,32 +634,61 @@ public class Navigation {
 						continue;
 					travelToAfterFlag();
 					return;
+				}
+				FinalProject.usMotor.rotateTo(sensorMotor.reference - 45);
+				while (FinalProject.usMotor.isMoving()) {
 
-				}
-			}
-			FinalProject.usMotor.rotateTo(sensorMotor.reference + 45);
-			while (FinalProject.usMotor.isMoving()) {
-				if (colorpoller.checkColors()) {
-					for (int j = 0; j < 3; j++) {
-						Sound.beep();
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
+					if (colorpoller.checkColors(FinalProject.correctColor)) {
+						for (int j = 0; j < 3; j++) {
+							Sound.beep();
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+							}
 						}
+						hasFlag = true;
+						FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), true);
+						FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
+						while (isNavigating())
+							continue;
+						travelToAfterFlag();
+						return;
+
 					}
-					hasFlag = true;
-					FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), true);
-					FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
-					while (isNavigating())
-						continue;
-					travelToAfterFlag();
-					return;
+				}
+				FinalProject.usMotor.rotateTo(sensorMotor.reference + 45);
+				while (FinalProject.usMotor.isMoving()) {
+
+					if (colorpoller.checkColors(FinalProject.correctColor)) {
+						for (int j = 0; j < 3; j++) {
+							Sound.beep();
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+							}
+						}
+						hasFlag = true;
+						FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), true);
+						FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, -10), false);
+						while (isNavigating())
+							continue;
+						travelToAfterFlag();
+						return;
+					}
 				}
 			}
+			FinalProject.usMotor.rotateTo(sensorMotor.reference);
+			while (FinalProject.usMotor.isMoving())
+				continue;
 			searchRegionPath.addLast(searchRegionPath.removeFirst());
 			searchRegionPath.addLast(searchRegionPath.removeFirst());
+			if (counter == 3)
+				break;
+			travelToWithoutAvoid(searchRegionPath.getFirst(), searchRegionPath.get(1));
+			while (isNavigating())
+				continue;
+			counter++;
 		}
-
 	}
 
 	/**

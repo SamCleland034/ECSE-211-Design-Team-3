@@ -60,7 +60,7 @@ public class SensorRotation extends Thread {
 		movedLeft = false;
 		movedRight = false;
 		boolean halfturn = false;
-		boolean corrected = false;
+
 		motor.resetTachoCount();
 		reference = motor.getTachoCount();
 		motor.setSpeed(70);
@@ -74,7 +74,6 @@ public class SensorRotation extends Thread {
 					movedLeft = true;
 					movedRight = false;
 					halfturn = true;
-					corrected = false;
 
 				} else if (!movedLeft && halfturn) {
 					motor.rotateTo(reference - 25);
@@ -83,7 +82,6 @@ public class SensorRotation extends Thread {
 					movedLeft = true;
 					movedRight = false;
 					halfturn = true;
-					corrected = false;
 
 				} else if (!movedRight && halfturn) {
 					motor.rotateTo(reference + 25);
@@ -92,7 +90,7 @@ public class SensorRotation extends Thread {
 					movedLeft = false;
 					movedRight = true;
 					halfturn = true;
-					corrected = false;
+
 				}
 				endTime = System.currentTimeMillis();
 				if (endTime - startTime < SAMPLINGPERIOD) {
@@ -101,20 +99,12 @@ public class SensorRotation extends Thread {
 					} catch (InterruptedException e) {
 					}
 				}
-			} else if (!on && corrected) {
+			} else {
 				try {
 					Thread.sleep(SAMPLINGPERIOD);
 				} catch (InterruptedException e) {
 				}
-			} /*
-				 * else if (!movedLeft && !corrected) { motor.rotateTo(reference, true);
-				 * movedLeft = false; movedRight = false; halfturn = false; corrected = true;
-				 * 
-				 * } else if (!movedRight && !corrected) { motor.rotateTo(reference, true);
-				 * movedLeft = false; movedRight = false; halfturn = false; corrected = true;
-				 * 
-				 * }
-				 */
+			}
 		}
 	}
 
