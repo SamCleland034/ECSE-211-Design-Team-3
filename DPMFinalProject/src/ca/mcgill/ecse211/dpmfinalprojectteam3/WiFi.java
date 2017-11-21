@@ -35,7 +35,7 @@ import ca.mcgill.ecse211.WiFiClient.WifiConnection;
  */
 public class WiFi {
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.14";
+	private static final String SERVER_IP = "192.168.2.24";
 	private static final int TEAM_NUMBER = 3;
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
@@ -73,7 +73,7 @@ public class WiFi {
 			FinalProject.URSRGX = ((Long) data.get("SG_UR_x")).intValue();
 			FinalProject.URSRGY = ((Long) data.get("SG_UR_y")).intValue();
 			FinalProject.URSRRX = ((Long) data.get("SR_UR_x")).intValue();
-			FinalProject.URSRRY = ((Long) data.get("Red_UR_y")).intValue();
+			FinalProject.URSRRY = ((Long) data.get("SR_UR_y")).intValue();
 			FinalProject.zipgreenX = ((Long) data.get("ZC_G_x")).intValue();
 			FinalProject.zipgreenY = ((Long) data.get("ZC_G_y")).intValue();
 			FinalProject.zipredX = ((Long) data.get("ZC_R_x")).intValue();
@@ -94,14 +94,14 @@ public class WiFi {
 			FinalProject.greenCorner = ((Long) data.get("GreenCorner")).intValue();
 			FinalProject.greenColor = ((Long) data.get("OG")).intValue();
 			FinalProject.redColor = ((Long) data.get("OR")).intValue();
-			FinalProject.REDXONE = ((Long) data.get("RED_LL_x")).intValue();
-			FinalProject.REDYONE = ((Long) data.get("RED_LL_y")).intValue();
-			FinalProject.REDXTWO = ((Long) data.get("RED_UR_x")).intValue();
-			FinalProject.REDYTWO = ((Long) data.get("RED_UR_y")).intValue();
-			FinalProject.GREENXONE = ((Long) data.get("GREEN_LL_x")).intValue();
-			FinalProject.GREENYONE = ((Long) data.get("GREEN_LL_y")).intValue();
-			FinalProject.GREENXTWO = ((Long) data.get("GREEN_UR_x")).intValue();
-			FinalProject.GREENYTWO = ((Long) data.get("GREEN_UR_y")).intValue();
+			FinalProject.REDXONE = ((Long) data.get("Red_LL_x")).intValue();
+			FinalProject.REDYONE = ((Long) data.get("Red_LL_y")).intValue();
+			FinalProject.REDXTWO = ((Long) data.get("Red_UR_x")).intValue();
+			FinalProject.REDYTWO = ((Long) data.get("Red_UR_y")).intValue();
+			FinalProject.GREENXONE = ((Long) data.get("Green_LL_x")).intValue();
+			FinalProject.GREENYONE = ((Long) data.get("Green_LL_y")).intValue();
+			FinalProject.GREENXTWO = ((Long) data.get("Green_UR_x")).intValue();
+			FinalProject.GREENYTWO = ((Long) data.get("Green_UR_y")).intValue();
 
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());

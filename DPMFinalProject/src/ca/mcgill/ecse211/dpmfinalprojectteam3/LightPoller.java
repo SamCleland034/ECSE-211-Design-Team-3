@@ -3,12 +3,14 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
+// TODO: Auto-generated Javadoc
 // 
 /**
  * Class used for sampling data for the light sensors, particularly the color
  * sensor that will be used for color detection. The other two sensors for line
  * detection will use the JointLightPoller class to synchronize their data with
- * each other. Will be terminated once the robot has found the flag
+ * each other. Will be terminated once the robot has found the flag. Using RGB
+ * mode for this class.
  */
 public class LightPoller extends Thread {
 
@@ -18,17 +20,19 @@ public class LightPoller extends Thread {
 	/** The provider. */
 	private SampleProvider provider;
 
-	/** The sample. */
+	/** The array data will be in to. */
 	private float[] sample;
 
-	/** The light val. */
+	/** The light value that is read. */
 	private double lightVal = 0;
+
+	/** The color values. */
 	private double[] colorValues = new double[3];
 
-	/** The last light val. */
+	/** The last light value read. */
 	private double lastLightVal = 0;
 
-	/** The on. */
+	/** boolean to indicate if the thread is on. */
 	public boolean on;
 
 	/**
@@ -132,6 +136,11 @@ public class LightPoller extends Thread {
 		on = false;
 	}
 
+	/**
+	 * Check for white color
+	 *
+	 * @return true, if reading white color
+	 */
 	public boolean checkWhite() {
 		boolean result = false;
 		synchronized (this) {
@@ -140,6 +149,11 @@ public class LightPoller extends Thread {
 		return result;
 	}
 
+	/**
+	 * Checks for red color
+	 *
+	 * @return true, if reading red color
+	 */
 	public boolean checkRed() {
 		boolean result = false;
 		synchronized (this) {
@@ -148,6 +162,11 @@ public class LightPoller extends Thread {
 		return result;
 	}
 
+	/**
+	 * Checks for blue color
+	 *
+	 * @return true, if reading blue color
+	 */
 	public boolean checkBlue() {
 		boolean result = false;
 		synchronized (this) {
@@ -157,6 +176,11 @@ public class LightPoller extends Thread {
 		return result;
 	}
 
+	/**
+	 * Checks for yellow color.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean checkYellow() {
 		boolean result = false;
 		synchronized (this) {
@@ -165,23 +189,19 @@ public class LightPoller extends Thread {
 		return result;
 	}
 
+	/**
+	 * Method called from the navigation class when in flagsearch mode to read
+	 * colors in from this poller. Using synchronize block so we get accurate values
+	 * from 1 sampling interval.
+	 *
+	 * @param correctColor
+	 *            the correct color that we are looking for, int from 1-4 depending
+	 *            on what was passed in
+	 * @return true, if it finds the color that was passed in.
+	 */
 	public boolean checkColors(int correctColor) {
 		boolean result = false;
 		synchronized (this) {
-			/*
-			 * result = (colorValues[0] < FinalProject.RGBColors[0] + FinalProject.EPSILON
-			 * && colorValues[0] > FinalProject.RGBColors[0] - FinalProject.EPSILON) &&
-			 * (colorValues[1] < FinalProject.RGBColors[1] + FinalProject.EPSILON &&
-			 * colorValues[1] > FinalProject.RGBColors[1] - FinalProject.EPSILON) &&
-			 * (colorValues[2] < FinalProject.RGBColors[2] + FinalProject.EPSILON &&
-			 * colorValues[2] > FinalProject.RGBColors[2] - FinalProject.EPSILON);
-			 * 
-			 * if (colorValues[0] > 0.45 && colorValues[1] > 0.45 && colorValues[2] > 0.098)
-			 * result = 4; else if (colorValues[0] > colorValues[1] && colorValues[0] >
-			 * colorValues[2]) result = 1; else if (colorValues[0] < colorValues[2] &&
-			 * colorValues[1] < colorValues[2]) result = 2; else if (colorValues[0] >
-			 * colorValues[1] && colorValues[1] > colorValues[2]) result = 3;
-			 */
 			if (correctColor == 1)
 				result = checkRed();
 			else if (correctColor == 2)

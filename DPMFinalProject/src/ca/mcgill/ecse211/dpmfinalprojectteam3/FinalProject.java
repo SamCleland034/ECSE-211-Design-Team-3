@@ -89,18 +89,18 @@ import lejos.robotics.SampleProvider;
  * on how the the robot changes states.
  * 
  * @author Sam Cleland, Yiming Wu, Charles Brana
- * @version 3.0: Changes from 2.0, added controller class to display the flow
- *          from different stages more clearly instead of doing it directly in
- *          the main method, implemented odometry correction while navigating.
- *          Code estimation: 1600 lines of code(lines meaning number of
- *          semicolons).
+ * @version 4.0: Changes from 3.0, added PathFinder Class to set up the path
+ *          rather than setting up the path in the main class. Removed unused
+ *          methods from the project, particularly in the light localizer class.
+ *          Current number of lines of code: 1538, Code estimation: 1600 lines
+ *          of code(lines meaning number of semicolons).
  */
 public class FinalProject extends Thread {
 
-	/** The red corner. */
+	/** The red team's starting corner. */
 	public static int redCorner;
 
-	/** The green corner. */
+	/** The green team's starting corner. */
 	public static int greenCorner;
 
 	/** The red team for the game. */
@@ -178,13 +178,29 @@ public class FinalProject extends Thread {
 
 	/** y coord of upper right corner of vertical shallow water region. */
 	public static int SVURY;
+
+	/** X coordinate of Upper right red zone. */
 	public static int REDXTWO;
+
+	/** X coordinate of Lower left red zone. */
 	public static int REDXONE;
+
+	/** Y coordinate of Upper right red zone. */
 	public static int REDYTWO;
+
+	/** Y coordinate of Lower left red zone. */
 	public static int REDYONE;
+
+	/** Y coordinate of upper right green zone. */
 	public static int GREENYTWO;
+
+	/** Y coordinate of lower left green zone. */
 	public static int GREENYONE;
+
+	/** X coordinate of upper right green zone. */
 	public static int GREENXTWO;
+
+	/** X coordinate of lower left green zone. */
 	public static int GREENXONE;
 	/** The red color the red team is searching for. */
 	public static int redColor;
@@ -221,12 +237,12 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.375; // Width of car
+	public static final double TRACK = 11.46; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 12;
 
-	/** Enumeration used for state transitions */
+	/** Enumeration used for state transitions. */
 	public static Stage stage;
 	/** The Constant LightPort, for the color sensor. */
 	private static final Port LightPort = LocalEV3.get().getPort("S4");
@@ -246,6 +262,7 @@ public class FinalProject extends Thread {
 	/** The Constant rightSensor. */
 	public static final EV3ColorSensor rightSensor = new EV3ColorSensor(RightPort);
 
+	/** The Constant EPSILON for searching for correct flag. */
 	public static final double EPSILON = 6;
 
 	/**
@@ -262,11 +279,16 @@ public class FinalProject extends Thread {
 	/** The color provider, used for detecting the colors of blocks. */
 	static SampleProvider colorProvider = colorSensor.getRGBMode();
 
+	/** The starting Y of the robot. */
 	public static int startingY;
 
+	/** The starting X of the robot. */
 	public static int startingX;
 
+	/** The RGB colors we are trying to find. */
 	public static float[] RGBColors;
+
+	/** The color being searched for. */
 	public static int correctColor;
 
 	/**
@@ -290,7 +312,8 @@ public class FinalProject extends Thread {
 		UltrasonicPoller uspoller = new UltrasonicPoller(usDist, sample, master, gps);
 		LocalizationType lt = LocalizationType.RISINGEDGE;
 		UltrasonicLocalizer usLoc = new UltrasonicLocalizer(odometer, gps, lt, uspoller);
-		Controller ctfcontroller = new Controller(master, jointpoller, lightLoc, oc, sensorMotor, usLoc, uspoller, gps);
+		Controller ctfcontroller = new Controller(master, jointpoller, lightLoc, oc, sensorMotor, usLoc, uspoller, gps,
+				colorpoller);
 		PathFinder pf = new PathFinder(gps);
 		oc.setNavigation(gps);
 		gps.setColorProvider(colorpoller);
@@ -309,14 +332,14 @@ public class FinalProject extends Thread {
 				startingX = 1;
 				startingY = 1;
 			} else if (greenCorner == 1) {
-				startingX = 11;
+				startingX = 7;
 				startingY = 1;
 			} else if (greenCorner == 2) {
-				startingX = 11;
-				startingY = 11;
+				startingX = 7;
+				startingY = 7;
 			} else {
 				startingX = 1;
-				startingY = 11;
+				startingY = 7;
 			}
 		} else {
 			if (redCorner == 0) {
@@ -337,10 +360,16 @@ public class FinalProject extends Thread {
 
 		// determines path based on the layout that is choosen, will have to traverse x
 		// or y first depending on the layout of the zipline
-		pf.start();
+		pf.getPath();
 		ctfcontroller.startControlFlow();
 	}
 
+	/**
+	 * Gets the colors we need for flag search corresponding to the integer that was
+	 * passed in from the wifi for both of the teams.
+	 *
+	 * @return the colors
+	 */
 	private static void getColors() {
 		if (FinalProject.greenTeam == 3) {
 			correctColor = FinalProject.greenColor;

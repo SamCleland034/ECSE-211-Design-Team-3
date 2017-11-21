@@ -1,6 +1,5 @@
 package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
-// TODO: Auto-generated Javadoc
 /**
  * Avoidance controls if the robot should be in the avoiding state or not while
  * navigating only. It takes in data from an ultrasonic poller instance and if
@@ -20,7 +19,10 @@ public class Avoidance extends Thread {
 	/** The poller. */
 	private UltrasonicPoller poller;
 
-	/** The Constant FILTERCONTROL. */
+	/**
+	 * Filter for how much the robot has to see nothing for it to break out of bang
+	 * bang controller.
+	 */
 	private static final int FILTERCONTROL = 92;
 
 	private static final float MOTOR_SPEED = 250;

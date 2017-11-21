@@ -3,13 +3,13 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class OdometryCorrection, used to correct the small but accumulating
  * errors of the odometer using the light sensor to detect gridlines on the
- * floor. This class samples from the JointLightPoller class and because we are
- * using two light sensors, we can correct the angle by making one motor catch
- * up to the other if one light sensor detects a line.
+ * floor. This class samples from the JointLightPoller class and because we want
+ * the data from the two light sensors used for correcting to be in sync. We can
+ * correct the angle by making one motor catch up to the other if one light
+ * sensor detects a line.
  * 
  */
 public class OdometryCorrection extends Thread {
@@ -29,7 +29,7 @@ public class OdometryCorrection extends Thread {
 	/** The joint poller. */
 	private JointLightPoller jointPoller;
 
-	/** The samplingperiod. */
+	/** The sampling period for this thread. */
 	private static int SAMPLINGPERIOD = 12;
 	/** The distance between lines. */
 	private static double TILE_SPACING = 30.48;
@@ -201,9 +201,6 @@ public class OdometryCorrection extends Thread {
 	 * rechecking the left poller so send all resources here
 	 */
 	private void checkRightPoller() {
-		// FinalProject.rightMotor.setSpeed(50);
-		// FinalProject.rightMotor.forward();
-		// long startTime = System.currentTimeMillis();
 		FinalProject.rightMotor.setSpeed(70);
 		FinalProject.leftMotor.setSpeed(70);
 		FinalProject.leftMotor.backward();
@@ -217,9 +214,7 @@ public class OdometryCorrection extends Thread {
 		FinalProject.rightMotor.forward();
 		while (jointPoller.getRightValue() > 0.23) {
 			continue;
-			/*
-			 * if (timedOut(startTime)) break; continue;
-			 */
+
 		}
 		FinalProject.rightMotor.stop(false);
 		checkOrientation();
@@ -243,13 +238,9 @@ public class OdometryCorrection extends Thread {
 		FinalProject.rightMotor.stop(false);
 		FinalProject.leftMotor.setSpeed(50);
 		FinalProject.leftMotor.forward();
-		// FinalProject.leftMotor.setSpeed(50);
-		// FinalProject.leftMotor.forward();
-		// long startTime = System.currentTimeMillis();
+
 		while (jointPoller.getLeftValue() > 0.23) {
-			/*
-			 * if (timedOut(startTime)) break;
-			 */
+
 			continue;
 		}
 		FinalProject.leftMotor.stop(false);
@@ -270,14 +261,14 @@ public class OdometryCorrection extends Thread {
 	}
 
 	/**
-	 * On.
+	 * Turn thread on.
 	 */
 	public void on() {
 		this.on = true;
 	}
 
 	/**
-	 * Off.
+	 * Turn thread off.
 	 */
 	public void off() {
 		this.on = false;

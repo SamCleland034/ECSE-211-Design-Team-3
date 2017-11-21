@@ -6,15 +6,15 @@ import lejos.hardware.Sound;
  * Class that implements the state machine logic we designed for the project,
  * shown in the software document, final software design (5.0). Determines which
  * method to call based on the current state of the robot. Only determines state
- * transitions from navigation flag search and ziptraversal states, the
+ * transitions from navigation, flag search and ziptraversal states. The
  * avoidance state is only accessed while in the navigation state since we need
  * to be navigating in order to avoid. This class doesn't actually change the
  * state from navigation to flag search or ziptraversal, it only changes from
  * flag search or ziptraversal back to navigation since we know explicitly when
- * one of these algorithms ends. But for navigation, we have to dynamically
- * figure out when to transition states based on the coordinates that the robot
- * ends up in after travelling to a position, so we figure this out through the
- * navigation method startNav().
+ * one of these algorithms ends. But for navigation, we have to figure out when
+ * to transition states based on the coordinates that the robot ends up in after
+ * travelling to a position, so we figure this out through the navigation method
+ * startNav().
  * 
  * @since 11/7/17
  * @author Sam
@@ -70,7 +70,8 @@ public class Controller {
 	 *            the gps
 	 */
 	public Controller(Avoidance master, JointLightPoller jointpoller, LightLocalizer lightLoc, OdometryCorrection oc,
-			SensorRotation sensormotor, UltrasonicLocalizer usLoc, UltrasonicPoller uspoller, Navigation gps) {
+			SensorRotation sensormotor, UltrasonicLocalizer usLoc, UltrasonicPoller uspoller, Navigation gps,
+			LightPoller colorpoller) {
 		this.master = master;
 		this.jointpoller = jointpoller;
 		this.lightLoc = lightLoc;
@@ -138,7 +139,7 @@ public class Controller {
 		oc.start();
 		// leftpoller.start();
 		// rightpoller.start();
-		master.start();
+		// master.start();
 		while (true) {
 
 			if (FinalProject.stage == Stage.NAVIGATION) {
@@ -150,7 +151,7 @@ public class Controller {
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.ZIPTRAVERSAL) {
 				// start ziptraversal
-				ziptraversal(gps, master, lightLoc, sensormotor, colorpoller, jointpoller);
+				ziptraversal(gps, master, lightLoc, sensormotor, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {
 				// END
@@ -184,7 +185,8 @@ public class Controller {
 	}
 
 	/**
-	 * Starting localization.
+	 * Starting localization, first thing that the robot does corresponding to the
+	 * game logic
 	 *
 	 * @param uspoller
 	 *            the uspoller
@@ -225,8 +227,8 @@ public class Controller {
 	/**
 	 * This method will be called when the robot is in the flagsearch state after
 	 * reaching one of the search region corners. We will then turn off the line
-	 * detector threads such as odometry correction and left poller and turn on the
-	 * ultrasonic related threads except avoidance.
+	 * detector threads such as odometry correction and jointlightpoller and turn on
+	 * the ultrasonic related threads except avoidance.
 	 *
 	 * @param gps
 	 *            the gps
@@ -280,7 +282,7 @@ public class Controller {
 	 *            the jointlightpoller
 	 */
 	private static void ziptraversal(Navigation gps, Avoidance master, LightLocalizer loc, SensorRotation sensorMotor,
-			LightPoller colorpoller, JointLightPoller jointlightpoller) {
+			JointLightPoller jointlightpoller) {
 		// need lightpoller for light loc
 		jointlightpoller.on();
 		// don't need avoidance
@@ -288,7 +290,7 @@ public class Controller {
 		// don't need us motor
 		sensorMotor.off();
 		// don't need colorpoller incase it is on
-		colorpoller.off();
+
 		// need to turn to 0 for correct localization
 		gps.turnTo(0);
 		while (Navigation.isNavigating())
@@ -356,8 +358,8 @@ public class Controller {
 	/**
 	 * This method will be called if the robot is in the navigation phase of the
 	 * project. Continuously cycles through the coordinates passed in through the
-	 * wifi class. Turns on the threads that will be used during this
-	 * FinalProject.stage
+	 * wifi class. Turns on the threads that will be used during this stage such as
+	 * odometry correction, uspoller, jointlightpoller, avoidance and sensormotor.
 	 *
 	 * @param gps
 	 *            the gps
