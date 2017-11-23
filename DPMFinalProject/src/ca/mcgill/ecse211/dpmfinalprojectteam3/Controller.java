@@ -22,31 +22,31 @@ import lejos.hardware.Sound;
  */
 public class Controller {
 
-	/** The master. */
+	/** Avoidance instance. */
 	private Avoidance master;
 
-	/** The jointpoller. */
+	/** The jointpoller instance. */
 	private JointLightPoller jointpoller;
 
-	/** The light loc. */
+	/** LightLocalizer instance. */
 	private LightLocalizer lightLoc;
 
-	/** The oc. */
+	/** OdometryCorrection instance. */
 	private OdometryCorrection oc;
 
-	/** The sensormotor. */
+	/** The sensormotor instance. */
 	private SensorRotation sensormotor;
 
-	/** The us loc. */
+	/** UltrasonicLocalizer instance. */
 	private UltrasonicLocalizer usLoc;
 
-	/** The uspoller. */
+	/** UltrasonicPoller instance. */
 	private UltrasonicPoller uspoller;
 
-	/** The gps. */
+	/** Navigation instance. */
 	private Navigation gps;
 
-	/** The colorpoller. */
+	/** LightPoller instance for color detection. */
 	private LightPoller colorpoller;
 
 	/**
@@ -134,11 +134,10 @@ public class Controller {
 		}
 		// change state
 		FinalProject.stage = Stage.NAVIGATION;
-		// start threads
+		// start threads, still unsure of what threads will be on for final demo
+		// most likely not using sensormotor and master, since not working properly.
 		// sensormotor.start();
 		oc.start();
-		// leftpoller.start();
-		// rightpoller.start();
 		// master.start();
 		while (true) {
 
@@ -341,13 +340,12 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(0.6);
-		// loc.correctPosition();
+
 		// start localization at the zipline orientation coordinates
 		loc.sweepLeft();
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
-		// experimental turn
-		// gps.turn(4);
+
 		while (Navigation.isNavigating())
 			continue;
 		FinalProject.odometer.setTheta(0);
@@ -378,7 +376,6 @@ public class Controller {
 		while (Navigation.isNavigating())
 			continue;
 		sleepFor(0.3);
-		// gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
 		// turn to 0 for light localization
 		gps.turnTo(0);
 		jointlightpoller.on();
@@ -429,8 +426,6 @@ public class Controller {
 		colorpoller.off();
 		motor.on();
 		uspoller.on();
-		// leftPoller.on();
-		// rightPoller.on();
 		jointpoller.on();
 		gps.startNav();
 	}

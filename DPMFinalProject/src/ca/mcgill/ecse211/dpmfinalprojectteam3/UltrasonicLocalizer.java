@@ -102,12 +102,11 @@ public class UltrasonicLocalizer {
 		if (localizationType == LocalizationType.RISINGEDGE) { // Starts by facing the wall
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();// Turns
-			// this.dist = 0;
 			// Get data from ultrasonic sensor
 			while (true) {
 				FinalProject.usDist.fetchSample(usdata, 0);
 				usdata[0] *= 100;
-				if (usdata[0] > 65) {
+				if (usdata[0] > 70) {
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
 					navigation.turnWithoutInterruption(46);
@@ -117,18 +116,7 @@ public class UltrasonicLocalizer {
 					FinalProject.odometer.setTheta(0);
 					return;
 				}
-			} // Filter the distances that is too far that's not meant to be
-			/*
-			 * while (this.dist < BOTTOM_THRESHOLD) { // It's seeing the wall during the
-			 * turn
-			 * 
-			 * this.dist = poller.getReading(); // update distance from wall
-			 * 
-			 * if (this.dist > BOTTOM_THRESHOLD) { FIRST_ANGLE = odometer.getTheta(); //
-			 * Stop the motos when it doesn't see the wall anymore Sound.buzz();
-			 * FinalProject.leftMotor.stop(true); FinalProject.rightMotor.stop(false); } }
-			 */
-			// Save the angle read by the odometer
+			}
 
 		}
 
@@ -139,8 +127,11 @@ public class UltrasonicLocalizer {
 			FinalProject.rightMotor.setSpeed(150);
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();
-			// Fetch data
 
+			// Fetching data within the class because of more reliable than via another
+			// thread. Since we are focused on the localization we can do it in the main
+			// body
+			// of code
 			FinalProject.usDist.fetchSample(usdata, 0);
 			usdata[0] *= 100;
 			;
@@ -205,20 +196,6 @@ public class UltrasonicLocalizer {
 		this.localizing = false;
 	}
 
-	private double processUSData() {
-		double data = poller.getReading();
-		if (filter < FILTER_CONTROL && data > 51) {
-			filter++;
-			return this.dist;
-		} else if (filter >= FILTER_CONTROL && data > 51) {
-			return data;
-		} else {
-			filter = 0;
-			return data;
-		}
-
-	}
-
 	/**
 	 * Update angle. Update angle to the correct heading that we need to adjust to
 	 *
@@ -249,34 +226,6 @@ public class UltrasonicLocalizer {
 			UPDATED_ANGLE = UPDATED_ANGLE + 200; // This value is found experimentally
 			navigation.turnWithoutInterruption(UPDATED_ANGLE);
 		}
-	}
-
-	/**
-	 * Filter close, filter out close data unless it is repeated a lot , which means
-	 * we are actually close to something
-	 *
-	 * @param dist
-	 *            the dist, distance ultrasonic sensor reads
-	 * @return the double, distance value returned
-	 */
-	// Filter out distances that are too close for no reasons
-	private double filter_close(double dist) {
-
-		if (dist <= 20 && filterControl < FILTER_OUT) {
-			// bad value, do not set the distance var, however do increment the
-			// filter value
-			filterControl++;
-		} else if (dist <= 20) {
-			// We have repeated large values, so there must actually be nothing
-			// there: leave the distance alone
-			this.dist = dist;
-		} else {
-			// distance went below 255: reset filter and leave
-			// distance alone.
-			filterControl = 0;
-			this.dist = dist;
-		}
-		return this.dist;
 	}
 
 }

@@ -30,18 +30,6 @@ public class Navigation {
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
 	private static final int ROTATE_SPEED = 171;
 
-	/** The Constant MAX_DISTANCE_WALL. */
-	private static final int MAX_DISTANCE_WALL = 15;
-
-	/** The Constant AVOID_ANGLE. */
-	private static final int AVOID_ANGLE = 90;
-
-	/** The Constant AVOID_DISTANCE. */
-	private static final int AVOID_DISTANCE = 30;
-
-	/** The Constant SENSOR_OFFSET. */
-	private static final double SENSOR_OFFSET = 10;
-
 	/** The Constant SQUARE_LENGTH. */
 	private static final double SQUARE_LENGTH = 30.48;
 
@@ -53,11 +41,6 @@ public class Navigation {
 
 	/** The search region path. */
 	private LinkedList<Integer> searchRegionPath;
-
-	/** The Constant THRESHOLD. */
-	private static final int THRESHOLD = 50;
-
-	private static final long SAMPLING_PERIOD = 10;
 
 	/** The path. */
 	private LinkedList<Double> path; // For demo coordinates
@@ -132,7 +115,7 @@ public class Navigation {
 			coordY = path.removeFirst();
 
 			avoided = false;
-			System.out.println("TRAVELLING TO" + coordX + " " + coordY);
+			System.out.println("TRAVELLING TO " + coordX + " " + coordY);
 			travelTo(coordX, coordY);
 
 			if (!hasFlag && coordX == FinalProject.URSRRX && coordY == FinalProject.URSRRY) {
@@ -170,8 +153,6 @@ public class Navigation {
 	public void travelTo(double endX, double endY) {
 
 		isNavigating = true;
-		// CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) *
-		// CENTER_OFFSET);
 		// convert from coordinates to actual distance
 		endX = endX * SQUARE_LENGTH;
 		endY = endY * SQUARE_LENGTH;
@@ -221,8 +202,6 @@ public class Navigation {
 	public void travelToWithoutAvoid(double endX, double endY) {
 
 		isNavigating = true;
-		// CENTER_OFFSET = Math.sqrt(Math.pow(endX, 2) + Math.pow(endY, 2) *
-		// CENTER_OFFSET);
 		// convert from coordinates to actual distance
 		endX = endX * SQUARE_LENGTH;
 		endY = endY * SQUARE_LENGTH;
@@ -314,32 +293,31 @@ public class Navigation {
 
 		while (!master.inDanger) {// far enough from block
 
-			// update distance from
-			// wall
+			// check if the robot is within some sort of threshold between the destination
+			// and its current distance travelled
 			if (Math.abs(endX - odometer.getX()) < 3 && Math.abs(endY - odometer.getY()) < 3) {
-				// if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY -
-				// odometer.getY(), 2)) < 2) {
+				// wait for OC to finish before moving
 				oc.off();
 				while (oc.isOn)
 					continue;
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.9), true);
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.9), false);
+				// move a little bit forward to compensate for stopping early
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.89), true);
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.89), false);
 				Sound.buzz();
 
 				return; // break out of while loop if has reached destination
 			}
 			if (oc.corrected) {
 				oc.corrected = false;
-				// distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) +
-				// Math.pow(endY - odometer.getY(), 2));
-
 				FinalProject.leftMotor.forward();
 				FinalProject.rightMotor.forward();
+				// have to start the robot again because OC stops the robot when correcting
 
 			}
 
 		}
 		// if too close to obstacle
+		// wait for OC to finish
 		while (oc.isOn)
 			continue;
 		FinalProject.leftMotor.stop(true);
@@ -390,10 +368,10 @@ public class Navigation {
 	}
 
 	/**
-	 * Turn to with interrupt.
+	 * Turn to that can be interuptted, useful if acting on data from a sensor.
 	 *
 	 * @param theta
-	 *            the theta
+	 *            the theta desired to turn to
 	 */
 	void turnToWithInterrupt(double theta) {
 		// get current angle and convert to degrees
@@ -428,17 +406,17 @@ public class Navigation {
 	public double zipTraversal() {
 		ziptraversing = true;
 		double initialTheta = odometer.getTheta();
-		FinalProject.leftMotor.setSpeed(300); // set speeds
-		FinalProject.rightMotor.setSpeed(300);
-		FinalProject.zipMotor.setSpeed(225);
+		FinalProject.leftMotor.setSpeed(400); // set speeds
+		FinalProject.rightMotor.setSpeed(400);
+		FinalProject.zipMotor.setSpeed(300);
 		FinalProject.zipMotor.forward();// travels about 3/4 the zipline
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), true);
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 230), false);
 		while (isNavigating())
 			continue;
-		FinalProject.leftMotor.setSpeed(150); // slow down once getting to the downward slope
-		FinalProject.rightMotor.setSpeed(150);
-		FinalProject.zipMotor.setSpeed(225 / 2);
+		FinalProject.leftMotor.setSpeed(200); // slow down once getting to the downward slope
+		FinalProject.rightMotor.setSpeed(200);
+		FinalProject.zipMotor.setSpeed(150);
 		FinalProject.zipMotor.rotate(convertDistance(1.1, 100), true); // rotate the rest of the way at slower speed
 		FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 61), true);
 		FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 61), false);

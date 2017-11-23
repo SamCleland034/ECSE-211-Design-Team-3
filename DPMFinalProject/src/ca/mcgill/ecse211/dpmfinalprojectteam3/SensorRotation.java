@@ -2,7 +2,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-// TODO: Auto-generated Javadoc
 /**
  * This class is used to rotate the sensor to allow it to sweep without moving
  * the robot. Used since we want to sweep the area while also getting data from
@@ -62,11 +61,13 @@ public class SensorRotation extends Thread {
 		boolean halfturn = false;
 
 		motor.resetTachoCount();
+		// creating reference point for the motor to rotate about
 		reference = motor.getTachoCount();
 		motor.setSpeed(70);
 		while (true) {
 			if (on) {
 				startTime = System.currentTimeMillis();
+				// hasn't turned yet
 				if (!movedLeft && !halfturn) {
 					motor.rotateTo(reference - 25);
 					while (motor.isMoving())
@@ -74,7 +75,7 @@ public class SensorRotation extends Thread {
 					movedLeft = true;
 					movedRight = false;
 					halfturn = true;
-
+					// needs to back to the right
 				} else if (!movedLeft && halfturn) {
 					motor.rotateTo(reference - 25);
 					while (motor.isMoving())
@@ -82,7 +83,7 @@ public class SensorRotation extends Thread {
 					movedLeft = true;
 					movedRight = false;
 					halfturn = true;
-
+					// turns back to the left
 				} else if (!movedRight && halfturn) {
 					motor.rotateTo(reference + 25);
 					while (motor.isMoving())
@@ -99,6 +100,7 @@ public class SensorRotation extends Thread {
 					} catch (InterruptedException e) {
 					}
 				}
+				// just sleep if off
 			} else {
 				try {
 					Thread.sleep(SAMPLINGPERIOD);

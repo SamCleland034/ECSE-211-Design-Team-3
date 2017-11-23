@@ -5,13 +5,12 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class LightLocalizer, used to allow the robot in the beginning and in
  * times when error accumulates too much to re-adjust itself and start off fresh
  * Using one to potentially two light sensors to perform this task.
  *
- * @version 1.0
+ * 
  */
 public class LightLocalizer {
 
@@ -45,6 +44,7 @@ public class LightLocalizer {
 	/** The joint poller. */
 	private JointLightPoller jointPoller;
 
+	/** The localizing. */
 	public boolean localizing;
 	// assign port to light sensor
 
@@ -70,11 +70,10 @@ public class LightLocalizer {
 	/**
 	 * 4th version of this method that uses the joint poller rather than the two
 	 * individual light pollers to synchronize values. Reduced time of light
-	 * localization also with this method
+	 * localization also with this method since using a simpler method
 	 */
 	public void startLightLOC4() {
-		// navigation.turn(10);
-		// while(navigation.isNavigating()) continue;
+
 		odometer.setTheta(0);
 		// initialize color sensor
 		Sound.beepSequenceUp();
@@ -133,9 +132,6 @@ public class LightLocalizer {
 
 		}
 
-		// once the sensor sees the black line, drive 25 cm backwards
-		// navigation.driveWithoutAvoid(-25);
-
 		navigation.turnTo(90); // turn to 90 degrees
 		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
 		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
@@ -193,16 +189,6 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Send resources to check if the right poller is about to cross the line, so it
-	 * is more likely to detect
-	 */
-
-	/**
-	 * Send resources to check if the left poller is about to cross the line, so it
-	 * is more likely to detect
-	 */
-
-	/**
 	 * Check right poller and after it crosses set the speed back to what it was
 	 * before
 	 *
@@ -224,9 +210,7 @@ public class LightLocalizer {
 		FinalProject.rightMotor.forward();
 		while (jointPoller.getRightValue() > 0.23) {
 			continue;
-			/*
-			 * if (timedOut(startTime)) break; continue;
-			 */
+
 		}
 		FinalProject.rightMotor.stop(false);
 		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
@@ -236,17 +220,9 @@ public class LightLocalizer {
 
 	/**
 	 * Check left poller 2.
-	 *
-	 * @param speed
-	 *            the speed
 	 */
 	private void checkLeftPoller() {
-		/*
-		 * FinalProject.leftMotor.setSpeed(40); FinalProject.leftMotor.forward(); while
-		 * (jointPoller.getLeftValue() > 0.3) continue;
-		 * FinalProject.leftMotor.stop(false);
-		 * FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
-		 */
+
 		FinalProject.rightMotor.setSpeed(80);
 		FinalProject.leftMotor.setSpeed(80);
 		FinalProject.rightMotor.backward();
@@ -266,6 +242,11 @@ public class LightLocalizer {
 
 	}
 
+	/**
+	 * Method designed to detect if the robot is on a line while localizing, if it
+	 * is on a line, it will move to the right and then begin localizing to get off
+	 * the line. Particularly useful moving right for the starting localization
+	 */
 	public void sweepRight() {
 		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
@@ -289,6 +270,11 @@ public class LightLocalizer {
 		}
 	}
 
+	/**
+	 * Method designed to detect if the robot is on a line while localizing, if it
+	 * is on a line, it will move to the left and then begin localizing to get off
+	 * the line.
+	 */
 	public void sweepLeft() {
 		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
 		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
@@ -310,6 +296,10 @@ public class LightLocalizer {
 		}
 	}
 
+	/**
+	 * Reposition right if the robot detects a line while moving forward, used in
+	 * starting localization
+	 */
 	private void repositionRight() {
 		navigation.turnWithoutInterruption(90);
 		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), true);
@@ -319,6 +309,10 @@ public class LightLocalizer {
 			continue;
 	}
 
+	/**
+	 * Reposition left for zip localization if the robot detects a line, to get in a
+	 * better position for localization
+	 */
 	private void repositionLeft() {
 		navigation.turnWithoutInterruption(-90);
 		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), true);

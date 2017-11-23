@@ -4,7 +4,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -300,8 +299,6 @@ public class FinalProject extends Thread {
 	public static void main(String[] args) {
 		// INITALIZE COMPONENTS
 		Navigation gps = new Navigation(odometer);
-		final TextLCD t = LocalEV3.get().getTextLCD();
-		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
 		LightPoller colorpoller = new LightPoller(colorSensor, colorProvider);
 		Avoidance master = new Avoidance(gps);
 
@@ -326,7 +323,7 @@ public class FinalProject extends Thread {
 		WiFi wifi = new WiFi();
 		wifi.getValues();
 		odometer.start();
-		odometryDisplay.start();
+
 		getColors();
 		if (greenTeam == 3) {
 			if (greenCorner == 0) {
@@ -359,9 +356,8 @@ public class FinalProject extends Thread {
 
 		}
 
-		// determines path based on the layout that is choosen, will have to traverse x
-		// or y first depending on the layout of the zipline
 		pf.getPath();
+		// start state machine logic
 		ctfcontroller.startControlFlow();
 	}
 

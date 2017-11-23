@@ -16,13 +16,6 @@ public class OdometryCorrection extends Thread {
 
 	/** The odometer. */
 	private Odometer odometer;
-
-	/** The left poller. */
-	private LightPoller leftPoller;
-
-	/** The right poller. */
-	private LightPoller rightPoller;
-
 	/** The on. */
 	boolean on;
 
@@ -39,6 +32,8 @@ public class OdometryCorrection extends Thread {
 
 	/** The gps. */
 	private Navigation gps;
+	// Another variable for on for the gps to know if the OC is actually done
+	// executing
 	public boolean isOn = false;
 	public int counter;
 
@@ -60,8 +55,6 @@ public class OdometryCorrection extends Thread {
 	public OdometryCorrection(Odometer odometer, JointLightPoller jointPoller) {
 
 		this.odometer = odometer;
-		this.leftPoller = leftPoller;
-		this.rightPoller = rightPoller;
 		this.jointPoller = jointPoller;
 		this.on = false;
 	}
