@@ -63,9 +63,6 @@ public class JointLightPoller extends Thread {
 		sample = new float[2];
 		while (true) {
 			if (on) {
-
-				// leftLastLightVal = leftLightVal;
-				// rightLastLightVal = rightLightVal;
 				leftprovider.fetchSample(sample, 0); // acquire data
 				rightprovider.fetchSample(sample, 1);
 				leftLightVal = (double) (sample[0]);// extract from buffer, cast to int
@@ -73,14 +70,10 @@ public class JointLightPoller extends Thread {
 				synchronized (this) {
 					lightData[0] = leftLightVal;
 					lightData[1] = rightLightVal;
-					// lightData[2] = leftLastLightVal;
-					// lightData[3] = rightLastLightVal;
-					// lightData[4] = (leftLightVal - leftLastLightVal) / leftLastLightVal;
-					// lightData[5] = (rightLightVal - rightLastLightVal) / rightLastLightVal;
 				}
 
 				try {
-					Thread.sleep(18);
+					Thread.sleep(12);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {

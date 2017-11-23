@@ -100,14 +100,15 @@ public class OdometryCorrection extends Thread {
 				}
 				if (lightValue[0] < 0.23) {
 					if (counter == 0) {
-						FinalProject.leftMotor.stop(true);
-						FinalProject.rightMotor.stop(false);
+						FinalProject.rightMotor.stop(true);
+						FinalProject.leftMotor.stop(false);
 
 						Sound.beep();
 						checkRightPoller();
-						corrected = true;
+
 						counter = 2;
 						isOn = false;
+						corrected = true;
 						sleepFor(1);
 					} else {
 						counter--;
@@ -117,14 +118,15 @@ public class OdometryCorrection extends Thread {
 				}
 				if (lightValue[1] < 0.23) {
 					if (counter == 0) {
-						FinalProject.rightMotor.stop(true);
-						FinalProject.leftMotor.stop(false);
+						FinalProject.leftMotor.stop(true);
+						FinalProject.rightMotor.stop(false);
 
 						Sound.beep();
 						checkLeftPoller();
 						counter = 2;
-						corrected = true;
+
 						isOn = false;
+						corrected = true;
 						sleepFor(1);
 					} else {
 						counter--;
@@ -201,8 +203,8 @@ public class OdometryCorrection extends Thread {
 	 * rechecking the left poller so send all resources here
 	 */
 	private void checkRightPoller() {
-		FinalProject.rightMotor.setSpeed(70);
-		FinalProject.leftMotor.setSpeed(70);
+		FinalProject.rightMotor.setSpeed(80);
+		FinalProject.leftMotor.setSpeed(80);
 		FinalProject.leftMotor.backward();
 		FinalProject.rightMotor.backward();
 		while (jointPoller.getLeftValue() > 0.23) {
@@ -228,8 +230,8 @@ public class OdometryCorrection extends Thread {
 	 * to recheck the right light poller
 	 */
 	private void checkLeftPoller() {
-		FinalProject.rightMotor.setSpeed(70);
-		FinalProject.leftMotor.setSpeed(70);
+		FinalProject.rightMotor.setSpeed(80);
+		FinalProject.leftMotor.setSpeed(80);
 		FinalProject.rightMotor.backward();
 		FinalProject.leftMotor.backward();
 		while (jointPoller.getRightValue() > 0.23)

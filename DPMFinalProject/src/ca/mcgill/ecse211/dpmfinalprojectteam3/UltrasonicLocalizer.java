@@ -102,12 +102,12 @@ public class UltrasonicLocalizer {
 		if (localizationType == LocalizationType.RISINGEDGE) { // Starts by facing the wall
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();// Turns
-			this.dist = 0;
+			// this.dist = 0;
 			// Get data from ultrasonic sensor
 			while (true) {
 				FinalProject.usDist.fetchSample(usdata, 0);
 				usdata[0] *= 100;
-				if (usdata[0] > 90) {
+				if (usdata[0] > 65) {
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
 					navigation.turnWithoutInterruption(46);
@@ -141,16 +141,18 @@ public class UltrasonicLocalizer {
 			FinalProject.rightMotor.backward();
 			// Fetch data
 
-			this.dist = poller.getReading();
+			FinalProject.usDist.fetchSample(usdata, 0);
+			usdata[0] *= 100;
 			;
 
-			filter_close(dist); // Filter out distances that are too close that's not meant to be
+			// Filter out distances that are too close that's not meant to be
 
-			while (this.dist >= 120) { // Doesn't see the wall
+			while (usdata[0] >= 50) { // Doesn't see the wall
 
-				this.dist = poller.getReading(); // update distance from wall
+				FinalProject.usDist.fetchSample(usdata, 0);
+				usdata[0] *= 100; // update distance from wall
 
-				if (this.dist < 120) {
+				if (usdata[0] < 50) {
 					FIRST_ANGLE = odometer.getTheta();
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
@@ -168,23 +170,25 @@ public class UltrasonicLocalizer {
 			FinalProject.leftMotor.backward();
 			FinalProject.rightMotor.forward();
 			try {
-				Thread.sleep(500);
+				Thread.sleep(2500);
 			} catch (InterruptedException e) {
 				// there is nothing to be done here because it is not expected
 				// that
 				// the odometer will be interrupted by another thread
 			}
-			this.dist = poller.getReading();
+
 			; // update distance from wall
 
-			filter_close(dist); // Filter out distances that are too close for no reasons
-
+			// filter_close(dist); // Filter out distances that are too close for no reasons
+			FinalProject.usDist.fetchSample(usdata, 0);
+			usdata[0] *= 100;
 			// Rotate until it sees a wall
-			while (this.dist >= 120) { // Doesn't see the wall
+			while (usdata[0] >= 50) { // Doesn't see the wall
 
-				this.dist = poller.getReading(); // update distance from wall
+				FinalProject.usDist.fetchSample(usdata, 0);
+				usdata[0] *= 100; // update distance from wall
 
-				if (this.dist < 120) {
+				if (usdata[0] < 50) {
 					SECOND_ANGLE = odometer.getTheta();
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false); // Sees the wall
@@ -227,12 +231,12 @@ public class UltrasonicLocalizer {
 
 		// Computes the correct angle to turn using the the angles collected
 		if (first_angle < second_angle) {
-			UPDATED_ANGLE = 45 - ((first_angle + second_angle) / 2);
+			UPDATED_ANGLE = 45 - ((first_angle + second_angle) / 2.0);
 			navigation.turn(UPDATED_ANGLE);
 		}
 
 		if (first_angle > second_angle) {
-			UPDATED_ANGLE = 225 - ((first_angle + second_angle) / 2);
+			UPDATED_ANGLE = 225 - ((first_angle + second_angle) / 2.0);
 			navigation.turn(UPDATED_ANGLE);
 		}
 

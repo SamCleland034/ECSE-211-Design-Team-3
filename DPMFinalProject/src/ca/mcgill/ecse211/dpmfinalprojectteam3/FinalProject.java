@@ -237,7 +237,7 @@ public class FinalProject extends Thread {
 	public static final double WHEEL_RADIUS = 2.145; // radius of wheel
 
 	/** The Constant TRACK. Distance between the wheels */
-	public static final double TRACK = 11.46; // Width of car
+	public static final double TRACK = 11.372; // Width of car
 
 	/** The Constant THRESHOLD value for avoidance. */
 	public static final double THRESHOLD = 12;
@@ -319,6 +319,7 @@ public class FinalProject extends Thread {
 		gps.setColorProvider(colorpoller);
 		gps.setOdometryCorrection(oc);
 		gps.setAvoidance(master);
+		colorpoller.setNavigation(gps);
 		// get values from server
 		stage = Stage.WIFI;
 		Sound.beepSequence();
@@ -346,14 +347,14 @@ public class FinalProject extends Thread {
 				startingX = 1;
 				startingY = 1;
 			} else if (redCorner == 1) {
-				startingX = 11;
+				startingX = 7;
 				startingY = 1;
 			} else if (redCorner == 2) {
-				startingX = 11;
-				startingY = 11;
+				startingX = 7;
+				startingY = 7;
 			} else {
 				startingX = 1;
-				startingY = 11;
+				startingY = 7;
 			}
 
 		}

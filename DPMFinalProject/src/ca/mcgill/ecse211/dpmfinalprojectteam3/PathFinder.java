@@ -61,10 +61,15 @@ public class PathFinder {
 	private void addPathRed() {
 		// connected to the left horizontal part of the shallow water region
 		if (isWithinRegion(FinalProject.SHLLX, FinalProject.SHLLY, FinalProject.REDXONE, FinalProject.REDYONE,
-				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+				FinalProject.REDXTWO, FinalProject.REDYTWO)
+				&& !(isWithinRegion(FinalProject.SVLLX, FinalProject.SVLLY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO)
+						|| isWithinRegion(FinalProject.SVURX, FinalProject.SVURY, FinalProject.REDXONE,
+								FinalProject.REDYONE, FinalProject.REDXTWO, FinalProject.REDYTWO))) {
 			if (FinalProject.REDYONE > FinalProject.GREENYONE) {
 				// have to travel to the left and then travel up the vertical portion of the
 				// river
+				System.out.println("BUILDING HORIZONTAL LEFT");
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
 				double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 				coordsList.add((double) FinalProject.SHLLX - 0.5);
@@ -118,7 +123,13 @@ public class PathFinder {
 			}
 			// same as above except connected to the right part of the shallow water region
 		} else if (isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.REDXONE, FinalProject.REDYONE,
-				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+				FinalProject.REDXTWO, FinalProject.REDYTWO)
+				&& !(isWithinRegion(FinalProject.SVLLX, FinalProject.SVLLY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO)
+						|| isWithinRegion(FinalProject.SVURX, FinalProject.SVURY, FinalProject.REDXONE,
+								FinalProject.REDYONE, FinalProject.REDXTWO, FinalProject.REDYTWO))) {
+			System.out.println("BUILDING HORIZONTAL RIGHT");
+
 			if (FinalProject.REDYONE > FinalProject.GREENYONE) {
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
 				double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
@@ -174,6 +185,8 @@ public class PathFinder {
 			// connected to the green zone, left or right part of the shallow water region
 		} else if (isWithinRegion(FinalProject.SVLLX, FinalProject.SVLLY, FinalProject.REDXONE, FinalProject.REDYONE,
 				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+			System.out.println("BUILDING VERTICAL");
+
 			if (isWithinRegion(FinalProject.SHLLX, FinalProject.SHLLY, FinalProject.GREENXONE, FinalProject.GREENYONE,
 					FinalProject.GREENXTWO, FinalProject.GREENYTWO)) {
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
@@ -198,7 +211,8 @@ public class PathFinder {
 				searchRegionList.add(FinalProject.LLSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
-			} else {
+			} else if (isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.GREENXONE,
+					FinalProject.GREENYONE, FinalProject.GREENXTWO, FinalProject.GREENYTWO)) {
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
 				double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 				coordsList.addLast((double) middleX);
@@ -221,10 +235,66 @@ public class PathFinder {
 				searchRegionList.add(FinalProject.LLSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
+			} else {
+				// case where SVUR and SHUR are both on the red zone, have to distinguish based
+				// on if SHLL or SHUR are connected to the green zone, else that means
+				// travelling along the vertical instead of horizontal
+				if (FinalProject.REDYONE > FinalProject.GREENYONE) {
+					double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+					double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+					coordsList.add((double) FinalProject.SHURX + 0.5);
+					coordsList.add((double) FinalProject.startingY);
+					coordsList.add((double) FinalProject.SHURX + 0.5);
+					coordsList.add((double) middleY);
+					coordsList.add((double) middleX);
+					coordsList.add((double) middleY);
+					coordsList.add((double) middleX);
+					coordsList.add((double) FinalProject.SVLLY - 0.5);
+					coordsList.add((double) FinalProject.URSRGX);
+					coordsList.add((double) FinalProject.SVLLY - 0.5);
+					coordsList.add((double) FinalProject.URSRGX);
+					coordsList.add((double) FinalProject.URSRGY);
+					searchRegionList.add(FinalProject.URSRGX);
+					searchRegionList.add(FinalProject.URSRGY);
+					searchRegionList.add(FinalProject.URSRGX);
+					searchRegionList.add(FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.URSRGX);
+					gps.setSearchRegionPath(searchRegionList);
+
+				} else {
+					double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+					double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+					coordsList.add((double) FinalProject.SHURX + 0.5);
+					coordsList.add((double) FinalProject.startingY);
+					coordsList.add((double) FinalProject.SHURX + 0.5);
+					coordsList.add((double) middleY);
+					coordsList.add((double) middleX);
+					coordsList.add((double) middleY);
+					coordsList.add((double) middleX);
+					coordsList.add((double) FinalProject.SVURY + 0.5);
+					coordsList.add((double) FinalProject.LLSRGX);
+					coordsList.add((double) FinalProject.SVURY + 0.5);
+					coordsList.add((double) FinalProject.LLSRGX);
+					coordsList.add((double) FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.URSRGY);
+					searchRegionList.add(FinalProject.URSRGX);
+					searchRegionList.add(FinalProject.URSRGY);
+					searchRegionList.add(FinalProject.URSRGX);
+					searchRegionList.add(FinalProject.LLSRGY);
+					gps.setSearchRegionPath(searchRegionList);
+
+				}
 			}
 			// same as above
 		} else if (isWithinRegion(FinalProject.SVURX, FinalProject.SVURY, FinalProject.REDXONE, FinalProject.REDYONE,
 				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+			System.out.println("BUILDING VERTICAL UR");
 			if (isWithinRegion(FinalProject.SHLLX, FinalProject.SHLLY, FinalProject.GREENXONE, FinalProject.GREENYONE,
 					FinalProject.GREENXTWO, FinalProject.GREENYTWO)) {
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
@@ -249,7 +319,8 @@ public class PathFinder {
 				searchRegionList.add(FinalProject.URSRGX);
 				gps.setSearchRegionPath(searchRegionList);
 
-			} else {
+			} else if (isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.GREENXONE,
+					FinalProject.GREENYONE, FinalProject.GREENXTWO, FinalProject.GREENYTWO)) {
 				double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
 				double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 				coordsList.addLast((double) middleX);
@@ -271,84 +342,245 @@ public class PathFinder {
 				searchRegionList.add(FinalProject.LLSRGX);
 				searchRegionList.add(FinalProject.URSRGX);
 				gps.setSearchRegionPath(searchRegionList);
+			} else {
+				// case where SVUR and SHUR are both on the red zone, have to distinguish based
+				// on if SHLL or SHUR are connected to the green zone, else that means
+				// travelling along the vertical instead of horizontal
+				if ((isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO))) {
+					if (FinalProject.REDYONE > FinalProject.GREENYONE) {
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.add((double) FinalProject.SHURX + 0.5);
+						coordsList.add((double) FinalProject.startingY);
+						coordsList.add((double) FinalProject.SHURX + 0.5);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) FinalProject.SVLLY - 0.5);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.SVLLY - 0.5);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGX);
+						gps.setSearchRegionPath(searchRegionList);
+
+					} else {
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.add((double) FinalProject.SHURX + 0.5);
+						coordsList.add((double) FinalProject.startingY);
+						coordsList.add((double) FinalProject.SHURX + 0.5);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) FinalProject.SVURY + 0.5);
+						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.SVURY + 0.5);
+						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						gps.setSearchRegionPath(searchRegionList);
+
+					}
+				} else {
+					if (FinalProject.REDYONE > FinalProject.GREENYONE) {
+						// have to travel to the left and then travel up the vertical portion of the
+						// river
+						System.out.println("BUILDING HORIZONTAL LEFT");
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.add((double) FinalProject.SHLLX - 0.5);
+						coordsList.add((double) FinalProject.startingY);
+						coordsList.add((double) FinalProject.SHLLX - 0.5);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) FinalProject.SVLLY - 0.5);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.SVLLY - 0.5);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGX);
+						gps.setSearchRegionPath(searchRegionList);
+						// Traversing the river from close to far, so have to change where we travel to
+						// and go to the closer corner of the search region
+					} else {
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.add((double) FinalProject.SHLLX - 0.5);
+						coordsList.add((double) FinalProject.startingY);
+						coordsList.add((double) FinalProject.SHLLX - 0.5);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) middleY);
+						coordsList.add((double) middleX);
+						coordsList.add((double) FinalProject.SVURY + 0.5);
+						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.SVURY + 0.5);
+						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
+						searchRegionList.add(FinalProject.URSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						gps.setSearchRegionPath(searchRegionList);
+
+					}
+				}
+
 			}
 		}
-		// should always be the same
-		coordsList.addLast((double) FinalProject.zipgreenXc);
-		coordsList.addLast((double) FinalProject.URSRGY);
-		coordsList.addLast((double) FinalProject.zipgreenXc);
-		coordsList.addLast((double) FinalProject.zipgreenYc);
-		coordsList.addLast((double) FinalProject.startingX);
-		coordsList.addLast((double) FinalProject.zipredYc);
-		coordsList.addLast((double) FinalProject.startingX);
-		coordsList.addLast((double) FinalProject.startingY);
-		gps.setPath(coordsList);
+		// travel to zipline on x axis or y axis first depending on if changing in x or
+		// y more, same for getting
+		// off the zipline
+		if (Math.abs(FinalProject.zipredXc - FinalProject.zipgreenXc) > Math
+				.abs(FinalProject.zipredYc - FinalProject.zipgreenYc)) {
+			System.out.println("X BEFORE Y");
+			coordsList.addLast((double) FinalProject.zipgreenXc);
+			coordsList.addLast((double) FinalProject.URSRGY);
+			coordsList.addLast((double) FinalProject.zipgreenXc);
+			coordsList.addLast((double) FinalProject.zipgreenYc);
+			coordsList.addLast((double) FinalProject.startingX);
+			coordsList.addLast((double) FinalProject.zipredYc);
+			coordsList.addLast((double) FinalProject.startingX);
+			coordsList.addLast((double) FinalProject.startingY);
+			gps.setPath(coordsList);
+		} else {
+			System.out.println("Y BEFORE X");
+			coordsList.addLast((double) FinalProject.URSRGX);
+			coordsList.addLast((double) FinalProject.zipgreenYc);
+			coordsList.addLast((double) FinalProject.zipgreenXc);
+			coordsList.addLast((double) FinalProject.zipgreenYc);
+			coordsList.addLast((double) FinalProject.zipredXc);
+			coordsList.addLast((double) FinalProject.startingY);
+			coordsList.addLast((double) FinalProject.startingX);
+			coordsList.addLast((double) FinalProject.startingY);
+			gps.setPath(coordsList);
+		}
 	}
 
 	/**
-	 * Adds the path green for the robot if the robot is on the green team.
+	 * Adds the path green for the robot if robot is on the green team.
 	 */
 	private void addPathGreen() {
 		System.out.println("ADDING GREEN PATH");
-		// Don't want to run into search region so we go around it
-		if (FinalProject.startingY >= FinalProject.LLSRGY && FinalProject.startingY <= FinalProject.URSRGY) {
+		// If zipline is changing along Y more than X, we make it travel in the X
+		// direction first, to avoid running into the zipline
+		if (Math.abs(FinalProject.zipgreenXc - FinalProject.zipredXc) <= Math
+				.abs(FinalProject.zipgreenYc - FinalProject.zipredYc)) {
 			coordsList.add((double) FinalProject.startingX);
-			coordsList.add((double) FinalProject.URSRGY);
-			coordsList.add((double) FinalProject.zipgreenXc);
-			coordsList.add((double) FinalProject.URSRGY);
+			coordsList.add((double) FinalProject.zipgreenYc);
 			coordsList.add((double) FinalProject.zipgreenXc);
 			coordsList.add((double) FinalProject.zipgreenYc);
-			// same as above for if green zone is on the far side
-		} else if (FinalProject.startingY <= FinalProject.URSRGY && FinalProject.startingY >= FinalProject.LLSRGY) {
-			coordsList.add((double) FinalProject.startingX);
-			coordsList.add((double) FinalProject.LLSRGY);
-			coordsList.add((double) FinalProject.zipgreenXc);
-			coordsList.add((double) FinalProject.LLSRGY);
-			coordsList.add((double) FinalProject.zipgreenXc);
-			coordsList.add((double) FinalProject.zipgreenYc);
-			// else is ok to go the normal way
 		} else {
-			coordsList.add((double) FinalProject.startingX);
-			coordsList.add((double) FinalProject.zipgreenYc);
+			coordsList.add((double) FinalProject.zipgreenXc);
+			coordsList.add((double) FinalProject.startingY);
 			coordsList.add((double) FinalProject.zipgreenXc);
 			coordsList.add((double) FinalProject.zipgreenYc);
 		}
 		// change path based on which zone is on which side, such as to go to LL or UR
 		// search region
-		if (FinalProject.GREENYONE < FinalProject.REDYONE) {
-			System.out.println("RED ZONE FURTHER AWAY THAN GREEN");
-			coordsList.add((double) FinalProject.LLSRRX);
-			coordsList.add((double) FinalProject.zipredYc);
-			coordsList.add((double) FinalProject.LLSRRX);
-			coordsList.add((double) FinalProject.LLSRRY);
-			searchRegionList.addLast(FinalProject.LLSRRX);
-			searchRegionList.addLast(FinalProject.LLSRRY);
-			searchRegionList.addLast(FinalProject.LLSRRX);
-			searchRegionList.addLast(FinalProject.URSRRY);
-			searchRegionList.addLast(FinalProject.URSRRX);
-			searchRegionList.addLast(FinalProject.URSRRY);
-			searchRegionList.addLast(FinalProject.URSRRX);
-			searchRegionList.addLast(FinalProject.LLSRRY);
-			gps.setSearchRegionPath(searchRegionList);
+		if (Math.abs(FinalProject.zipredXc - FinalProject.LLSRRX + FinalProject.zipredYc - FinalProject.LLSRRY) < Math
+				.abs(FinalProject.zipredXc - FinalProject.URSRRX + FinalProject.zipredYc - FinalProject.URSRRY)) {
+			if (Math.abs(FinalProject.zipgreenXc - FinalProject.zipredXc) <= Math
+					.abs(FinalProject.zipgreenYc - FinalProject.zipredYc)) {
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.zipredYc);
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				gps.setSearchRegionPath(searchRegionList);
+			} else {
+				coordsList.add((double) FinalProject.zipredXc);
+				coordsList.add((double) FinalProject.URSRRY);
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				gps.setSearchRegionPath(searchRegionList);
+			}
 		} else {
-			coordsList.add((double) FinalProject.zipredXc);
-			coordsList.add((double) FinalProject.URSRRY);
-			coordsList.add((double) FinalProject.URSRRX);
-			coordsList.add((double) FinalProject.URSRRY);
-			searchRegionList.addLast(FinalProject.URSRRX);
-			searchRegionList.addLast(FinalProject.URSRRY);
-			searchRegionList.addLast(FinalProject.URSRRX);
-			searchRegionList.addLast(FinalProject.LLSRRY);
-			searchRegionList.addLast(FinalProject.LLSRRX);
-			searchRegionList.addLast(FinalProject.LLSRRY);
-			searchRegionList.addLast(FinalProject.LLSRRX);
-			searchRegionList.addLast(FinalProject.URSRRY);
-			gps.setSearchRegionPath(searchRegionList);
+			if (Math.abs(FinalProject.zipgreenXc - FinalProject.zipredXc) <= Math
+					.abs(FinalProject.zipgreenYc - FinalProject.zipredYc)) {
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.zipredYc);
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				gps.setSearchRegionPath(searchRegionList);
+			} else {
+				coordsList.add((double) FinalProject.zipredXc);
+				coordsList.add((double) FinalProject.URSRRY);
+				coordsList.add((double) FinalProject.URSRRX);
+				coordsList.add((double) FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				searchRegionList.addLast(FinalProject.URSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.LLSRRY);
+				searchRegionList.addLast(FinalProject.LLSRRX);
+				searchRegionList.addLast(FinalProject.URSRRY);
+				gps.setSearchRegionPath(searchRegionList);
+			}
 		}
 		// check if the lower left corner of the shallow region is connected to the red
 		// region
 		if (isWithinRegion(FinalProject.SHLLX, FinalProject.SHLLY, FinalProject.REDXONE, FinalProject.REDYONE,
-				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+				FinalProject.REDXTWO, FinalProject.REDYTWO)
+				&& !(isWithinRegion(FinalProject.SVLLX, FinalProject.SVLLY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO)
+						|| isWithinRegion(FinalProject.SVURX, FinalProject.SVURY, FinalProject.REDXONE,
+								FinalProject.REDYONE, FinalProject.REDXTWO, FinalProject.REDYTWO))) {
 			System.out.println("ADDING LOWER LEFT HORIZONTAL");
 			if (FinalProject.GREENYONE < FinalProject.REDYONE) {
 				// go to the average of these coordinates, this allows it to scale with a larger
@@ -389,7 +621,11 @@ public class PathFinder {
 			} // same as above case except for if it is the right side of the shallow water
 				// region
 		} else if (isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.REDXONE, FinalProject.REDYONE,
-				FinalProject.REDXTWO, FinalProject.REDYTWO)) {
+				FinalProject.REDXTWO, FinalProject.REDYTWO)
+				&& !(isWithinRegion(FinalProject.SVLLX, FinalProject.SVLLY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO)
+						|| isWithinRegion(FinalProject.SVURX, FinalProject.SVURY, FinalProject.REDXONE,
+								FinalProject.REDYONE, FinalProject.REDXTWO, FinalProject.REDYTWO))) {
 			System.out.println("ADDING UPPER RIGHT HORIZONTAL");
 			if (FinalProject.GREENYONE < FinalProject.REDYONE) {
 				double middleX = (FinalProject.SVURX + FinalProject.SVLLX) / 2.0;
@@ -466,6 +702,82 @@ public class PathFinder {
 				coordsList.addLast((double) FinalProject.startingX);
 				coordsList.addLast((double) FinalProject.startingY);
 				gps.setPath(coordsList);
+			} else {
+				if ((isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.REDXONE, FinalProject.REDYONE,
+						FinalProject.REDXTWO, FinalProject.REDYTWO))) {
+					if (FinalProject.GREENYONE < FinalProject.REDYONE) {
+						double middleX = (FinalProject.SVURX + FinalProject.SVLLX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.addLast((double) FinalProject.SHURX + 0.5);
+						coordsList.addLast((double) FinalProject.URSRRY);
+						coordsList.addLast((double) FinalProject.SHURX + 0.5);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) FinalProject.SVLLY - 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.SVLLY - 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.startingY);
+						gps.setPath(coordsList);
+					} else {
+						double middleX = (FinalProject.SVURX + FinalProject.SVLLX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.addLast((double) FinalProject.SHURX + 0.5);
+						coordsList.addLast((double) FinalProject.LLSRRY);
+						coordsList.addLast((double) FinalProject.SHURX + 0.5);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) FinalProject.SVURY + 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.SVURY + 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.startingY);
+						gps.setPath(coordsList);
+					}
+				} else {
+					if (FinalProject.GREENYONE < FinalProject.REDYONE) {
+						// go to the average of these coordinates, this allows it to scale with a larger
+						// river region
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.addLast((double) FinalProject.SHLLX - 0.5);
+						coordsList.addLast((double) FinalProject.URSRRY);
+						coordsList.addLast((double) FinalProject.SHLLX - 0.5);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) FinalProject.SVLLY - 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.SVLLY - 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.startingY);
+						gps.setPath(coordsList);
+					} else {
+						// change path alittle bit if traversing from close to far side, have to travel
+						// +0.5 instead of -0.5 and to search vertical UR instead of LL
+						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
+						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
+						coordsList.addLast((double) FinalProject.SHLLX - 0.5);
+						coordsList.addLast((double) FinalProject.URSRRY);
+						coordsList.addLast((double) FinalProject.SHLLX - 0.5);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) middleY);
+						coordsList.addLast((double) middleX);
+						coordsList.addLast((double) FinalProject.SVURY + 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.SVURY + 0.5);
+						coordsList.addLast((double) FinalProject.startingX);
+						coordsList.addLast((double) FinalProject.startingY);
+						gps.setPath(coordsList);
+					}
+				}
+
 			}
 			// same case as above except it is red being the far zone, so have to change
 			// where the robot is coming from

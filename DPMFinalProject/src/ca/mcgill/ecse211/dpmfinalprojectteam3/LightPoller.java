@@ -35,6 +35,8 @@ public class LightPoller extends Thread {
 	/** boolean to indicate if the thread is on. */
 	public boolean on;
 
+	private Navigation gps;
+
 	/**
 	 * Instantiates a new light poller.
 	 *
@@ -57,7 +59,7 @@ public class LightPoller extends Thread {
 	 */
 	public void run() {
 		sample = new float[provider.sampleSize()];
-		while (true) {
+		while (!gps.hasFlag) {
 			if (on) {
 				synchronized (this) {
 
@@ -212,5 +214,10 @@ public class LightPoller extends Thread {
 				result = checkWhite();
 		}
 		return result;
+	}
+
+	public void setNavigation(Navigation gps) {
+		this.gps = gps;
+
 	}
 }

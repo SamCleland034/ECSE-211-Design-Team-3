@@ -25,10 +25,10 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	public static final int MOTOR_SPEED = 200;
+	public static final int MOTOR_SPEED = 250;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
-	private static final int ROTATE_SPEED = 150;
+	private static final int ROTATE_SPEED = 171;
 
 	/** The Constant MAX_DISTANCE_WALL. */
 	private static final int MAX_DISTANCE_WALL = 15;
@@ -66,7 +66,7 @@ public class Navigation {
 	private Odometer odometer;
 
 	/** The has flag. */
-	private boolean hasFlag = false;
+	boolean hasFlag = false;
 
 	/** The poller. */
 	private UltrasonicPoller poller;
@@ -132,10 +132,10 @@ public class Navigation {
 			coordY = path.removeFirst();
 
 			avoided = false;
-
+			System.out.println("TRAVELLING TO" + coordX + " " + coordY);
 			travelTo(coordX, coordY);
 
-			if (coordX == FinalProject.LLSRRX && coordY == FinalProject.LLSRRY) {
+			if (!hasFlag && coordX == FinalProject.URSRRX && coordY == FinalProject.URSRRY) {
 				// if the coords we just travelled to are the flagsearch coords for red zone
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
@@ -143,7 +143,7 @@ public class Navigation {
 				// coords travelled to were zipline coords
 				FinalProject.stage = Stage.ZIPTRAVERSAL;
 				break;
-			} else if (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY) {
+			} else if (!hasFlag && (coordX == FinalProject.URSRGX && coordY == FinalProject.URSRGY)) {
 				// if the coords that were travelled to are flagsearch coords for green zone
 				FinalProject.stage = Stage.FLAGSEARCH;
 				break;
@@ -316,23 +316,26 @@ public class Navigation {
 
 			// update distance from
 			// wall
+			if (Math.abs(endX - odometer.getX()) < 3 && Math.abs(endY - odometer.getY()) < 3) {
+				// if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY -
+				// odometer.getY(), 2)) < 2) {
+				oc.off();
+				while (oc.isOn)
+					continue;
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.9), true);
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.9), false);
+				Sound.buzz();
+
+				return; // break out of while loop if has reached destination
+			}
 			if (oc.corrected) {
 				oc.corrected = false;
-				distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY - odometer.getY(), 2));
+				// distanceToTravel = Math.sqrt(Math.pow(endX - odometer.getX(), 2) +
+				// Math.pow(endY - odometer.getY(), 2));
 
 				FinalProject.leftMotor.forward();
 				FinalProject.rightMotor.forward();
 
-			}
-			if (Math.abs(endX - odometer.getX()) < 2.1 && Math.abs(endY - odometer.getY()) < 2.1) {
-				// if (Math.sqrt(Math.pow(endX - odometer.getX(), 2) + Math.pow(endY -
-				// odometer.getY(), 2)) < 2) {
-				oc.off();
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.3), true);
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.3), false);
-				Sound.buzz();
-
-				return; // break out of while loop if has reached destination
 			}
 
 		}
@@ -479,22 +482,28 @@ public class Navigation {
 
 	/**
 	 * Method that will be called when we enter the flag search state. The robot
-	 * will perform a sweep of the search region starting at each corner. If the
-	 * ultrasonic sensor detects an object while sweeping, it will stop sweeping and
-	 * travel to that object and sweep again with the small motor to get readings
-	 * for the light sensor. If the light color readings (plural since using RGB
-	 * mode) we will signal that we have found that flag and it will then call
-	 * the @seetravelToAfterFlag() method to bring us to one of the corners of the
-	 * search region depending on where we currently are to then continue our path.
+	 * will perform a sweep of each tile starting at one of the corners, it will
+	 * then proceed to the next row if it doesn't see anything, but if it does see
+	 * something within a tile it will go to that tile and then check if the color
+	 * of the tile is the one that we are searching for. If it is, beep 3 times and
+	 * go to the upper right corner of the search region
 	 *
 	 * @param correctColor
-	 *            the correct color the robot will be detecting
-	 * @return true once it finds the flag, will keep running if it doesn't find the
-	 *         flag
+	 *            the correct RGB colors our robot will be searching for
+	 * 
 	 * @since 10/29/17
+	 * 
 	 */
 	public void flagSearch(float[] correctColors) {
-		travelToAfterFlag();
+		hasFlag = true;
+		for (int i = 0; i < 3; i++) {
+			Sound.beep();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+		}
+		// travelToAfterFlag();
 		return;
 		/*
 		 * int distance = 0;
@@ -580,12 +589,12 @@ public class Navigation {
 			if ((searchRegionPath.getFirst() == FinalProject.URSRGX && searchRegionPath.get(1) == FinalProject.URSRGY)
 					|| (searchRegionPath.getFirst() == FinalProject.URSRGX
 							&& searchRegionPath.get(1) == FinalProject.LLSRGY)) {
-				travelToWithoutAvoid(FinalProject.URSRGX, FinalProject.LLSRGY);
+				travelToWithoutAvoid(FinalProject.URSRGX, FinalProject.URSRGY);
 				while (isNavigating())
 					continue;
 
 			} else {
-				travelToWithoutAvoid(FinalProject.LLSRGX, FinalProject.LLSRGY);
+				travelToWithoutAvoid(FinalProject.URSRGX, FinalProject.URSRGY);
 				while (isNavigating())
 					continue;
 

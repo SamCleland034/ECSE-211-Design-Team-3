@@ -135,7 +135,7 @@ public class Controller {
 		// change state
 		FinalProject.stage = Stage.NAVIGATION;
 		// start threads
-		sensormotor.start();
+		// sensormotor.start();
 		oc.start();
 		// leftpoller.start();
 		// rightpoller.start();
@@ -154,17 +154,59 @@ public class Controller {
 				ziptraversal(gps, master, lightLoc, sensormotor, jointpoller);
 				FinalProject.stage = Stage.NAVIGATION;
 			} else if (FinalProject.stage == Stage.FINISHED) {
-				// END
+				travelToCorner(gps, master, sensormotor, jointpoller, oc);
 				Sound.beepSequenceUp();
 				System.exit(0);
 			}
 		}
 	}
 
+	private void travelToCorner(Navigation gps, Avoidance master, SensorRotation sensormotor,
+			JointLightPoller jointpoller, OdometryCorrection oc) {
+		oc.off();
+		master.off();
+		sensormotor.off();
+		jointpoller.off();
+
+		if (FinalProject.greenTeam == 3) {
+			switch (FinalProject.greenCorner) {
+			case 0:
+				gps.travelToWithoutAvoid(0.5, 0.5);
+				break;
+			case 1:
+				gps.travelToWithoutAvoid(7.5, 0.5);
+				break;
+			case 2:
+				gps.travelToWithoutAvoid(7.5, 7.5);
+				break;
+			case 3:
+				gps.travelToWithoutAvoid(0.5, 7.5);
+				break;
+			}
+		} else {
+			switch (FinalProject.redCorner) {
+			case 0:
+				gps.travelToWithoutAvoid(0.5, 0.5);
+				break;
+			case 1:
+				gps.travelToWithoutAvoid(7.5, 0.5);
+				break;
+			case 2:
+				gps.travelToWithoutAvoid(7.5, 7.5);
+				break;
+			case 3:
+				gps.travelToWithoutAvoid(0.5, 7.5);
+				break;
+			}
+		}
+		while (Navigation.isNavigating())
+			continue;
+	}
+
 	private static void waitForLightLOC(LightLocalizer lightLoc) {
 		while (lightLoc.localizing)
 			continue;
-		sleepFor(2);
+		sleepFor(0.2);
 
 	}
 
@@ -176,9 +218,10 @@ public class Controller {
 	 * @param i
 	 *            the amount we want to sleep for (in seconds)
 	 */
-	private static void sleepFor(int i) {
+	private static void sleepFor(double i) {
 		try {
-			Thread.sleep(i * 1000);
+			double time = i * 1000;
+			Thread.sleep((long) time);
 		} catch (InterruptedException e) {
 		}
 
@@ -202,9 +245,10 @@ public class Controller {
 	private static void startingLocalization(UltrasonicPoller uspoller, JointLightPoller jointpoller, Navigation gps,
 			UltrasonicLocalizer usLoc, LightLocalizer lightLoc) {
 		// turn on uspoller
-		uspoller.on();
+		// uspoller.on();
+		uspoller.off();
 		uspoller.start();
-		sleepFor(1);
+		sleepFor(0.1);
 		// don't need light pollers for US localization
 		jointpoller.off();
 		// start us loc
@@ -217,8 +261,9 @@ public class Controller {
 		jointpoller.on();
 
 		jointpoller.start();
-		sleepFor(1);
+		sleepFor(0.1);
 		// start light localization
+		lightLoc.sweepRight();
 		lightLoc.startLightLOC4();
 		waitForLightLOC(lightLoc);
 
@@ -295,10 +340,10 @@ public class Controller {
 		gps.turnTo(0);
 		while (Navigation.isNavigating())
 			continue;
-		sleepFor(2);
+		sleepFor(0.6);
 		// loc.correctPosition();
 		// start localization at the zipline orientation coordinates
-		loc.sweep();
+		loc.sweepLeft();
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
 		// experimental turn
@@ -315,7 +360,7 @@ public class Controller {
 		// travel to the zipline to get ready for the zip traversal
 		gps.travelToWithoutAvoid(FinalProject.zipgreenX, FinalProject.zipgreenY);
 
-		sleepFor(1);
+		sleepFor(0.4);
 		// get inital theta value for when we are traversing the zipline
 		double initalTheta = gps.zipTraversal();
 		while (Navigation.isNavigating())
@@ -332,18 +377,18 @@ public class Controller {
 
 		while (Navigation.isNavigating())
 			continue;
-		sleepFor(2);
+		sleepFor(0.3);
 		// gps.travelToWithoutAvoid(FinalProject.zipredX + 1, FinalProject.zipredY + 1);
 		// turn to 0 for light localization
 		gps.turnTo(0);
 		jointlightpoller.on();
 		// perform a sweep just incase the robot is on a line, if it is on a line, it
 		// will reposition to the left to reposition correctly
-		loc.sweep();
+		loc.sweepLeft();
 		while (Navigation.isNavigating())
 			continue;
 
-		sleepFor(1);
+		sleepFor(0.2);
 		// relocalization on other end of zipline
 		loc.startLightLOC4();
 		waitForLightLOC(loc);

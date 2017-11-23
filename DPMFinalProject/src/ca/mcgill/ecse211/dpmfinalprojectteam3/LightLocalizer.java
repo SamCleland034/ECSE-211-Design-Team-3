@@ -211,8 +211,8 @@ public class LightLocalizer {
 	 */
 	private void checkRightPoller() {
 
-		FinalProject.rightMotor.setSpeed(70);
-		FinalProject.leftMotor.setSpeed(70);
+		FinalProject.rightMotor.setSpeed(80);
+		FinalProject.leftMotor.setSpeed(80);
 		FinalProject.leftMotor.backward();
 		FinalProject.rightMotor.backward();
 		while (jointPoller.getLeftValue() > 0.23) {
@@ -247,8 +247,8 @@ public class LightLocalizer {
 		 * FinalProject.leftMotor.stop(false);
 		 * FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
 		 */
-		FinalProject.rightMotor.setSpeed(70);
-		FinalProject.leftMotor.setSpeed(70);
+		FinalProject.rightMotor.setSpeed(80);
+		FinalProject.leftMotor.setSpeed(80);
 		FinalProject.rightMotor.backward();
 		FinalProject.leftMotor.backward();
 		while (jointPoller.getRightValue() > 0.23)
@@ -266,7 +266,30 @@ public class LightLocalizer {
 
 	}
 
-	public void sweep() {
+	public void sweepRight() {
+		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
+		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 21), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 21), true);
+		while (FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving()) {
+			double[] lightValue = jointPoller.getValues();
+			if (lightValue[0] < 0.25) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
+				repositionRight();
+				break;
+
+			}
+			if (lightValue[1] < 0.25) {
+				FinalProject.leftMotor.stop(true);
+				FinalProject.rightMotor.stop(false);
+				repositionRight();
+				break;
+			}
+		}
+	}
+
+	public void sweepLeft() {
 		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
 		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
 		while (FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving()) {
@@ -274,20 +297,29 @@ public class LightLocalizer {
 			if (lightValue[0] < 0.25) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
-				reposition();
+				repositionLeft();
 				break;
 
 			}
 			if (lightValue[1] < 0.25) {
 				FinalProject.leftMotor.stop(true);
 				FinalProject.rightMotor.stop(false);
-				reposition();
+				repositionLeft();
 				break;
 			}
 		}
 	}
 
-	private void reposition() {
+	private void repositionRight() {
+		navigation.turnWithoutInterruption(90);
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), false);
+		navigation.turnWithoutInterruption(-90);
+		while (Navigation.isNavigating())
+			continue;
+	}
+
+	private void repositionLeft() {
 		navigation.turnWithoutInterruption(-90);
 		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), true);
 		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 6), false);
