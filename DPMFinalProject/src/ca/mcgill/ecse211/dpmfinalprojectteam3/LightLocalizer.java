@@ -250,8 +250,8 @@ public class LightLocalizer {
 	public void sweepRight() {
 		FinalProject.rightMotor.setSpeed(Navigation.MOTOR_SPEED_RIGHT);
 		FinalProject.leftMotor.setSpeed(Navigation.MOTOR_SPEED);
-		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 21), true);
-		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 21), true);
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 18), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 18), true);
 		while (FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving()) {
 			double[] lightValue = jointPoller.getValues();
 			if (lightValue[0] < 0.25) {
@@ -276,8 +276,8 @@ public class LightLocalizer {
 	 * the line.
 	 */
 	public void sweepLeft() {
-		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
-		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 7), true);
+		FinalProject.leftMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 8.5), true);
+		FinalProject.rightMotor.rotate(Navigation.convertDistance(FinalProject.WHEEL_RADIUS, 8.5), true);
 		while (FinalProject.leftMotor.isMoving() && FinalProject.rightMotor.isMoving()) {
 			double[] lightValue = jointPoller.getValues();
 			if (lightValue[0] < 0.25) {

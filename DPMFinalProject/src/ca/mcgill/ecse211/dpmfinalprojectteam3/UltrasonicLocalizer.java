@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 
 import lejos.hardware.Sound;
 
+// TODO: Auto-generated Javadoc
 /**
  * This class is used in the start to approximate a suitable heading to then
  * perform light localization using the light sensor.
@@ -19,8 +20,7 @@ public class UltrasonicLocalizer {
 	// Define variables
 	public static float ROTATE_SPEED = 70;
 
-	/** The dist. */
-	private double dist;
+	/** The poller. */
 	private UltrasonicPoller poller;
 	/**
 	 * The updated angle. Angle we have to turn to once we calculate the new heading
@@ -31,12 +31,6 @@ public class UltrasonicLocalizer {
 	// The noise margin is set to be 35 to 55 which is determined experimentally
 	private static final int TOP_THRESHOLD = 51; // "d+k"
 
-	/** The Constant FILTER_OUT. To filter out bad data */
-	// Used to filter values
-	private static final int FILTER_OUT = 30;
-
-	private static final int FILTER_CONTROL = 130;
-
 	/** The odometer. */
 	private Odometer odometer;
 
@@ -46,22 +40,15 @@ public class UltrasonicLocalizer {
 	/** The localization type. */
 	private ca.mcgill.ecse211.dpmfinalprojectteam3.LocalizationType localizationType;
 
-	/** The filter control. */
-	private int filterControl;
-
+	/** Boolean to determine if this instance is in use. */
 	public boolean localizing;
 
-	private int filter = 0;
-
+	/** The usdata. */
 	private float[] usdata = new float[1];
 
 	/**
 	 * Instantiates a new ultrasonic localizer.
 	 *
-	 * @param leftMotor
-	 *            the left motor
-	 * @param rightMotor
-	 *            the right motor
 	 * @param odometer
 	 *            the odometer, keep track of the wheel rotations to get an angle to
 	 *            turn to
@@ -70,6 +57,8 @@ public class UltrasonicLocalizer {
 	 *            turn to after calculating theta values
 	 * @param lt
 	 *            the localization type, determine if rising or falling edge
+	 * @param poller
+	 *            the poller
 	 */
 	public UltrasonicLocalizer(Odometer odometer, Navigation navigation,
 			ca.mcgill.ecse211.dpmfinalprojectteam3.LocalizationType lt, UltrasonicPoller poller) {
@@ -83,7 +72,7 @@ public class UltrasonicLocalizer {
 
 	/**
 	 * Do localize, main ultrasonic localization method that will perform the
-	 * ultrasonic localization seen in lab 4
+	 * ultrasonic localization seen in lab 4.
 	 */
 	public void doLocalization() {
 
@@ -92,7 +81,7 @@ public class UltrasonicLocalizer {
 		this.localizing = true;
 		FinalProject.leftMotor.setSpeed(150);
 		FinalProject.rightMotor.setSpeed(150);
-
+		// determine if rising or falling edge
 		FinalProject.usDist.fetchSample(usdata, 0);
 		usdata[0] *= 100;
 		if (usdata[0] > TOP_THRESHOLD)
@@ -102,14 +91,17 @@ public class UltrasonicLocalizer {
 		if (localizationType == LocalizationType.RISINGEDGE) { // Starts by facing the wall
 			FinalProject.leftMotor.forward(); // Starts turning
 			FinalProject.rightMotor.backward();// Turns
-			// Get data from ultrasonic sensor
+
 			while (true) {
+				// get data from the sensor
 				FinalProject.usDist.fetchSample(usdata, 0);
 				usdata[0] *= 100;
+				// if data read is greater than threshold, break
 				if (usdata[0] > 70) {
 					FinalProject.leftMotor.stop(true);
 					FinalProject.rightMotor.stop(false);
-					navigation.turnWithoutInterruption(46);
+					// experimental turn
+					navigation.turnWithoutInterruption(47);
 					while (Navigation.isNavigating())
 						continue;
 					this.localizing = false;
@@ -155,7 +147,6 @@ public class UltrasonicLocalizer {
 			}
 
 			// Save the angle read by the odometer
-
 			// Rotate until the robot sees no wall
 			Sound.buzz();
 			FinalProject.leftMotor.backward();

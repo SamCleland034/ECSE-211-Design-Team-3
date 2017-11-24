@@ -16,10 +16,10 @@ public class OdometryCorrection extends Thread {
 
 	/** The odometer. */
 	private Odometer odometer;
-	/** The on. */
+	/** Determines if functioning or not. */
 	boolean on;
 
-	/** The joint poller. */
+	/** The joint poller that will supply data for this OC. */
 	private JointLightPoller jointPoller;
 
 	/** The sampling period for this thread. */
@@ -27,10 +27,13 @@ public class OdometryCorrection extends Thread {
 	/** The distance between lines. */
 	private static double TILE_SPACING = 30.48;
 
-	/** The corrected. */
+	/**
+	 * Boolean for the gps to use to allow the gps to know if it is just recently
+	 * detected a line.
+	 */
 	public boolean corrected = false;
 
-	/** The gps. */
+	/** The navigation instance that this OC is related to. */
 	private Navigation gps;
 	// Another variable for on for the gps to know if the OC is actually done
 	// executing
@@ -77,6 +80,7 @@ public class OdometryCorrection extends Thread {
 				isOn = true;
 				startTime = System.currentTimeMillis();
 				lightValue = jointPoller.getValues();
+				// detects a line in both sensors
 				if (lightValue[0] < 0.23 && lightValue[1] < 0.23) {
 					if (counter == 0) {
 						Sound.beepSequence();
@@ -91,12 +95,14 @@ public class OdometryCorrection extends Thread {
 						sleepFor(2);
 					}
 				}
+				// detects a line in the left but not the right
 				if (lightValue[0] < 0.23) {
 					if (counter == 0) {
 						FinalProject.rightMotor.stop(true);
 						FinalProject.leftMotor.stop(false);
 
 						Sound.beep();
+						// send all resources to the right
 						checkRightPoller();
 
 						counter = 2;
@@ -109,12 +115,14 @@ public class OdometryCorrection extends Thread {
 						sleepFor(2);
 					}
 				}
+				// detects a line in the right but not the left
 				if (lightValue[1] < 0.23) {
 					if (counter == 0) {
 						FinalProject.leftMotor.stop(true);
 						FinalProject.rightMotor.stop(false);
 
 						Sound.beep();
+						// send all resources to left
 						checkLeftPoller();
 						counter = 2;
 
@@ -138,7 +146,7 @@ public class OdometryCorrection extends Thread {
 			} else {
 				isOn = false;
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(400);
 				} catch (InterruptedException e) {
 				}
 			}

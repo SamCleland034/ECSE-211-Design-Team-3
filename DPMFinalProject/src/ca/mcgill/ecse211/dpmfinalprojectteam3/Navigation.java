@@ -25,10 +25,10 @@ public class Navigation {
 	private static Avoidance master;
 
 	/** The Constant MOTOR_SPEED. */
-	public static final int MOTOR_SPEED = 250;
+	public static final int MOTOR_SPEED = 260;
 
 	/** The Constant ROTATE_SPEED. Speed used when rotating in place */
-	private static final int ROTATE_SPEED = 171;
+	private static final int ROTATE_SPEED = 200;
 
 	/** The Constant SQUARE_LENGTH. */
 	private static final double SQUARE_LENGTH = 30.48;
@@ -295,16 +295,16 @@ public class Navigation {
 
 			// check if the robot is within some sort of threshold between the destination
 			// and its current distance travelled
-			if (Math.abs(endX - odometer.getX()) < 3 && Math.abs(endY - odometer.getY()) < 3) {
+			if (Math.abs(endX - odometer.getX()) < 3.1 && Math.abs(endY - odometer.getY()) < 3.1) {
 				// wait for OC to finish before moving
 				oc.off();
 				while (oc.isOn)
 					continue;
 				// move a little bit forward to compensate for stopping early
-				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.89), true);
-				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 2.89), false);
+				FinalProject.leftMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 3.365), true);
+				FinalProject.rightMotor.rotate(convertDistance(FinalProject.WHEEL_RADIUS, 3.365), false);
 				Sound.buzz();
-
+				avoided = false;
 				return; // break out of while loop if has reached destination
 			}
 			if (oc.corrected) {
@@ -473,9 +473,11 @@ public class Navigation {
 	 * 
 	 */
 	public void flagSearch(float[] correctColors) {
+		// Not doing flag search, test results ended up being too poor
+		// for use in the final competition
 		hasFlag = true;
 		for (int i = 0; i < 3; i++) {
-			Sound.beep();
+			Sound.buzz();
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {

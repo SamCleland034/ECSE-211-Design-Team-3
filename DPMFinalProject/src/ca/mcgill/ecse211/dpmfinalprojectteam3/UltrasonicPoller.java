@@ -11,25 +11,25 @@ import lejos.robotics.SampleProvider;
  */
 public class UltrasonicPoller extends Thread {
 
-	/** The us. */
+	/** the sampleprovider for the us sensor */
 	private SampleProvider us;
 
-	/** The us data. */
+	/** data array for the poller. */
 	private float[] usData;
 
-	/** The master. */
+	/** avoidance instance. */
 	private Avoidance master;
 
-	/** The gps. */
+	/** navigation instance. */
 	private Navigation gps;
 
-	/** The reading. */
+	/** The reading we get from the poller. */
 	private int reading;
 
 	/** The Constant SAMPLINGPERIOD. */
 	private static final int SAMPLINGPERIOD = 22;
 
-	/** The on. */
+	/** Indicates if this is on. */
 	private boolean on;
 
 	/**
@@ -65,6 +65,7 @@ public class UltrasonicPoller extends Thread {
 		long startTime, endTime;
 		while (true) {
 			if (on) {
+
 				startTime = System.currentTimeMillis();
 				us.fetchSample(usData, 0); // acquire data
 				reading = (int) (usData[0] * 100.0); // extract from buffer, cast to int

@@ -3,7 +3,6 @@ package ca.mcgill.ecse211.dpmfinalprojectteam3;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
-// TODO: Auto-generated Javadoc
 // 
 /**
  * Class used for sampling data for the light sensors, particularly the color

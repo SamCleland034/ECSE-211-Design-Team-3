@@ -106,18 +106,18 @@ public class PathFinder {
 				coordsList.add((double) middleY);
 				coordsList.add((double) middleX);
 				coordsList.add((double) FinalProject.SVURY + 0.5);
-				coordsList.add((double) FinalProject.LLSRGX);
+				coordsList.add((double) FinalProject.URSRGX);
 				coordsList.add((double) FinalProject.SVURY + 0.5);
-				coordsList.add((double) FinalProject.LLSRGX);
-				coordsList.add((double) FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.URSRGY);
+				coordsList.add((double) FinalProject.URSRGX);
+				coordsList.add((double) FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.URSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
 			}
@@ -166,18 +166,18 @@ public class PathFinder {
 				coordsList.add((double) middleY);
 				coordsList.add((double) middleX);
 				coordsList.add((double) FinalProject.SVURY + 0.5);
-				coordsList.add((double) FinalProject.LLSRGX);
+				coordsList.add((double) FinalProject.URSRGX);
 				coordsList.add((double) FinalProject.SVURY + 0.5);
-				coordsList.add((double) FinalProject.LLSRGX);
-				coordsList.add((double) FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.URSRGY);
+				coordsList.add((double) FinalProject.URSRGX);
+				coordsList.add((double) FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.URSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
 			}
@@ -198,17 +198,17 @@ public class PathFinder {
 				coordsList.addLast((double) FinalProject.SHLLX - 0.5);
 				coordsList.addLast((double) middleY);
 				coordsList.addLast((double) FinalProject.SHLLX - 0.5);
-				coordsList.addLast((double) FinalProject.LLSRGY);
-				coordsList.addLast((double) FinalProject.LLSRGX);
-				coordsList.addLast((double) FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.URSRGY);
+				coordsList.addLast((double) FinalProject.URSRGY);
+				coordsList.addLast((double) FinalProject.URSRGX);
+				coordsList.addLast((double) FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.URSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
 			} else if (isWithinRegion(FinalProject.SHURX, FinalProject.SHURY, FinalProject.GREENXONE,
@@ -222,17 +222,17 @@ public class PathFinder {
 				coordsList.addLast((double) FinalProject.SHURX + 0.5);
 				coordsList.addLast((double) middleY);
 				coordsList.addLast((double) FinalProject.SHURX + 0.5);
-				coordsList.addLast((double) FinalProject.LLSRGY);
-				coordsList.addLast((double) FinalProject.LLSRGX);
-				coordsList.addLast((double) FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.LLSRGY);
-				searchRegionList.add(FinalProject.LLSRGX);
-				searchRegionList.add(FinalProject.URSRGY);
+				coordsList.addLast((double) FinalProject.URSRGY);
+				coordsList.addLast((double) FinalProject.URSRGX);
+				coordsList.addLast((double) FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.URSRGY);
 				searchRegionList.add(FinalProject.URSRGX);
 				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.LLSRGY);
+				searchRegionList.add(FinalProject.LLSRGX);
+				searchRegionList.add(FinalProject.URSRGY);
 				gps.setSearchRegionPath(searchRegionList);
 
 			} else {
@@ -275,18 +275,18 @@ public class PathFinder {
 					coordsList.add((double) middleY);
 					coordsList.add((double) middleX);
 					coordsList.add((double) FinalProject.SVURY + 0.5);
-					coordsList.add((double) FinalProject.LLSRGX);
+					coordsList.add((double) FinalProject.URSRGX);
 					coordsList.add((double) FinalProject.SVURY + 0.5);
-					coordsList.add((double) FinalProject.LLSRGX);
-					coordsList.add((double) FinalProject.LLSRGY);
-					searchRegionList.add(FinalProject.LLSRGX);
-					searchRegionList.add(FinalProject.LLSRGY);
-					searchRegionList.add(FinalProject.LLSRGX);
-					searchRegionList.add(FinalProject.URSRGY);
+					coordsList.add((double) FinalProject.URSRGX);
+					coordsList.add((double) FinalProject.URSRGY);
 					searchRegionList.add(FinalProject.URSRGX);
 					searchRegionList.add(FinalProject.URSRGY);
 					searchRegionList.add(FinalProject.URSRGX);
 					searchRegionList.add(FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.LLSRGY);
+					searchRegionList.add(FinalProject.LLSRGX);
+					searchRegionList.add(FinalProject.URSRGY);
 					gps.setSearchRegionPath(searchRegionList);
 
 				}
@@ -374,6 +374,7 @@ public class PathFinder {
 						gps.setSearchRegionPath(searchRegionList);
 
 					} else {
+						// going from low y to a higher y, so have to offset by 0.5
 						double middleX = (FinalProject.SVLLX + FinalProject.SVURX) / 2.0;
 						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 						coordsList.add((double) FinalProject.SHURX + 0.5);
@@ -384,18 +385,18 @@ public class PathFinder {
 						coordsList.add((double) middleY);
 						coordsList.add((double) middleX);
 						coordsList.add((double) FinalProject.SVURY + 0.5);
-						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.URSRGX);
 						coordsList.add((double) FinalProject.SVURY + 0.5);
-						coordsList.add((double) FinalProject.LLSRGX);
-						coordsList.add((double) FinalProject.LLSRGY);
-						searchRegionList.add(FinalProject.LLSRGX);
-						searchRegionList.add(FinalProject.LLSRGY);
-						searchRegionList.add(FinalProject.LLSRGX);
-						searchRegionList.add(FinalProject.URSRGY);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.URSRGY);
 						searchRegionList.add(FinalProject.URSRGX);
 						searchRegionList.add(FinalProject.URSRGY);
 						searchRegionList.add(FinalProject.URSRGX);
 						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
 						gps.setSearchRegionPath(searchRegionList);
 
 					}
@@ -440,18 +441,18 @@ public class PathFinder {
 						coordsList.add((double) middleY);
 						coordsList.add((double) middleX);
 						coordsList.add((double) FinalProject.SVURY + 0.5);
-						coordsList.add((double) FinalProject.LLSRGX);
+						coordsList.add((double) FinalProject.URSRGX);
 						coordsList.add((double) FinalProject.SVURY + 0.5);
-						coordsList.add((double) FinalProject.LLSRGX);
-						coordsList.add((double) FinalProject.LLSRGY);
-						searchRegionList.add(FinalProject.LLSRGX);
-						searchRegionList.add(FinalProject.LLSRGY);
-						searchRegionList.add(FinalProject.LLSRGX);
-						searchRegionList.add(FinalProject.URSRGY);
+						coordsList.add((double) FinalProject.URSRGX);
+						coordsList.add((double) FinalProject.URSRGY);
 						searchRegionList.add(FinalProject.URSRGX);
 						searchRegionList.add(FinalProject.URSRGY);
 						searchRegionList.add(FinalProject.URSRGX);
 						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.LLSRGY);
+						searchRegionList.add(FinalProject.LLSRGX);
+						searchRegionList.add(FinalProject.URSRGY);
 						gps.setSearchRegionPath(searchRegionList);
 
 					}
@@ -542,6 +543,7 @@ public class PathFinder {
 				gps.setSearchRegionPath(searchRegionList);
 			}
 		} else {
+			// if changing in y more than x build the path to travel x first
 			if (Math.abs(FinalProject.zipgreenXc - FinalProject.zipredXc) <= Math
 					.abs(FinalProject.zipgreenYc - FinalProject.zipredYc)) {
 				coordsList.add((double) FinalProject.URSRRX);
@@ -647,7 +649,7 @@ public class PathFinder {
 				double middleX = (FinalProject.SVURX + FinalProject.SVLLX) / 2.0;
 				double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 				coordsList.addLast((double) FinalProject.SHURX + 0.5);
-				coordsList.addLast((double) FinalProject.LLSRRY);
+				coordsList.addLast((double) FinalProject.URSRRY);
 				coordsList.addLast((double) FinalProject.SHURX + 0.5);
 				coordsList.addLast((double) middleY);
 				coordsList.addLast((double) middleX);
@@ -725,7 +727,7 @@ public class PathFinder {
 						double middleX = (FinalProject.SVURX + FinalProject.SVLLX) / 2.0;
 						double middleY = (FinalProject.SHLLY + FinalProject.SHURY) / 2.0;
 						coordsList.addLast((double) FinalProject.SHURX + 0.5);
-						coordsList.addLast((double) FinalProject.LLSRRY);
+						coordsList.addLast((double) FinalProject.URSRRY);
 						coordsList.addLast((double) FinalProject.SHURX + 0.5);
 						coordsList.addLast((double) middleY);
 						coordsList.addLast((double) middleX);

@@ -101,16 +101,16 @@ public class Controller {
 				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(0);
 			} else if (FinalProject.greenCorner == 1) {
-				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setX(11 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setY(FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(3 * Math.PI / 2);
 			} else if (FinalProject.greenCorner == 2) {
-				FinalProject.odometer.setX(7 * FinalProject.TILE_SPACING);
-				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setX(11 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(11 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(Math.PI);
 			} else {
 				FinalProject.odometer.setX(FinalProject.TILE_SPACING);
-				FinalProject.odometer.setY(7 * FinalProject.TILE_SPACING);
+				FinalProject.odometer.setY(11 * FinalProject.TILE_SPACING);
 				FinalProject.odometer.setTheta(Math.PI / 2);
 			}
 		} else {
@@ -173,13 +173,13 @@ public class Controller {
 				gps.travelToWithoutAvoid(0.5, 0.5);
 				break;
 			case 1:
-				gps.travelToWithoutAvoid(7.5, 0.5);
+				gps.travelToWithoutAvoid(11.5, 0.5);
 				break;
 			case 2:
-				gps.travelToWithoutAvoid(7.5, 7.5);
+				gps.travelToWithoutAvoid(11.5, 11.5);
 				break;
 			case 3:
-				gps.travelToWithoutAvoid(0.5, 7.5);
+				gps.travelToWithoutAvoid(0.5, 11.5);
 				break;
 			}
 		} else {
@@ -188,13 +188,13 @@ public class Controller {
 				gps.travelToWithoutAvoid(0.5, 0.5);
 				break;
 			case 1:
-				gps.travelToWithoutAvoid(7.5, 0.5);
+				gps.travelToWithoutAvoid(11.5, 0.5);
 				break;
 			case 2:
-				gps.travelToWithoutAvoid(7.5, 7.5);
+				gps.travelToWithoutAvoid(11.5, 11.5);
 				break;
 			case 3:
-				gps.travelToWithoutAvoid(0.5, 7.5);
+				gps.travelToWithoutAvoid(0.5, 11.5);
 				break;
 			}
 		}
@@ -342,6 +342,7 @@ public class Controller {
 		sleepFor(0.6);
 
 		// start localization at the zipline orientation coordinates
+		// sweep incase of a line, if there is reposition to the center
 		loc.sweepLeft();
 		loc.startLightLOC4();
 		waitForLightLOC(loc);
@@ -356,7 +357,7 @@ public class Controller {
 		FinalProject.odometer.setX(FinalProject.TILE_SPACING * FinalProject.zipgreenXc);
 		FinalProject.odometer.setY(FinalProject.TILE_SPACING * FinalProject.zipgreenYc);
 		// travel to the zipline to get ready for the zip traversal
-		gps.travelToWithoutAvoid(FinalProject.zipgreenX, FinalProject.zipgreenY);
+		gps.travelTo(FinalProject.zipgreenX, FinalProject.zipgreenY);
 
 		sleepFor(0.4);
 		// get inital theta value for when we are traversing the zipline

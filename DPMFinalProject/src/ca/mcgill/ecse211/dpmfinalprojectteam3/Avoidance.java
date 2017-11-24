@@ -82,6 +82,7 @@ public class Avoidance extends Thread {
 			if (avoiding && !inDanger) {
 				startTime = System.currentTimeMillis();
 				distance = poller.getReading();
+				// do avoidance
 				if (distance < FinalProject.THRESHOLD) {
 					inDanger = true;
 				}
